@@ -47,6 +47,7 @@
           <li><a href="#workflow">流程</a></li>
           <li><a href="#features">功能</a></li>
           <li><a href="#hotwords">熱詞</a></li>
+          <li><a href="#listen">實測</a></li>
           <li><a href="#performance">效能</a></li>
           <li><a href="#privacy">隱私</a></li>
           <li><a href="#cli">AI 與命令列</a></li>
@@ -60,8 +61,7 @@
         </button>
         <div class="sound" data-sound>
           <button class="icon-btn" type="button" aria-expanded="false" aria-controls="sound-panel" data-sound-menu>
-            <svg class="i-sound-off" viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 6h2.6L7.5 3v10L4.1 10H1.5z"/><path class="ln" d="M10.5 6l4 4M14.5 6l-4 4"/></svg>
-            <svg class="i-sound-on" viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 6h2.6L7.5 3v10L4.1 10H1.5z"/><path class="ln" d="M10 5.6a3.4 3.4 0 0 1 0 4.8M12.1 3.5a6.4 6.4 0 0 1 0 9"/></svg>
+            <svg class="i-ears" viewBox="0 0 16 16" aria-hidden="true"><path class="ear ear--l" d="M2.4 10.4 3.3 2.7l3.9 5.6z"/><path class="ear ear--r" d="M13.6 10.4 12.7 2.7 8.8 8.3z"/><path d="M1.6 14.6c0-4 2.9-6.5 6.4-6.5s6.4 2.5 6.4 6.5z"/></svg>
             <span class="sr">聲音：背景音樂與古箏弦</span><span class="sr" data-sound-pending hidden>，待播放，按下開始</span>
           </button>
           <div class="sound__panel" id="sound-panel" role="group" aria-labelledby="sound-title" hidden>
@@ -104,8 +104,9 @@
         </dl>
       </div>
       <div class="wrap hero__zheng">
-        <div class="zheng" data-zheng data-notes="D2 F2 G2 A2 C3 D3 F3 G3 A3 C4 D4 F4 G4 A4 C5 D5 F5 G5 A5 C6 D6" role="group" tabindex="0" aria-labelledby="zheng-label" aria-describedby="zheng-help">
+        <div class="zheng" data-zheng data-notes="D2 E2 F♯2 A2 B2 D3 E3 F♯3 A3 B3 D4 E4 F♯4 A4 B4 D5 E5 F♯5 A5 B5 D6" data-samples="D2 F2 G2 A2 C3 D3 F3 G3 A3 C4 D4 F4 G4 A4 C5 D5 F5 G5 A5 C6 D6" role="group" tabindex="0" aria-labelledby="zheng-label" aria-describedby="zheng-help">
           <canvas class="zheng__canvas" aria-hidden="true"></canvas>
+          <p class="pluck-sub" aria-hidden="true" data-pluck><span class="pluck-sub__tc" data-pluck-tc></span><span class="pluck-sub__line"><b>你：</b><span data-pluck-notes></span></span></p>
         </div>
         <div class="zheng__meta">
           <p class="zheng__label" id="zheng-label"><b>古箏</b> <span data-zheng-range>D 五聲定弦</span></p>
@@ -115,7 +116,7 @@
           </div>
         </div>
       </div>
-      <div class="wrap hero__stage">
+      <div class="wrap hero__stage" id="editor">
         <div class="appframe beam" data-demo role="group" tabindex="0" aria-label="ListenMiao 編輯器：產品週會.m4a 的 7 段字幕與 2 位說話者" aria-describedby="demo-help">
           <p class="sr" id="demo-help">按上下方向鍵切換字幕段落，Home 與 End 跳到第一段或最後一段。</p>
           <p class="sr" aria-live="polite" data-demo-live></p>
@@ -250,6 +251,18 @@
             <span class="film__btn" aria-hidden="true"><span class="film__ico"><svg viewBox="0 0 16 16"><path d="M5 3.2v9.6l7.6-4.8z"/></svg></span><span class="film__label">播放影片</span><span class="film__dur">1:01</span></span>
           </button>
         </div>
+        <div class="chapters" data-reveal data-chapters>
+          <p class="chapters__head" id="chapters-title">章節<span>按時間從那一段播放，或到頁面上自己操作</span></p>
+          <ol class="chapters__list" aria-labelledby="chapters-title">
+            <li class="chap"><button type="button" class="chap__seek" data-start="16" data-end="21.333"><span class="chap__tc">0:16</span><span class="chap__title">自動加標點，分辨說話者</span></button><a class="chap__go" href="#features">到頁面上玩<span class="sr">：分辨說話者示意動畫</span></a><span class="chap__bar" aria-hidden="true"></span></li>
+            <li class="chap"><button type="button" class="chap__seek" data-start="21.333" data-end="26.667"><span class="chap__tc">0:21</span><span class="chap__title">先給熱詞，辨識時比較容易寫對</span></button><a class="chap__go" href="#listen">到頁面上玩<span class="sr">：實測給熱詞前後</span></a><span class="chap__bar" aria-hidden="true"></span></li>
+            <li class="chap"><button type="button" class="chap__seek" data-start="26.667" data-end="32"><span class="chap__tc">0:26</span><span class="chap__title">在波形時間軸上直接校對</span></button><a class="chap__go" href="#editor">到頁面上玩<span class="sr">：首頁的編輯器</span></a><span class="chap__bar" aria-hidden="true"></span></li>
+            <li class="chap"><button type="button" class="chap__seek" data-start="32" data-end="37.333"><span class="chap__tc">0:32</span><span class="chap__title">錄音不必上傳到任何雲端服務</span></button><a class="chap__go" href="#privacy">到頁面上玩<span class="sr">：隱私</span></a><span class="chap__bar" aria-hidden="true"></span></li>
+            <li class="chap"><button type="button" class="chap__seek" data-start="37.333" data-end="42.667"><span class="chap__tc">0:37</span><span class="chap__title">自動調校，為這台電腦挑出最快的設定</span></button><a class="chap__go" href="#performance">到頁面上玩<span class="sr">：效能與調校重播</span></a><span class="chap__bar" aria-hidden="true"></span></li>
+            <li class="chap"><button type="button" class="chap__seek" data-start="42.667" data-end="48"><span class="chap__tc">0:42</span><span class="chap__title">七種格式匯出，也能燒錄字幕</span></button><a class="chap__go" href="#exports">到頁面上玩<span class="sr">：匯出格式</span></a><span class="chap__bar" aria-hidden="true"></span></li>
+            <li class="chap"><button type="button" class="chap__seek" data-start="48" data-end="53.333"><span class="chap__tc">0:48</span><span class="chap__title">命令列、監看資料夾與 MCP server</span></button><a class="chap__go" href="#cli">到頁面上玩<span class="sr">：AI 與命令列</span></a><span class="chap__bar" aria-hidden="true"></span></li>
+          </ol>
+        </div>
       </div>
     </section>
     <section class="section story" id="workflow" aria-labelledby="workflow-title">
@@ -354,19 +367,38 @@
           <h2 id="features-title">校對與交付需要的工具</h2>
           <p class="sec-lead">介面以 WCAG 2.2 AA 為目標，主要工作只用鍵盤就能完成。</p>
         </header>
+        <article class="diar" data-diar>
+          <div class="diar__text">
+            <h3 class="diar__title">分辨說話者，記住聲音</h3>
+            <p class="diar__lead">自動判斷或指定人數；取名後存進語者庫，之後自動認出。分錯時可以合併或改給別人。</p>
+            <p class="diar__how">怎麼分出誰在說話<span class="tag-demo">示意</span></p>
+            <ol class="diar__steps">
+              <li data-diar-step="1"><b>分段</b>找出每一小段時間有人在說話</li>
+              <li data-diar-step="2"><b>聲紋分群</b>比對每段的聲紋，像的歸成同一群</li>
+              <li data-diar-step="3"><b>排回時間軸</b>依第一次開口的順序編成說話者 1、2</li>
+              <li data-diar-step="4"><b>認人</b>和語者庫裡記過的聲音夠像，就換成名字</li>
+            </ol>
+            <button type="button" class="btn btn--ghost btn--sm" data-diar-play>重播示意動畫</button>
+          </div>
+          <div class="diar__stage" data-diar-stage data-step="4" aria-hidden="true">
+            <span class="diar__cluster c1"></span>
+            <span class="diar__cluster c2"></span>
+            <span class="diar__lane l1"><b data-name-a="說話者 1" data-name-b="王小明">王小明</b></span>
+            <span class="diar__lane l2"><b data-name-a="說話者 2" data-name-b="陳美玲">陳美玲</b></span>
+            <i class="s1" style="--t:0.02;--w:0.07;--cx:18;--cy:30"></i>
+            <i class="s1" style="--t:0.1;--w:0.05;--cx:26;--cy:44"></i>
+            <i class="s2" style="--t:0.17;--w:0.08;--cx:70;--cy:28"></i>
+            <i class="s2" style="--t:0.27;--w:0.06;--cx:80;--cy:42"></i>
+            <i class="s1" style="--t:0.35;--w:0.09;--cx:14;--cy:56"></i>
+            <i class="s2" style="--t:0.46;--w:0.05;--cx:66;--cy:56"></i>
+            <i class="s2" style="--t:0.53;--w:0.07;--cx:76;--cy:68"></i>
+            <i class="s1" style="--t:0.62;--w:0.06;--cx:28;--cy:70"></i>
+            <i class="s2" style="--t:0.7;--w:0.08;--cx:86;--cy:56"></i>
+            <i class="s1" style="--t:0.8;--w:0.07;--cx:20;--cy:82"></i>
+            <i class="s2" style="--t:0.89;--w:0.05;--cx:70;--cy:82"></i>
+          </div>
+        </article>
         <div class="panels" data-spotlight>
-          <article class="card" data-reveal>
-            <div class="card__ui" aria-hidden="true">
-              <p class="ui-head">說話者</p>
-              <ul class="ui-spk">
-                <li class="s1"><span class="sw"></span><span class="nm">說話者 1</span><span class="sec">00:09</span><span class="act is-hot">記住聲音</span></li>
-                <li class="s2"><span class="sw"></span><span class="nm">說話者 2</span><span class="sec">00:13</span><span class="act">併入…</span></li>
-              </ul>
-              <div class="ui-lanes"><span class="s1" style="--a:0;--b:0.1256"></span><span class="s2" style="--a:0.1256;--b:0.2783"></span><span class="s1" style="--a:0.2783;--b:0.4075"></span><span class="s2" style="--a:0.4075;--b:0.8362"></span><span class="s1" style="--a:0.8362;--b:1"></span></div>
-            </div>
-            <h3>分辨說話者，記住聲音</h3>
-            <p>自動判斷或指定人數；取名後存進語者庫，之後自動認出。分錯時可以合併或改給別人。</p>
-          </article>
           <article class="card" data-reveal>
             <div class="card__ui" aria-hidden="true">
               <p class="ui-head">字幕<span>#3</span></p>
@@ -401,16 +433,6 @@
           </article>
           <article class="card" data-reveal>
             <div class="card__ui" aria-hidden="true">
-              <pre class="ui-srt"><span class="dim">3</span>
-<span class="dim">00:00:09,400 --&gt; 00:00:13,760</span>
-說話者 1：那 Docker 映像檔就下週發佈。</pre>
-              <div class="ui-chips"><span class="is-on">SRT</span><span>VTT</span><span>ASS</span><span>TXT</span><span>MD</span><span>DOCX</span><span>JSON</span></div>
-            </div>
-            <h3>匯出七種格式，燒錄字幕</h3>
-            <p>字幕檔、Markdown、Word 與 JSON 都能下載，也能把字幕直接燒錄到原始影片。</p>
-          </article>
-          <article class="card" data-reveal>
-            <div class="card__ui" aria-hidden="true">
               <p class="ui-head">監看資料夾</p>
               <ul class="ui-files">
                 <li><span class="ico">♪</span>週會.m4a</li>
@@ -426,119 +448,445 @@
       </div>
     </section>
     <section class="section hot" id="hotwords" aria-labelledby="hotwords-title">
-      <div class="wrap hot__grid">
+      <div class="wrap">
         <header class="sec-head" data-reveal>
           <p class="eyebrow"><span>03</span>熱詞</p>
           <h2 id="hotwords-title">先給熱詞，罕見詞比較容易寫對</h2>
           <p class="sec-lead">把人名、公司名與術語寫成一句話交給模型；詞彙表的取代規則再自動修正同音字。</p>
         </header>
-        <div class="hot__text">
-          <div class="hot__stats" data-reveal>
-            <div class="stat">
-              <p class="stat__label">罕見詞寫對</p>
-              <p class="stat__value"><span class="from">9</span><span class="arrow" aria-hidden="true">→</span><span data-count-to="18" data-count-from="9" data-decimals="0" data-suffix="">18</span><span class="unit">／23&nbsp;處</span></p>
-            </div>
-            <div class="stat">
-              <p class="stat__label">字元錯誤率</p>
-              <p class="stat__value"><span class="from">14.94%</span><span class="arrow" aria-hidden="true">→</span><span data-count-to="6.64" data-count-from="14.94" data-decimals="2" data-suffix="%">6.64%</span></p>
-            </div>
+        <div class="hot__stats" data-reveal>
+          <div class="stat">
+            <p class="stat__label">罕見詞寫對</p>
+            <p class="stat__value"><span class="from">9</span><span class="arrow" aria-hidden="true">→</span><span data-count-to="18" data-count-from="9" data-decimals="0" data-suffix="">18</span><span class="unit">／23&nbsp;處</span></p>
           </div>
-          <p class="footnote" data-reveal>66&nbsp;秒的會議錄音，含 23&nbsp;處罕見人名、公司名、地名與英文術語，以語音合成念出。見<a href="https://github.com/Scorpio-meow/ListenMiao/blob/main/docs/benchmarks.md#熱詞">效能實測</a>。</p>
+          <div class="stat">
+            <p class="stat__label">字元錯誤率</p>
+            <p class="stat__value"><span class="from">14.94%</span><span class="arrow" aria-hidden="true">→</span><span data-count-to="6.64" data-count-from="14.94" data-decimals="2" data-suffix="%">6.64%</span></p>
+          </div>
         </div>
-        <div class="hot__demo" data-reveal>
-          <div class="hw">
-            <p class="hw__label">熱詞</p>
-            <p class="hw__input">會中提到 Docker 映像檔、SRT 字幕檔、Word 逐字稿與 OpenVINO。</p>
+        <p class="footnote" data-reveal>66&nbsp;秒的會議錄音，含 23&nbsp;處罕見人名、公司名、地名與英文術語，以語音合成念出。見<a href="https://github.com/Scorpio-meow/ListenMiao/blob/main/docs/benchmarks.md#熱詞">效能實測</a>。</p>
+        <ul class="fix-more" aria-label="實測修正的例子">
+          <li><s>細質</s>汐止</li>
+          <li><s>英歌</s>鶯歌</li>
+          <li><s>superbase</s>Supabase</li>
+          <li><s>Piano</s>pyannote</li>
+        </ul>
+        <p class="hot__link">另一段 22 秒週會錄音給熱詞前後的逐字差別，可以到<a href="#listen">實測</a>邊聽邊看。</p>
+      </div>
+    </section>
+    <section class="section listen" id="listen" aria-labelledby="listen-title">
+      <div class="wrap">
+        <header class="sec-head" data-reveal>
+          <p class="eyebrow"><span>04</span>實測</p>
+          <h2 id="listen-title">聽一段真實的辨識結果</h2>
+          <p class="sec-lead">22&nbsp;秒的兩人週會錄音，用 ListenMiao 0.7.6 在 Core Ultra 7 155U 的內顯（int8）實際辨識兩次：一次不給熱詞，一次給熱詞。播放時字幕會跟著亮起，標出來的字是兩次結果不同的地方。</p>
+        </header>
+        <div class="listen__grid">
+          <div class="player" data-listen>
+            <audio class="player__audio" controls preload="none" aria-label="產品週會錄音，22 秒" data-listen-audio>
+              <source src="media/meeting.m4a" type="audio/mp4">
+            </audio>
+            <div class="race" data-race data-length="22.0">
+              <p class="race__head">跟錄音賽跑<span class="tag-demo">示意</span></p>
+              <div class="race__rows" aria-hidden="true">
+                <div class="race__row"><span class="race__name">錄音播放</span><span class="race__track"><span class="race__fill" data-race-play></span></span><span class="race__val" data-race-play-val></span></div>
+                <div class="race__row race__row--lm" data-race-lm><span class="race__name">ListenMiao 處理</span><span class="race__track"><span class="race__fill" data-race-proc></span></span><span class="race__val" data-race-proc-val></span></div>
+              </div>
+              <p class="race__note">處理時間是實測值（給熱詞 13.9&nbsp;秒、不給熱詞 14.84&nbsp;秒，跟著下面選的分頁）；兩條進度只是照播放時間示意快慢，不是即時處理。</p>
+            </div>
+            <div class="steps__tabs player__tabs" role="tablist" aria-label="辨識結果" data-tabs>
+              <button type="button" role="tab" id="tab-plain" aria-controls="cues-plain" aria-selected="false" tabindex="-1" data-proc="14.84">不給熱詞<small>9&nbsp;段</small></button>
+              <button type="button" role="tab" id="tab-hot" aria-controls="cues-hot" aria-selected="true" data-proc="13.9">給熱詞<small>8&nbsp;段</small></button>
+            </div>
+            <div class="cues__panels">
+              <div class="cues" id="cues-plain" role="tabpanel" aria-labelledby="tab-plain" hidden="until-found">
+                <ol class="cues__list" data-cues>
+                <li><button type="button" class="cue" data-start="0.0" data-end="2.6"><span class="cue__t">0:00:00.00</span><span class="cue__k s1">說話者 1</span><span class="cue__x">我們先確認這週的上線時程</span></button></li>
+                <li><button type="button" class="cue" data-start="2.6" data-end="4.76"><span class="cue__t">0:00:02.60</span><span class="cue__k s2">說話者 2</span><span class="cue__x">API 文件，昨天更新了，</span></button></li>
+                <li><button type="button" class="cue" data-start="4.76" data-end="6.48"><span class="cue__t">0:00:04.76</span><span class="cue__k s2">說話者 2</span><span class="cue__x">熱詞也加好了。</span></button></li>
+                <li><button type="button" class="cue" data-start="6.48" data-end="9.32"><span class="cue__t">0:00:06.48</span><span class="cue__k s1">說話者 1</span><span class="cue__x">那 Docker <del>印象</del>檔就下週發佈</span></button></li>
+                <li><button type="button" class="cue" data-start="9.32" data-end="11.76"><span class="cue__t">0:00:09.32</span><span class="cue__k s2">說話者 2</span><span class="cue__x">測試報告我週五前補上</span></button></li>
+                <li><button type="button" class="cue" data-start="11.76" data-end="14.12"><span class="cue__t">0:00:11.76</span><span class="cue__k s1">說話者 1</span><span class="cue__x">字幕檔，我先匯出 SRT</span></button></li>
+                <li><button type="button" class="cue" data-start="14.12" data-end="16.36"><span class="cue__t">0:00:14.12</span><span class="cue__k s1">說話者 1</span><span class="cue__x"><del>為了</del>逐字稿，下午給大家</span></button></li>
+                <li><button type="button" class="cue" data-start="16.36" data-end="19.96"><span class="cue__t">0:00:16.36</span><span class="cue__k s2">說話者 2</span><span class="cue__x">好 <del>openvino</del> 的版本，我也一起確認，</span></button></li>
+                <li><button type="button" class="cue" data-start="19.96" data-end="22.0"><span class="cue__t">0:00:19.96</span><span class="cue__k s1">說話者 1</span><span class="cue__x">那就這樣下週一再對一次進度。</span></button></li>
+                </ol>
+              </div>
+              <div class="cues" id="cues-hot" role="tabpanel" aria-labelledby="tab-hot">
+                <ol class="cues__list" data-cues>
+                <li><button type="button" class="cue" data-start="0.0" data-end="2.6"><span class="cue__t">0:00:00.00</span><span class="cue__k s1">說話者 1</span><span class="cue__x">我們先確認這週的上線時程</span></button></li>
+                <li><button type="button" class="cue" data-start="2.6" data-end="4.76"><span class="cue__t">0:00:02.60</span><span class="cue__k s2">說話者 2</span><span class="cue__x">API 文件，昨天更新了，</span></button></li>
+                <li><button type="button" class="cue" data-start="4.76" data-end="6.48"><span class="cue__t">0:00:04.76</span><span class="cue__k s2">說話者 2</span><span class="cue__x">熱詞也加好了。</span></button></li>
+                <li><button type="button" class="cue" data-start="6.48" data-end="9.32"><span class="cue__t">0:00:06.48</span><span class="cue__k s1">說話者 1</span><span class="cue__x">那 Docker <ins>映像</ins>檔就下週發佈</span></button></li>
+                <li><button type="button" class="cue" data-start="9.32" data-end="11.76"><span class="cue__t">0:00:09.32</span><span class="cue__k s2">說話者 2</span><span class="cue__x">測試報告我週五前補上</span></button></li>
+                <li><button type="button" class="cue" data-start="11.76" data-end="16.4"><span class="cue__t">0:00:11.76</span><span class="cue__k s1">說話者 1</span><span class="cue__x">字幕檔，我先匯出 SRT <ins>Word</ins> 逐字稿，下午給大家</span></button></li>
+                <li><button type="button" class="cue" data-start="16.4" data-end="20.0"><span class="cue__t">0:00:16.40</span><span class="cue__k s2">說話者 2</span><span class="cue__x">好 <ins>OpenVINO</ins> 的版本，我也一起確認，</span></button></li>
+                <li><button type="button" class="cue" data-start="20.0" data-end="22.0"><span class="cue__t">0:00:20.00</span><span class="cue__k s1">說話者 1</span><span class="cue__x">那就這樣 下週一再對一次進度。</span></button></li>
+                </ol>
+              </div>
+            </div>
           </div>
-          <ol class="fix" data-fixes>
-            <li><span class="fix__t">0:00:09.40</span><span class="fix__x">那 <s>docker 印象檔</s><ins data-scramble>Docker 映像檔</ins>就下週發佈。</span></li>
-            <li><span class="fix__t">0:00:17.76</span><span class="fix__x">我先匯出 <s>srt word</s><ins data-scramble>SRT、Word</ins> 逐字稿</span></li>
-            <li><span class="fix__t">0:00:23.60</span><span class="fix__x">好，<s>openvino</s><ins data-scramble>OpenVINO</ins> 的版本</span></li>
-          </ol>
-          <ul class="fix-more" aria-label="實測修正的例子">
-            <li><s>細質</s>汐止</li>
-            <li><s>英歌</s>鶯歌</li>
-            <li><s>superbase</s>Supabase</li>
-            <li><s>Piano</s>pyannote</li>
-          </ul>
+          <div class="listen__side">
+            <dl class="listen__facts">
+              <div><dt>兩次結果不同</dt><dd><b>3</b>&nbsp;處</dd></div>
+              <div><dt>處理時間</dt><dd><b>13.9</b>&nbsp;秒<small>給熱詞；不給熱詞 14.84&nbsp;秒，錄音 22.0&nbsp;秒</small></dd></div>
+            </dl>
+            <div class="hw">
+              <p class="hw__label">給熱詞那次用的熱詞</p>
+              <p class="hw__input">會中提到 Docker 映像檔、SRT 字幕檔、Word 逐字稿與 OpenVINO。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section exports" id="exports" aria-labelledby="exports-title">
+      <div class="wrap">
+        <header class="sec-head" data-reveal>
+          <p class="eyebrow"><span>05</span>匯出</p>
+          <h2 id="exports-title">同一份逐字稿，七種格式</h2>
+          <p class="sec-lead">下面都是上一段「給熱詞」那次結果直接從 ListenMiao 匯出的檔案，沒有改過一個字；字幕也能直接燒進影片。</p>
+        </header>
+        <div class="exports__grid">
+          <div class="fmt">
+            <div class="steps__tabs fmt__tabs" role="tablist" aria-label="匯出格式" data-tabs>
+              <button type="button" role="tab" id="fmt-tab-srt" aria-controls="fmt-srt" aria-selected="true">SRT</button>
+              <button type="button" role="tab" id="fmt-tab-vtt" aria-controls="fmt-vtt" aria-selected="false" tabindex="-1">VTT</button>
+              <button type="button" role="tab" id="fmt-tab-ass" aria-controls="fmt-ass" aria-selected="false" tabindex="-1">ASS</button>
+              <button type="button" role="tab" id="fmt-tab-txt" aria-controls="fmt-txt" aria-selected="false" tabindex="-1">TXT</button>
+              <button type="button" role="tab" id="fmt-tab-md" aria-controls="fmt-md" aria-selected="false" tabindex="-1">Markdown</button>
+              <button type="button" role="tab" id="fmt-tab-json" aria-controls="fmt-json" aria-selected="false" tabindex="-1">JSON</button>
+              <button type="button" role="tab" id="fmt-tab-docx" aria-controls="fmt-docx" aria-selected="false" tabindex="-1">Word</button>
+            </div>
+            <div class="fmt__panels">
+              <div class="fmt__panel" role="tabpanel" id="fmt-srt" aria-labelledby="fmt-tab-srt">
+                <pre class="fmt__pre" tabindex="0"><code>1
+00:00:00,000 --&gt; 00:00:02,600
+說話者 1：我們先確認這週的上線時程
+
+2
+00:00:02,600 --&gt; 00:00:04,760
+說話者 2：API 文件，昨天更新了，
+
+3
+00:00:04,760 --&gt; 00:00:06,480
+說話者 2：熱詞也加好了。
+
+4
+00:00:06,480 --&gt; 00:00:09,320
+說話者 1：那 Docker 映像檔就下週發佈
+
+5
+00:00:09,320 --&gt; 00:00:11,760
+說話者 2：測試報告我週五前補上
+
+6
+00:00:11,760 --&gt; 00:00:16,400
+說話者 1：字幕檔，我先匯出 SRT Word 逐字稿，下午給大家
+
+7
+00:00:16,400 --&gt; 00:00:20,000
+說話者 2：好 OpenVINO 的版本，我也一起確認，
+
+8
+00:00:20,000 --&gt; 00:00:22,000
+說話者 1：那就這樣 下週一再對一次進度。</code></pre>
+              </div>
+              <div class="fmt__panel" role="tabpanel" id="fmt-vtt" aria-labelledby="fmt-tab-vtt" hidden="until-found">
+                <pre class="fmt__pre" tabindex="0"><code>WEBVTT
+
+00:00:00.000 --&gt; 00:00:02.600
+&lt;v 說話者 1&gt;我們先確認這週的上線時程
+
+00:00:02.600 --&gt; 00:00:04.760
+&lt;v 說話者 2&gt;API 文件，昨天更新了，
+
+00:00:04.760 --&gt; 00:00:06.480
+&lt;v 說話者 2&gt;熱詞也加好了。
+
+00:00:06.480 --&gt; 00:00:09.320
+&lt;v 說話者 1&gt;那 Docker 映像檔就下週發佈
+
+00:00:09.320 --&gt; 00:00:11.760
+&lt;v 說話者 2&gt;測試報告我週五前補上
+
+00:00:11.760 --&gt; 00:00:16.400
+&lt;v 說話者 1&gt;字幕檔，我先匯出 SRT Word 逐字稿，下午給大家
+
+00:00:16.400 --&gt; 00:00:20.000
+&lt;v 說話者 2&gt;好 OpenVINO 的版本，我也一起確認，
+
+00:00:20.000 --&gt; 00:00:22.000
+&lt;v 說話者 1&gt;那就這樣 下週一再對一次進度。</code></pre>
+              </div>
+              <div class="fmt__panel" role="tabpanel" id="fmt-ass" aria-labelledby="fmt-tab-ass" hidden="until-found">
+                <pre class="fmt__pre" tabindex="0"><code>[Script Info]
+Title: 產品週會.wav
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Microsoft JhengHei,64,&amp;H00FFFFFF,&amp;H000000FF,&amp;H00000000,&amp;H80000000,0,0,0,0,100,100,0,0,1,3,1,2,80,80,60,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:02.60,Default,說話者 1,0,0,0,,說話者 1：我們先確認這週的上線時程
+Dialogue: 0,0:00:02.60,0:00:04.76,Default,說話者 2,0,0,0,,說話者 2：API 文件，昨天更新了，
+Dialogue: 0,0:00:04.76,0:00:06.48,Default,說話者 2,0,0,0,,說話者 2：熱詞也加好了。
+Dialogue: 0,0:00:06.48,0:00:09.32,Default,說話者 1,0,0,0,,說話者 1：那 Docker 映像檔就下週發佈
+Dialogue: 0,0:00:09.32,0:00:11.76,Default,說話者 2,0,0,0,,說話者 2：測試報告我週五前補上
+Dialogue: 0,0:00:11.76,0:00:16.40,Default,說話者 1,0,0,0,,說話者 1：字幕檔，我先匯出 SRT Word 逐字稿，下午給大家
+Dialogue: 0,0:00:16.40,0:00:20.00,Default,說話者 2,0,0,0,,說話者 2：好 OpenVINO 的版本，我也一起確認，
+Dialogue: 0,0:00:20.00,0:00:22.00,Default,說話者 1,0,0,0,,說話者 1：那就這樣 下週一再對一次進度。</code></pre>
+              </div>
+              <div class="fmt__panel" role="tabpanel" id="fmt-txt" aria-labelledby="fmt-tab-txt" hidden="until-found">
+                <pre class="fmt__pre" tabindex="0"><code>說話者 1：我們先確認這週的上線時程
+
+說話者 2：API 文件，昨天更新了，
+熱詞也加好了。
+
+說話者 1：那 Docker 映像檔就下週發佈
+
+說話者 2：測試報告我週五前補上
+
+說話者 1：字幕檔，我先匯出 SRT Word 逐字稿，下午給大家
+
+說話者 2：好 OpenVINO 的版本，我也一起確認，
+
+說話者 1：那就這樣 下週一再對一次進度。</code></pre>
+              </div>
+              <div class="fmt__panel" role="tabpanel" id="fmt-md" aria-labelledby="fmt-tab-md" hidden="until-found">
+                <pre class="fmt__pre" tabindex="0"><code># 產品週會.wav
+
+- 長度：00:00:22
+- 說話者：說話者 1（00:00:11）、說話者 2（00:00:07）
+
+[00:00:00] **說話者 1**：我們先確認這週的上線時程
+
+[00:00:02] **說話者 2**：API 文件，昨天更新了， 熱詞也加好了。
+
+[00:00:06] **說話者 1**：那 Docker 映像檔就下週發佈
+
+[00:00:09] **說話者 2**：測試報告我週五前補上
+
+[00:00:11] **說話者 1**：字幕檔，我先匯出 SRT Word 逐字稿，下午給大家
+
+[00:00:16] **說話者 2**：好 OpenVINO 的版本，我也一起確認，
+
+[00:00:20] **說話者 1**：那就這樣 下週一再對一次進度。</code></pre>
+              </div>
+              <div class="fmt__panel" role="tabpanel" id="fmt-json" aria-labelledby="fmt-tab-json" hidden="until-found">
+                <pre class="fmt__pre" tabindex="0"><code>{
+  &quot;text&quot;: &quot;我們先確認這週的上線時程\nAPI 文件，昨天更新了，\n熱詞也加好了。\n那 Docker 映像檔就下週發佈\n測試報告我週五前補上\n字幕檔，我先匯出 SRT Word 逐字稿，下午給大家\n好 OpenVINO 的版本，我也一起確認，\n那就這樣 下週一再對一次進度。&quot;,
+  &quot;segments&quot;: [
+    {
+      &quot;start&quot;: 0.0,
+      &quot;end&quot;: 2.6,
+      &quot;text&quot;: &quot;我們先確認這週的上線時程&quot;,
+      &quot;speaker&quot;: &quot;S1&quot;,
+      &quot;speaker_name&quot;: &quot;說話者 1&quot;
+    },
+    {
+      &quot;start&quot;: 2.6,
+      &quot;end&quot;: 4.76,
+      &quot;text&quot;: &quot;API 文件，昨天更新了，&quot;,
+      &quot;speaker&quot;: &quot;S2&quot;,
+      &quot;speaker_name&quot;: &quot;說話者 2&quot;
+    },
+    {
+      &quot;start&quot;: 4.76,
+      &quot;end&quot;: 6.48,
+      &quot;text&quot;: &quot;熱詞也加好了。&quot;,
+      &quot;speaker&quot;: &quot;S2&quot;,
+      &quot;speaker_name&quot;: &quot;說話者 2&quot;
+    },
+    {
+      &quot;start&quot;: 6.48,
+      &quot;end&quot;: 9.32,
+      &quot;text&quot;: &quot;那 Docker 映像檔就下週發佈&quot;,
+      &quot;speaker&quot;: &quot;S1&quot;,
+      &quot;speaker_name&quot;: &quot;說話者 1&quot;
+    },
+    {
+      &quot;start&quot;: 9.32,
+      &quot;end&quot;: 11.76,
+      &quot;text&quot;: &quot;測試報告我週五前補上&quot;,
+      &quot;speaker&quot;: &quot;S2&quot;,
+      &quot;speaker_name&quot;: &quot;說話者 2&quot;
+    },
+    {
+      &quot;start&quot;: 11.76,
+      &quot;end&quot;: 16.4,
+      &quot;text&quot;: &quot;字幕檔，我先匯出 SRT Word 逐字稿，下午給大家&quot;,
+      &quot;speaker&quot;: &quot;S1&quot;,
+      &quot;speaker_name&quot;: &quot;說話者 1&quot;
+    },
+    {
+      &quot;start&quot;: 16.4,
+      &quot;end&quot;: 20.0,
+      &quot;text&quot;: &quot;好 OpenVINO 的版本，我也一起確認，&quot;,
+      &quot;speaker&quot;: &quot;S2&quot;,
+      &quot;speaker_name&quot;: &quot;說話者 2&quot;
+    },
+    {
+      &quot;start&quot;: 20.0,
+      &quot;end&quot;: 22.0,
+      &quot;text&quot;: &quot;那就這樣 下週一再對一次進度。&quot;,
+      &quot;speaker&quot;: &quot;S1&quot;,
+      &quot;speaker_name&quot;: &quot;說話者 1&quot;
+    }
+  ],
+  &quot;audio_seconds&quot;: 22.0,
+  &quot;processing_seconds&quot;: 13.9,
+  &quot;speakers&quot;: [
+    {
+      &quot;id&quot;: &quot;S1&quot;,
+      &quot;name&quot;: &quot;說話者 1&quot;,
+      &quot;seconds&quot;: 11.0
+    },
+    {
+      &quot;id&quot;: &quot;S2&quot;,
+      &quot;name&quot;: &quot;說話者 2&quot;,
+      &quot;seconds&quot;: 7.8
+    }
+  ]
+}</code></pre>
+              </div>
+              <div class="fmt__panel" role="tabpanel" id="fmt-docx" aria-labelledby="fmt-tab-docx" hidden="until-found">
+                <div class="fmt__doc"><img src="images/docx-meeting.webp" alt="Word 逐字稿第一頁：標題「產品週會.wav」、長度與說話者，下面是加上時間與說話者的段落" width="790" height="500" loading="lazy" decoding="async"></div>
+              </div>
+            </div>
+          </div>
+          <div class="burn-cmp">
+            <h3 class="burn-cmp__title">燒錄字幕前後</h3>
+            <p class="burn-cmp__text">把宣傳影片的前 22&nbsp;秒配上這段錄音，辨識後用 <code>render</code> 燒錄；畫面是燒錄前後同一格。左右拖曳，或聚焦後按方向鍵比較。</p>
+            <div class="compare" data-compare style="--pos: 50%">
+              <img class="compare__img" src="media/burn-before-640.webp" srcset="media/burn-before-640.webp 640w, media/burn-before.webp 1280w" sizes="(max-width: 1023px) 92vw, 560px" alt="燒錄前的畫面：深色背景中央是 ListenMiao 標誌" width="1280" height="720" loading="lazy" decoding="async">
+              <img class="compare__img compare__after" src="media/burn-after-640.webp" srcset="media/burn-after-640.webp 640w, media/burn-after.webp 1280w" sizes="(max-width: 1023px) 92vw, 560px" alt="燒錄後的同一格畫面：標誌下方多了白色字幕「那 Docker 映像檔就下週發佈」" width="1280" height="720" loading="lazy" decoding="async">
+              <span class="compare__tag compare__tag--before" aria-hidden="true">燒錄前</span>
+              <span class="compare__tag compare__tag--after" aria-hidden="true">燒錄後</span>
+              <span class="compare__line" aria-hidden="true"></span>
+              <input class="compare__range" type="range" min="0" max="100" value="50" step="1" aria-label="燒錄前後的分界位置" aria-valuetext="左邊燒錄前、右邊燒錄後，各一半" data-compare-range>
+            </div>
+          </div>
         </div>
       </div>
     </section>
     <section class="section perf" id="performance" aria-labelledby="performance-title">
       <div class="wrap">
         <header class="sec-head" data-reveal>
-          <p class="eyebrow"><span>04</span>效能</p>
+          <p class="eyebrow"><span>06</span>效能</p>
           <h2 id="performance-title">自動調校，替每台電腦挑最快的設定</h2>
           <p class="sec-lead">第一次啟動時，用內附的 29&nbsp;秒範例語音實測每個裝置與權重格式，淘汰錯誤率過高的格式，再選出最快的一個。</p>
         </header>
-        <div class="perf__grid">
-          <figure class="bars" data-reveal aria-labelledby="bars-title">
-            <figcaption class="bars__head">
-              <span class="bars__title" id="bars-title">各機器自動調校選中的設定</span>
-              <span class="bars__unit">速度＝處理秒數 ÷ 音訊秒數，越小越快</span>
-            </figcaption>
-            <div class="bars__switch" role="group" aria-label="顯示方式">
-              <button type="button" aria-pressed="true" data-bars-view="chart">圖表</button>
-              <button type="button" aria-pressed="false" data-bars-view="table">表格</button>
+        <figure class="bars" data-reveal aria-labelledby="bars-title">
+          <figcaption class="bars__head">
+            <span class="bars__title" id="bars-title">各機器自動調校選中的設定</span>
+            <span class="bars__unit">速度＝處理秒數 ÷ 音訊秒數，越小越快</span>
+          </figcaption>
+          <div class="bars__switch" role="group" aria-label="顯示方式">
+            <button type="button" aria-pressed="true" data-bars-view="chart">圖表</button>
+            <button type="button" aria-pressed="false" data-bars-view="table">表格</button>
+          </div>
+          <div class="bars__chart" data-bars-chart>
+            <div class="bars__scale" aria-hidden="true"><span style="--at:0">0</span><span style="--at:0.25">0.25</span><span style="--at:0.5">0.5</span><span style="--at:0.75">0.75</span><span style="--at:1">1.0</span></div>
+            <ul class="bars__list">
+              <li class="bars__row" tabindex="0" style="--v:0.021;--end:0.021;--i:0" data-tip-name="Ryzen 9 9950X3D＋RTX 5090・PyTorch fp16" data-tip-more="顯示記憶體 3.8 GB・整輪調校約 1.5–2 分鐘（含轉換）">
+                <span class="bars__name">Ryzen 9 9950X3D＋RTX 5090<small>PyTorch fp16</small></span>
+                <span class="bars__plot"><span class="bars__fill"></span><span class="bars__val" data-count-to="0.021" data-count-from="0" data-decimals="3" data-suffix="">0.021</span></span>
+              </li>
+              <li class="bars__row" tabindex="0" style="--v:0.34;--end:0.34;--i:1" data-tip-name="Core i5-12500H・Iris Xe 內顯・int8" data-tip-more="記憶體 3.1 GB・整輪調校約 6 分鐘（int8 已轉好）">
+                <span class="bars__name">Core i5-12500H<small>Iris Xe 內顯・int8</small></span>
+                <span class="bars__plot"><span class="bars__fill"></span><span class="bars__val" data-count-to="0.34" data-count-from="0" data-decimals="2" data-suffix="">0.34</span></span>
+              </li>
+              <li class="bars__row" tabindex="0" style="--v:0.38;--end:0.38;--i:2" data-tip-name="Core Ultra 7 155U・內顯・int8" data-tip-more="記憶體 2.8 GB・整輪調校約 7 分鐘（int8 已轉好）">
+                <span class="bars__name">Core Ultra 7 155U<small>內顯・int8</small></span>
+                <span class="bars__plot"><span class="bars__fill"></span><span class="bars__val" data-count-to="0.38" data-count-from="0" data-decimals="2" data-suffix="">0.38</span></span>
+              </li>
+              <li class="bars__row" tabindex="0" style="--v:0.66;--end:0.66;--i:3" data-tip-name="Core i7-9700・CPU・int8" data-tip-more="記憶體 2.2 GB・整輪調校約 35 分鐘（8 GB 記憶體不足，fp16 換頁）">
+                <span class="bars__name">Core i7-9700<small>CPU・int8</small></span>
+                <span class="bars__plot"><span class="bars__fill"></span><span class="bars__val" data-count-to="0.66" data-count-from="0" data-decimals="2" data-suffix="">0.66</span></span>
+              </li>
+            </ul>
+            <div class="bars__tip" data-bars-tip hidden><b></b><span></span><small></small></div>
+          </div>
+          <div class="bars__table-wrap" data-bars-table hidden>
+            <table class="bars__table" role="table">
+              <thead><tr role="row"><th role="columnheader" scope="col">機器與選中的設定</th><th role="columnheader" scope="col" class="num">速度</th><th role="columnheader" scope="col" class="num">記憶體</th><th role="columnheader" scope="col" class="num">整輪調校</th></tr></thead>
+              <tbody>
+                <tr role="row"><th role="rowheader" scope="row">Ryzen 9 9950X3D＋RTX 5090<small>RTX 5090・PyTorch fp16</small></th><td role="cell" class="num" data-label="速度">0.021</td><td role="cell" class="num" data-label="記憶體">3.8&nbsp;GB<small>顯示記憶體</small></td><td role="cell" class="num" data-label="整輪調校">約 1.5–2&nbsp;分鐘</td></tr>
+                <tr role="row"><th role="rowheader" scope="row">Core i5-12500H<small>Iris Xe 內顯・int8</small></th><td role="cell" class="num" data-label="速度">0.34</td><td role="cell" class="num" data-label="記憶體">3.1&nbsp;GB</td><td role="cell" class="num" data-label="整輪調校">約 6&nbsp;分鐘</td></tr>
+                <tr role="row"><th role="rowheader" scope="row">Core Ultra 7 155U<small>內顯・int8</small></th><td role="cell" class="num" data-label="速度">0.38</td><td role="cell" class="num" data-label="記憶體">2.8&nbsp;GB</td><td role="cell" class="num" data-label="整輪調校">約 7&nbsp;分鐘</td></tr>
+                <tr role="row"><th role="rowheader" scope="row">Core i7-9700<small>CPU・int8</small></th><td role="cell" class="num" data-label="速度">0.66</td><td role="cell" class="num" data-label="記憶體">2.2&nbsp;GB</td><td role="cell" class="num" data-label="整輪調校">約 35&nbsp;分鐘</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </figure>
+        <div class="est" data-est>
+          <div class="est__controls">
+            <h3 class="est__title">估算辨識要多久</h3>
+            <div class="est__field">
+              <div class="est__row"><label for="est-len">錄音長度</label><output for="est-len" data-est-len-out>60 分鐘</output></div>
+              <input class="range" type="range" id="est-len" min="1" max="180" step="1" value="60" data-est-len>
             </div>
-            <div class="bars__chart" data-bars-chart>
-              <div class="bars__scale" aria-hidden="true"><span style="--at:0">0</span><span style="--at:0.25">0.25</span><span style="--at:0.5">0.5</span><span style="--at:0.75">0.75</span><span style="--at:1">1.0</span></div>
-              <ul class="bars__list">
-                <li class="bars__row" tabindex="0" style="--v:0.021;--end:0.021;--i:0" data-tip-name="Ryzen 9 9950X3D＋RTX 5090・PyTorch fp16" data-tip-more="顯示記憶體 3.8 GB・整輪調校約 1.5–2 分鐘（含轉換）">
-                  <span class="bars__name">Ryzen 9 9950X3D＋RTX 5090<small>PyTorch fp16</small></span>
-                  <span class="bars__plot"><span class="bars__fill"></span><span class="bars__val" data-count-to="0.021" data-count-from="0" data-decimals="3" data-suffix="">0.021</span></span>
-                </li>
-                <li class="bars__row" tabindex="0" style="--v:0.34;--end:0.34;--i:1" data-tip-name="Core i5-12500H・Iris Xe 內顯・int8" data-tip-more="記憶體 3.1 GB・整輪調校約 6 分鐘（int8 已轉好）">
-                  <span class="bars__name">Core i5-12500H<small>Iris Xe 內顯・int8</small></span>
-                  <span class="bars__plot"><span class="bars__fill"></span><span class="bars__val" data-count-to="0.34" data-count-from="0" data-decimals="2" data-suffix="">0.34</span></span>
-                </li>
-                <li class="bars__row" tabindex="0" style="--v:0.38;--end:0.38;--i:2" data-tip-name="Core Ultra 7 155U・內顯・int8" data-tip-more="記憶體 2.8 GB・整輪調校約 7 分鐘（int8 已轉好）">
-                  <span class="bars__name">Core Ultra 7 155U<small>內顯・int8</small></span>
-                  <span class="bars__plot"><span class="bars__fill"></span><span class="bars__val" data-count-to="0.38" data-count-from="0" data-decimals="2" data-suffix="">0.38</span></span>
-                </li>
-                <li class="bars__row" tabindex="0" style="--v:0.66;--end:0.66;--i:3" data-tip-name="Core i7-9700・CPU・int8" data-tip-more="記憶體 2.2 GB・整輪調校約 35 分鐘（8 GB 記憶體不足，fp16 換頁）">
-                  <span class="bars__name">Core i7-9700<small>CPU・int8</small></span>
-                  <span class="bars__plot"><span class="bars__fill"></span><span class="bars__val" data-count-to="0.66" data-count-from="0" data-decimals="2" data-suffix="">0.66</span></span>
-                </li>
-              </ul>
-              <div class="bars__tip" data-bars-tip hidden><b></b><span></span><small></small></div>
+            <div class="est__field">
+              <div class="est__row"><label for="est-hw">硬體</label><output for="est-hw" data-est-hw-out>Core Ultra 7 155U</output></div>
+              <input class="range" type="range" id="est-hw" min="0" max="3" step="1" value="1" data-est-hw>
+              <ol class="est__ticks" aria-hidden="true"><li>i7-9700</li><li>Ultra 7 155U</li><li>i5-12500H</li><li>RTX 5090</li></ol>
             </div>
-            <div class="bars__table-wrap" data-bars-table hidden>
-              <table class="bars__table" role="table">
-                <thead><tr role="row"><th role="columnheader" scope="col">機器與選中的設定</th><th role="columnheader" scope="col" class="num">速度</th><th role="columnheader" scope="col" class="num">記憶體</th><th role="columnheader" scope="col" class="num">整輪調校</th></tr></thead>
+          </div>
+          <div class="est__result" aria-live="polite">
+            <p class="est__time" data-est-time>約 23 分鐘</p>
+            <p class="est__pick">自動調校選中 <b data-est-pick>內顯・int8</b>，速度 <b data-est-speed>0.38</b></p>
+            <p class="est__note">用<a href="https://github.com/Scorpio-meow/ListenMiao/blob/main/docs/benchmarks.md#辨識速度與自動調校">效能實測</a>裡各機器選中設定的速度乘上錄音長度，只算辨識。分辨說話者在 CPU 上另外跑，多人長錄音約 0.34&nbsp;倍，和內顯辨識同時進行時整體約 0.4&nbsp;倍。</p>
+          </div>
+          <script type="application/json" data-est-machines>[
+            { "name": "Core i7-9700", "pick": "CPU・int8", "speed": 0.66 },
+            { "name": "Core Ultra 7 155U", "pick": "內顯・int8", "speed": 0.38 },
+            { "name": "Core i5-12500H", "pick": "內顯・int8", "speed": 0.34 },
+            { "name": "Ryzen 9 9950X3D＋RTX 5090", "pick": "RTX 5090・PyTorch fp16", "speed": 0.021 }
+          ]</script>
+        </div>
+        <div class="replay" data-replay>
+          <div class="replay__head">
+            <div>
+              <h3 class="replay__title">重播一次真實的自動調校</h3>
+              <p class="replay__sub">Core Ultra 7 155U（32&nbsp;GB）在 2026-11-14 20:52–20:57 用 ListenMiao 0.7.6 重新調校的推論日誌，5 分半壓縮成十幾秒；速度是處理秒數 ÷ 音訊秒數，越小越快。上面長條圖與估算器的 0.38 取自效能實測文件 2026-10-31 那次調校，這裡是同一台電腦 2026-11-14 用內附 29&nbsp;秒範例語音重新調校的結果，所以數字不同。</p>
+            </div>
+            <button type="button" class="btn btn--ghost btn--sm" data-replay-play>重播</button>
+          </div>
+          <div class="replay__grid">
+            <ol class="replay__log">
+              <li data-at="0"><time>20:52:06</time>找不到硬體設定檔，開始自動調校</li>
+              <li data-at="4"><time>20:52:10</time>偵測到 Core Ultra 7 155U：14 個可用執行緒、31.7&nbsp;GB 記憶體，裝置有 CPU、內顯與 NPU</li>
+              <li data-at="4"><time>20:52:10</time>略過 CPU・fp32 與內顯・fp32：原始權重是 BF16，內顯以 FP16 運算</li>
+              <li data-at="4"><time>20:52:10</time>略過 NPU：實測時驅動回報 DEVICE_LOST；略過 PyTorch CPU：CPU 上 OpenVINO 比較快</li>
+              <li data-at="64"><time>20:53:10</time>以原始精度匯出成 OpenVINO，耗時 60.0&nbsp;秒</li>
+              <li data-at="95"><time>20:53:41</time>壓縮成 int4，耗時 30.6&nbsp;秒</li>
+              <li data-at="134"><time>20:54:20</time>實測 CPU・int4：0.348，字元錯誤率 2.81%</li>
+              <li data-at="172"><time>20:54:58</time>實測 CPU・int8：0.368，字元錯誤率 1.69%</li>
+              <li data-at="190"><time>20:55:16</time>壓縮成 fp16，耗時 17.3&nbsp;秒</li>
+              <li data-at="251"><time>20:56:17</time>實測 CPU・fp16：0.607，字元錯誤率 1.69%</li>
+              <li data-at="251"><time>20:56:17</time>略過內顯・int4：int4 在 CPU 上的錯誤率已不合格</li>
+              <li data-at="283"><time>20:56:49</time>實測內顯・int8：0.306，字元錯誤率 1.69%</li>
+              <li data-at="333"><time>20:57:39</time>實測內顯・fp16：0.359，字元錯誤率 1.69%</li>
+              <li data-at="333" class="is-verdict"><time>20:57:39</time>選擇內顯・int8：處理時間是音訊長度的 0.31 倍，可用裝置中最快；每個模型約 2.8&nbsp;GB，同時常駐 2 個</li>
+            </ol>
+            <div class="tune__scroll">
+              <table class="tune__table">
+                <thead><tr><th scope="col">組合</th><th scope="col" class="num">速度</th><th scope="col" class="num">字元錯誤率</th><th scope="col" class="num">記憶體</th><th scope="col">結果</th></tr></thead>
                 <tbody>
-                  <tr role="row"><th role="rowheader" scope="row">Ryzen 9 9950X3D＋RTX 5090<small>RTX 5090・PyTorch fp16</small></th><td role="cell" class="num" data-label="速度">0.021</td><td role="cell" class="num" data-label="記憶體">3.8&nbsp;GB<small>顯示記憶體</small></td><td role="cell" class="num" data-label="整輪調校">約 1.5–2&nbsp;分鐘</td></tr>
-                  <tr role="row"><th role="rowheader" scope="row">Core i5-12500H<small>Iris Xe 內顯・int8</small></th><td role="cell" class="num" data-label="速度">0.34</td><td role="cell" class="num" data-label="記憶體">3.1&nbsp;GB</td><td role="cell" class="num" data-label="整輪調校">約 6&nbsp;分鐘</td></tr>
-                  <tr role="row"><th role="rowheader" scope="row">Core Ultra 7 155U<small>內顯・int8</small></th><td role="cell" class="num" data-label="速度">0.38</td><td role="cell" class="num" data-label="記憶體">2.8&nbsp;GB</td><td role="cell" class="num" data-label="整輪調校">約 7&nbsp;分鐘</td></tr>
-                  <tr role="row"><th role="rowheader" scope="row">Core i7-9700<small>CPU・int8</small></th><td role="cell" class="num" data-label="速度">0.66</td><td role="cell" class="num" data-label="記憶體">2.2&nbsp;GB</td><td role="cell" class="num" data-label="整輪調校">約 35&nbsp;分鐘</td></tr>
+                  <tr data-at="134"><th scope="row">CPU・int4</th><td class="num">0.348</td><td class="num">2.81%</td><td class="num">1.6&nbsp;GB</td><td><span class="chip chip--out" data-at="251">淘汰</span></td></tr>
+                  <tr data-at="172"><th scope="row">CPU・int8</th><td class="num">0.368</td><td class="num">1.69%</td><td class="num">2.2&nbsp;GB</td><td><span class="chip" data-at="333">可用</span></td></tr>
+                  <tr data-at="251"><th scope="row">CPU・fp16</th><td class="num">0.607</td><td class="num">1.69%</td><td class="num">4.8&nbsp;GB</td><td><span class="chip" data-at="333">可用</span></td></tr>
+                  <tr data-at="283" data-pick-at="333" class="is-pick"><th scope="row">內顯・int8</th><td class="num">0.306</td><td class="num">1.69%</td><td class="num">2.8&nbsp;GB</td><td><span class="chip chip--pick" data-at="333">選中</span></td></tr>
+                  <tr data-at="333"><th scope="row">內顯・fp16</th><td class="num">0.359</td><td class="num">1.69%</td><td class="num">4.2&nbsp;GB</td><td><span class="chip" data-at="333">可用</span></td></tr>
                 </tbody>
               </table>
             </div>
-          </figure>
-          <div class="perf__facts">
-            <div class="fact" data-reveal>
-              <p class="fact__value"><span data-count-to="74" data-count-from="0" data-decimals="0" data-suffix="">74</span><small>秒</small></p>
-              <p class="fact__text">RTX 5090 處理 1&nbsp;小時錄音約 74&nbsp;秒。</p>
-            </div>
-            <div class="fact" data-reveal>
-              <p class="fact__value"><span data-count-to="15" data-count-from="0" data-decimals="0" data-suffix="">15</span><small>秒</small></p>
-              <p class="fact__text">調校完寫出硬體設定檔，之後啟動約 15&nbsp;秒就緒。</p>
-            </div>
-          </div>
-        </div>
-        <div class="tune" data-reveal>
-          <p class="tune__head"><span>Core Ultra 7 155U 的實測</span><span class="tune__sub">選中：和最快的內顯・fp16 相差 5% 以內，記憶體少 1.4&nbsp;GB</span></p>
-          <div class="tune__scroll">
-            <table class="tune__table">
-              <thead><tr><th scope="col">組合</th><th scope="col" class="num">速度</th><th scope="col" class="num">字元錯誤率</th><th scope="col" class="num">記憶體</th><th scope="col">結果</th></tr></thead>
-              <tbody>
-                <tr><th scope="row">CPU・int4</th><td class="num">0.38</td><td class="num">2.8%</td><td class="num">1.6&nbsp;GB</td><td><span class="chip chip--out">淘汰</span></td></tr>
-                <tr><th scope="row">CPU・int8</th><td class="num">0.41</td><td class="num">1.7%</td><td class="num">2.2&nbsp;GB</td><td><span class="chip">可用</span></td></tr>
-                <tr><th scope="row">CPU・fp16</th><td class="num">0.69</td><td class="num">1.7%</td><td class="num">4.8&nbsp;GB</td><td><span class="chip">可用</span></td></tr>
-                <tr class="is-pick"><th scope="row">內顯・int8</th><td class="num">0.382</td><td class="num">1.7%</td><td class="num">2.8&nbsp;GB</td><td><span class="chip chip--pick">選中</span></td></tr>
-                <tr><th scope="row">內顯・fp16</th><td class="num">0.378</td><td class="num">1.7%</td><td class="num">4.2&nbsp;GB</td><td><span class="chip">可用</span></td></tr>
-              </tbody>
-            </table>
           </div>
         </div>
       </div>
@@ -546,7 +894,7 @@
     <section class="section privacy" id="privacy" aria-labelledby="privacy-title">
       <div class="wrap">
         <header class="sec-head" data-reveal>
-          <p class="eyebrow"><span>05</span>隱私</p>
+          <p class="eyebrow"><span>07</span>隱私</p>
           <h2 id="privacy-title">錄音與逐字稿留在這台電腦</h2>
           <p class="sec-lead">開發者不經營任何伺服器，也不收集你的錄音、逐字稿與使用情形。沒有帳號、沒有分析追蹤、沒有廣告。</p>
         </header>
@@ -585,7 +933,7 @@
       <div class="wrap cli__grid">
         <div class="cli__text">
           <header class="sec-head" data-reveal>
-            <p class="eyebrow"><span>06</span>命令列、MCP 與 Skill</p>
+            <p class="eyebrow"><span>08</span>命令列、MCP 與 Skill</p>
             <h2 id="cli-title">批次轉檔，或讓 AI 助理直接呼叫</h2>
             <p class="sec-lead">命令列工具、MCP server 與 Agent Skill 都直接連這台電腦上執行中的服務，不經過系統設定的 proxy，也不跟著轉址，錄音與存取權杖不會送到別的主機。</p>
           </header>
@@ -656,7 +1004,7 @@
     <section class="section install" id="install" aria-labelledby="install-title">
       <div class="wrap">
         <header class="sec-head" data-reveal>
-          <p class="eyebrow"><span>07</span>安裝</p>
+          <p class="eyebrow"><span>09</span>安裝</p>
           <h2 id="install-title">安裝與系統需求</h2>
           <p class="sec-lead">下載 zip 就能安裝，不需要 git。安裝腳本會自動安裝 uv 與符合顯示卡的 PyTorch；啟動後開啟 <code>http://127.0.0.1:7860</code>，把音訊或影片拖進視窗，再按「辨識」。</p>
         </header>
@@ -733,6 +1081,11 @@
           <p class="after__item"><b>第一次啟動</b>會下載約 9&nbsp;GB 的模型並自動調校，約需數分鐘到十幾分鐘，進度顯示在底部狀態列；之後啟動約 15&nbsp;秒就緒。</p>
           <p class="after__item"><b>之後更新</b>按網頁右下角的版本號，再按「檢查更新」「立即更新」。新版的 zip 核對過 SHA-256 才換上，<code>.env</code> 與辨識結果、詞彙表、語者庫都保留；Docker 版見<a href="https://github.com/Scorpio-meow/ListenMiao/blob/main/docs/deployment.md#更新版本">更新版本</a>。</p>
         </div>
+        <div class="news">
+          <h3 class="news__title">最近更新</h3>
+          <ol class="news__list" data-changelog data-count="5" data-href="https://github.com/Scorpio-meow/ListenMiao/blob/main/CHANGELOG.md" data-labels='{"Added": "新增", "Changed": "變更", "Fixed": "修正", "Removed": "移除", "Deprecated": "棄用", "Security": "安全性"}' data-unit="項"></ol>
+          <a class="news__more" href="https://github.com/Scorpio-meow/ListenMiao/blob/main/CHANGELOG.md">完整更新紀錄</a>
+        </div>
       </div>
     </section>
   </main>
@@ -741,17 +1094,16 @@
     <div class="wrap">
       <div class="closing__cta">
         <button class="cat" type="button" aria-label="摸摸聽喵" data-cat>
-          <picture class="closing__mark">
-            <source srcset="images/mark-dark.svg" media="(prefers-color-scheme: dark)">
-            <img src="images/mark.svg" alt="" width="160" height="160">
-          </picture>
+          <span class="cat__art" aria-hidden="true"><svg class="cat__svg" viewBox="0 0 64 64" width="160" height="160" focusable="false"><defs><clipPath id="cat-cut"><rect x="-200" y="-200" width="2400" height="1140"/></clipPath><g id="cat-ink"><g transform="translate(3.92 9.38) scale(0.03053)"><g clip-path="url(#cat-cut)"><g transform="scale(2.5)"><path d="M0 0 C1.2 -0 2.5 -0 3.8 -0.1 C13 -0.1 22.5 0.4 30.5 5.4 C34.3 7.6 36.4 7.8 40.7 7.2 C41.6 6.8 42.5 6.3 43.4 5.8 C51.1 2.3 58.8 3.9 66.4 6.8 C68.5 7.6 70.6 8.4 72.7 9.2 C72.7 9.9 72.7 10.6 72.7 11.2 C73.5 11.3 74.3 11.3 75.1 11.4 C79.3 12.4 82 14.2 85.5 16.7 C87.4 18 89.2 19.2 91.2 20.2 C95.3 22.6 99 25.3 102.7 28.2 C103.6 28.9 104.5 29.6 105.4 30.3 C106.3 31.1 107.2 31.8 108.2 32.5 C109 33.2 109.9 33.8 110.8 34.5 C111.4 35.1 112 35.7 112.7 36.2 C112.7 36.9 112.7 37.6 112.7 38.2 C113.3 38.2 114 38.2 114.7 38.2 C116.2 39.7 116.2 39.7 117.9 41.8 C121.6 46.1 121.6 46.1 123.4 48.1 C129.8 54.9 136 63.1 137.9 72.4 C138.5 74.5 138.5 74.5 139.7 76.2 C142.7 77.5 145.6 78.1 148.7 78.7 C158.3 80.6 164.9 90.4 170.1 98.1 C174.5 105 177 112.5 179.7 120.2 C180 121.2 180.3 122.1 180.7 123 C185.9 138.4 188 153.6 188 169.8 C188 170.8 188 171.9 188 173 C188 180.2 187 187.1 185.7 194.2 C185.1 198.1 185.1 198.1 185.7 201.2 C187.3 203.1 189 204.6 190.9 206.2 C197 213.1 196.2 222.1 196.1 230.8 C196.1 231.4 196.1 232.1 196.1 232.8 C196.1 243.2 195.1 252.4 191.7 262.2 C191.3 263.6 190.9 265 190.5 266.3 C188.1 274.5 185.2 282.4 181.7 290.2 C181 290.2 180.4 290.2 179.7 290.2 C179.6 290.8 179.5 291.3 179.4 291.9 C175.9 303.3 165.6 315.9 157 323.9 C155.7 325.2 155.7 325.2 154.7 327.2 C154 327.2 153.4 327.2 152.7 327.2 C152.7 328.3 152.8 329.3 152.8 330.4 C153.1 345 150.5 354.3 141.7 366.2 C141.2 367 140.6 367.8 140.1 368.6 C139.8 368.9 139.8 368.9 138.7 370.2 C138 370.2 137.4 370.2 136.7 370.2 C136.5 370.8 136.2 371.4 136 371.9 C134.3 374.9 132.2 377 129.7 379.2 C129 379.9 128.3 380.6 127.6 381.3 C121.4 387.1 114.8 391.8 107.7 396.2 C107 396.7 106.3 397.1 105.6 397.6 C101.7 399.9 98.1 401.2 93.7 402.2 C93.7 402.9 93.7 403.6 93.7 404.2 C46.6 404.3 -0.5 404.4 -47.5 404.5 C-48.2 404.5 -48.9 404.5 -49.7 404.5 C-64.8 404.5 -80 404.5 -95.1 404.5 C-102.5 404.5 -110 404.5 -117.4 404.5 C-117.8 404.5 -117.8 404.5 -119.6 404.5 C-143.6 404.5 -167.5 404.6 -191.5 404.6 C-216.1 404.7 -240.7 404.7 -265.4 404.7 C-268.8 404.7 -272.3 404.7 -275.8 404.7 C-276.5 404.7 -277.2 404.7 -277.9 404.7 C-288.9 404.7 -299.9 404.8 -310.9 404.8 C-322 404.8 -333.1 404.8 -344.2 404.8 C-350.1 404.8 -356.1 404.8 -362.1 404.8 C-367.6 404.9 -373.1 404.9 -378.6 404.9 C-380.6 404.9 -382.6 404.9 -384.6 404.9 C-400.5 405 -413 402.2 -427.1 394.4 C-427.5 394.2 -427.5 394.2 -429.5 393.1 C-447.9 383 -466 370.6 -478.3 353.2 C-478.3 352.6 -478.3 351.9 -478.3 351.2 C-479 351.2 -479.6 351.2 -480.3 351.2 C-488.4 340.3 -493.9 327.4 -497.3 314.2 C-497.4 313.9 -497.4 313.9 -497.9 312.2 C-503.7 288.1 -501.8 262.1 -493.4 238.8 C-489.7 228.3 -492.4 219.6 -495.3 209.3 C-496.8 203.8 -497.3 198.2 -497.9 192.5 C-498.3 189.2 -498.3 189.2 -499.3 186.2 C-502 166.7 -502.7 146.8 -499.3 127.2 C-499.2 126.6 -499.2 126.6 -498.7 123.5 C-496.8 113.4 -493.8 105.2 -485.6 98.6 C-479.9 95.3 -473.5 95.7 -467.2 97.3 C-457.7 100.6 -447.4 107.1 -440.3 114.2 C-438.3 114.6 -436.3 115 -434.3 115.2 C-434 114 -433.6 112.8 -433.2 111.5 C-428.6 97.8 -416.9 81.1 -404.3 73.2 C-400.8 72.6 -399.2 72.8 -396 74.3 C-393.5 77.2 -393.4 79.4 -393.3 83.2 C-393.8 85.3 -394.3 87.4 -394.8 89.4 C-397.3 103.7 -394.7 117.6 -387.9 130.2 C-385.3 133.2 -385.3 133.2 -382.5 133.9 C-379.5 133.3 -376.6 132.6 -373.7 131.8 C-363.6 129.4 -353.6 128.9 -343.2 129 C-342 129 -340.7 129 -339.4 129 C-331.5 129 -324.1 129.7 -316.3 131.2 C-315.2 131.5 -314 131.7 -312.8 131.9 C-311.1 132.3 -309.3 132.6 -307.6 133 C-305.3 133.2 -305.3 133.2 -302.3 132.2 C-301.7 130.4 -301.7 130.4 -301.3 128.2 C-300.7 126.9 -300.1 125.6 -299.4 124.4 C-293.1 112.2 -292.6 98.3 -296.3 85.2 C-296.8 81.5 -296.8 81.5 -296.3 78.2 C-294.3 75.8 -294.3 75.8 -291.3 74.2 C-286 74 -283.3 74.9 -279.2 78.3 C-277.9 79.6 -276.6 80.9 -275.3 82.2 C-274.7 82.9 -274.1 83.5 -273.5 84.1 C-265.3 93 -259.6 102.9 -255.3 114.2 C-255 114.9 -254.7 115.6 -254.3 116.2 C-249.4 116 -247.2 114.4 -243.6 111.1 C-240.5 108.6 -237.2 106.6 -233.8 104.6 C-233.1 104.2 -232.5 103.8 -231.8 103.4 C-224 98.8 -217.6 95.5 -208.3 96.2 C-201.6 98.6 -196.6 102.5 -193.2 108.9 C-190.9 113.8 -189.5 119 -188.3 124.2 C-188.1 125 -187.9 125.8 -187.7 126.7 C-182 153.4 -182.9 197.5 -195.3 222.2 C-196.5 230.1 -194.7 237 -192.5 244.4 C-180.1 285.8 -180.1 285.8 -187.3 300.2 C-187.5 302 -187.7 303.7 -187.9 305.4 C-187.9 305.8 -187.9 305.8 -188.1 308.1 C-188.2 308.8 -188.3 309.5 -188.3 310.2 C-171.8 309.6 -156.3 305.9 -140.4 301.4 C-134.3 299.7 -128.2 298.4 -122 297.1 C-118.8 296.4 -115.6 295.6 -112.4 294.7 C-105.1 292.8 -97.9 291.5 -90.3 290.6 C-87.3 290.2 -87.3 290.2 -84.3 289.2 C-74.9 288.2 -65.5 288.1 -56.1 288.1 C-55.1 288.1 -54.1 288.1 -53.1 288.1 C-41.9 288.1 -31.2 289.2 -20.2 291.6 C-19.2 291.8 -18.2 292 -17.1 292.2 C-11.3 293.4 -6 295 -0.5 297.3 C1.7 298.3 3.9 299 6.2 299.7 C10.4 301 13.9 303 17.5 305.3 C20.3 306.5 21.7 306.8 24.7 306.2 C27.1 304.1 27.1 304.1 29.5 301.2 C35.8 293.8 42.8 287.9 50.7 282.2 C51.4 281.7 52.1 281.2 52.8 280.7 C57.5 277.4 62.1 275.1 67.4 273.1 C69.7 272.3 69.7 272.3 71.8 271.2 C76.5 268.8 81.7 268.2 87 267.7 C87.8 267.6 88.7 267.5 89.7 267.4 C90.3 267.4 91 267.3 91.7 267.2 C91.7 266.5 91.7 265.7 91.7 264.9 C92.6 226.6 92.6 226.6 99.7 212.2 C100.1 211.3 100.6 210.4 101 209.4 C104.1 203.4 107.5 198.7 112.7 194.2 C111.3 189.9 109.2 187.4 106 184.1 C92.3 169.4 81.1 148.4 81.4 127.9 C81.5 126.5 81.5 125 81.6 123.6 C81.7 120.2 81.7 120.2 80.7 118.2 C78.2 117.5 75.8 116.9 73.2 116.4 C66.8 114.8 60.7 113.1 54.7 110.2 C53.6 109.7 52.5 109.2 51.4 108.7 C37.4 102.1 25.9 94.2 18.7 80.2 C14 80.8 11.5 82.7 7.9 85.5 C0.7 90.8 -6.8 92.9 -15.3 95.2 C-17.5 95.9 -19.6 96.5 -21.8 97.2 C-22.6 97.5 -23.5 97.8 -24.4 98.1 C-26.3 99.2 -26.3 99.2 -27.2 101.6 C-27.3 104.2 -27.1 106 -26.4 108.5 C-20.9 134.2 -30.2 159 -43.9 180.3 C-56 198.4 -76.9 210.7 -97.8 216.1 C-108.9 218.3 -119.3 218.7 -130.4 217 C-131.2 216.9 -132 216.8 -132.8 216.6 C-138.5 215.7 -143.5 214.4 -147.3 209.9 C-148.3 207.2 -148.3 207.2 -148.1 204.2 C-145.9 200.5 -144 199.9 -140.1 198.4 C-135.6 196.6 -131.5 194.2 -127.2 191.8 C-124.3 190.2 -124.3 190.2 -122.1 189.3 C-119.8 187.9 -119.3 186.6 -118.3 184.2 C-118 183.6 -117.6 183 -117.2 182.4 C-114.8 177.8 -113.5 174.5 -114.3 169.2 C-116.3 165.9 -116.3 165.9 -118.3 163.2 C-118.3 162.6 -118.3 161.9 -118.3 161.2 C-118.6 161.1 -118.6 161.1 -120.1 160.4 C-132.5 153.8 -142 139.2 -146.3 126.1 C-150 110.1 -147.9 92.1 -139.5 78 C-131.2 65.5 -118.8 55.9 -103.9 52.7 C-100.1 51.8 -98 51.2 -95.7 47.9 C-94.7 46 -93.8 44.1 -92.8 42.2 C-82.4 22 -55.6 10.8 -35.3 4.2 C-23.4 0.8 -12.3 0.1 0 0 Z" fill="#040504" transform="translate(517.3125,11.75)"/><path d="M0 0 C9.3 3.8 17.4 10.5 25.3 16.7 C27 18 27 18 29.9 19.8 C33.1 23.2 32.7 26.5 32.6 31 C32.9 43.9 34.9 56.3 44 66.1 C50 71.6 55.5 74.6 63.8 74.4 C64.5 74.4 65.2 74.4 65.9 74.4 C75.5 74.1 82.2 70.9 89 64.2 C97 55.3 96.6 46.4 96 35 C97.3 34.7 98.7 34.4 100 34.1 C100.7 33.9 101.5 33.7 102.2 33.5 C110.4 31.9 118.4 31.8 126.7 31.8 C127.3 31.8 127.3 31.8 130.3 31.8 C138.4 31.8 146.1 32.5 154 34 C155 37.5 155 40.6 154.9 44.2 C154.9 54.4 157.6 59.4 164.6 66.8 C172 73.5 180.4 74.6 190.1 74.4 C197.6 73.6 203.4 70.1 208.4 64.6 C211.2 61 213.3 57.2 215 53 C215.3 52.2 215.7 51.3 216 50.5 C217.1 46.5 217.4 42.8 217.7 38.8 C219.1 23.4 219.1 23.4 224.2 18.7 C226.1 17.4 228 16.2 230 15 C231.2 14.2 232.5 13.3 233.7 12.4 C236.9 10.2 240.1 8.1 243.3 6.1 C244.7 5.2 246.1 4.2 247.5 3.3 C251.6 0.5 254.9 -1.2 260 -1 C264.2 3 264.9 6.9 265.7 12.4 C265.7 12.8 265.7 12.8 266.1 14.8 C267.7 25.9 268.3 36.9 268 48 C268 48.7 268 49.5 268 50.2 C267.7 62.7 266.3 74.4 263.6 86.5 C263 89.1 262.4 91.8 261.9 94.4 C259.2 107.7 259.2 107.7 258 110 C257.2 117 258.6 122.3 260.8 128.9 C270.4 158.2 271.7 187.6 258.1 215.8 C246.9 237.7 226 255.7 204 266 C202.9 266.6 201.9 267.1 200.8 267.7 C161.3 287.5 112.2 288.3 70.8 274.7 C38 263.3 9.9 243.4 -5.6 211.8 C-18.3 183.8 -15.9 153 -5.8 124.4 C-5.6 124 -5.6 124 -4.7 121.8 C-3.1 115.5 -4 110 -5.8 103.8 C-14.3 71.5 -19.4 34.5 -9 2 C-6.5 -2 -4.2 -0.9 0 0 Z" fill="#36353C" transform="translate(46,124)"/><path d="M0 0 C2.7 2.4 5 5 7.3 7.8 C9.3 10.2 11.4 12.4 13.5 14.6 C25.2 27.6 39.1 50.8 39.1 68.9 C-80.7 68.9 -200.5 68.9 -323.9 68.9 C-321.1 67.1 -318.7 66.1 -315.6 65.1 C-297.1 59.1 -279.4 49.4 -265.2 36.1 C-263.1 34.1 -261 32.3 -258.8 30.5 C-254.8 27.1 -251.7 23.1 -248.6 18.9 C-248 18.2 -247.5 17.6 -246.9 16.9 C-246.2 16.9 -245.6 16.9 -244.9 16.9 C-244.9 16.7 -244.9 16.7 -244.6 15.3 C-243.6 12.1 -241.9 9.6 -240.1 6.8 C-236.7 1.4 -234 -4 -231.9 -10.1 C-231.3 -10.1 -231.3 -10.1 -228.3 -10.2 C-210.4 -10.7 -193.2 -13.6 -176 -18.7 C-160.6 -23.3 -144.9 -26.7 -129 -29.4 C-128.1 -29.5 -127.1 -29.7 -126.2 -29.9 C-81.7 -37 -35.3 -29.4 0 0 Z" fill="#38373E" transform="translate(553.90625,347.078125)"/><path d="M0 0 C12.8 8.8 19.4 21.9 22.6 36.8 C23.7 50.6 22.8 63 17.6 75.8 C17.2 76.8 16.8 77.8 16.4 78.8 C7.5 100 -9.7 114.2 -30.4 122.8 C-35.6 124.8 -39.8 126.2 -45.4 125.8 C-44.6 124.9 -43.7 123.9 -42.9 123 C-34.7 113.5 -30.5 104.3 -31.4 91.8 C-33.2 80.3 -42.5 73.3 -51.1 66.6 C-60.6 59 -65.4 47.8 -66.8 35.9 C-67.3 25.2 -64 14.7 -57.2 6.3 C-40.2 -10.8 -20.3 -11.7 0 0 Z" fill="#E0282E" transform="translate(451.4296875,86.23828125)"/><path d="M0 0 C16.2 11.2 27.6 28 32.8 46.9 C34 55 30.7 60.8 26.1 67.2 C15.2 80.4 2.7 91.8 -13 99 C-13.7 99 -14.3 99 -15 99 C-15.2 98.4 -15.2 98.4 -16.2 95.6 C-22.8 77.9 -31.8 63.3 -43.9 48.9 C-44.4 48.3 -44.8 47.7 -45.3 47.2 C-48.8 43.1 -48.8 43.1 -51 42 C-51 41.3 -51 40.7 -51 40 C-51.6 39.7 -52.2 39.5 -52.7 39.2 C-55.2 37.9 -57 36.4 -59.1 34.5 C-61.3 32.4 -63.4 30.7 -66 29 C-60.4 16.4 -42.3 4.5 -30 -1 C-29.3 -1.3 -28.6 -1.6 -27.9 -2 C-18.5 -5.6 -8.6 -5.4 0 0 Z" fill="#333238" transform="translate(620,299)"/><path d="M0 0 C1.2 0.3 2.3 0.5 3.5 0.8 C17.7 4 17.7 4 23 9.1 C29.1 21.5 24 41.5 19.9 53.8 C13.3 72.9 4.2 90.6 -9.9 105.2 C-12.3 102.4 -14 99.3 -15.9 96.1 C-17.6 93.1 -19.6 90.4 -21.8 87.8 C-22.2 87.2 -22.6 86.6 -23.1 86 C-29.2 78.3 -35.9 72.2 -44.1 66.8 C-45.9 65.2 -45.9 65.2 -46.5 63.5 C-46.7 60.7 -46.9 58 -46.9 55.2 C-47 54.5 -47 53.8 -47 53 C-47.4 35.2 -46.8 17.2 -35.9 2.2 C-26.1 -6.9 -11.9 -2.6 0 0 Z" fill="#333138" transform="translate(671.9375,218.75)"/><path d="M0 0 C6.1 1.5 9 5.4 12.4 10.4 C20.8 24.2 25.6 38.9 28.1 54.8 C28.2 55.3 28.2 55.3 28.6 58.1 C29.3 63.6 29.2 69 29.2 74.5 C29.2 76.5 29.3 78.5 29.3 80.5 C29.3 87.9 28.9 94.7 27.1 101.8 C21.4 100.8 15.9 99.7 10.3 98.2 C4.4 96.7 -1.5 96.1 -7.6 95.6 C-11.8 94.5 -13.1 93 -15.9 89.8 C-17.1 88.6 -18.2 87.5 -19.4 86.4 C-23 82.8 -26 79 -28.9 74.9 C-29.4 74.1 -29.9 73.4 -30.4 72.7 C-37.7 62 -44 50.4 -44.3 37.3 C-44.4 36 -44.4 34.7 -44.5 33.4 C-43.8 28.8 -42.6 27.6 -38.9 24.8 C-36.4 23.3 -33.7 22.2 -31 21 C-9.9 11.5 -9.9 11.5 -4.9 3.7 C-2.9 0.8 -2.9 0.8 0 0 Z" fill="#343339" transform="translate(658.9375,104.25)"/><path d="M0 0 C17 0.4 34.5 14 47.1 24.4 C48.1 25.3 49.2 26.1 50.2 26.9 C59.4 34.8 73.2 51.2 75.8 63.4 C74.8 68.1 71.9 69.8 68.1 72.4 C67.5 72.9 66.9 73.3 66.3 73.8 C56.7 80.2 45.8 84.9 34.2 82.7 C32.5 82.3 30.8 81.9 29.1 81.4 C28.6 81.3 28.6 81.3 26.3 80.8 C13.7 77.5 2.4 72.6 -7.9 64.4 C-8.5 64 -9.1 63.6 -9.7 63.1 C-14.6 59.4 -17.2 55.2 -18.7 49.1 C-18.9 44.6 -17.5 42.2 -15.1 38.6 C-9.6 29.9 -7.5 22.3 -7.3 12 C-7.3 10.2 -7.2 8.5 -7.2 6.7 C-7.2 5.9 -7.2 5.2 -7.1 4.4 C-6.5 0.1 -3.7 0.1 0 0 Z" fill="#35343A" transform="translate(567.875,31.5625)"/><path d="M0 0 C1.2 -0 2.5 -0 3.8 -0.1 C10.8 -0.1 17.3 0.1 23.2 4.4 C27 9.3 28 14.2 27.2 20.4 C25.3 33.8 16.7 42.6 6.5 50.7 C-3 57.7 -15.6 65 -27.6 65.3 C-29.8 65.4 -29.8 65.4 -32 65.6 C-35.3 65.9 -37.8 66.1 -40.6 64.2 C-42.2 62.5 -43.7 60.7 -45.2 58.8 C-50.5 52.6 -55.6 48.2 -62.8 44.4 C-63.2 44.1 -63.2 44.1 -65.4 42.9 C-70.5 40.2 -75.2 38.5 -80.8 37.4 C-77.7 26.2 -67.3 20 -57.7 14.4 C-39.3 4.1 -21.1 0 0 0 Z" fill="#343339" transform="translate(517.8125,26.625)"/><path d="M0 0 C2.7 2.4 5 5 7.3 7.8 C9.3 10.2 11.4 12.4 13.5 14.6 C21.1 23.1 26.2 32.8 31.1 42.9 C31.5 43.7 31.9 44.5 32.3 45.4 C35.7 52.5 35.7 52.5 35.1 56.9 C32.1 53.3 32.1 53.3 32.1 49.9 C31.4 49.9 30.8 49.9 30.1 49.9 C29.9 49.4 29.6 48.9 29.4 48.4 C25.7 41.2 20.7 35.4 15.4 29.4 C14.3 28.1 13.2 26.8 12.1 25.4 C-8.7 0.6 -44.3 -13.8 -75.9 -17.1 C-81.4 -17.4 -86.8 -17.4 -92.3 -17.3 C-94.8 -17.3 -97.2 -17.3 -99.7 -17.4 C-109.6 -17.4 -119.1 -16.7 -128.9 -15.1 C-129.7 -15 -130.4 -14.8 -131.2 -14.7 C-137.9 -13.5 -144.5 -12 -151 -10.2 C-151.6 -10.1 -152.3 -9.9 -152.9 -9.7 C-157.3 -8.5 -161.7 -7.3 -166 -6.1 C-188.8 0.3 -211.1 4.9 -234.9 3.9 C-236 0.1 -235.6 -1.7 -234 -5.3 C-233.6 -6.2 -233.2 -7.1 -232.8 -8 C-232.5 -8.7 -232.2 -9.4 -231.9 -10.1 C-231.3 -10.1 -231.3 -10.1 -228.3 -10.2 C-210.4 -10.7 -193.2 -13.6 -176 -18.7 C-160.6 -23.3 -144.9 -26.7 -129 -29.4 C-128.1 -29.5 -127.1 -29.7 -126.2 -29.9 C-81.7 -37 -35.3 -29.4 0 0 Z" fill="#59555F" transform="translate(553.90625,347.078125)"/><path d="M0 0 C0.8 -0 1.6 -0 2.4 -0 C4.1 -0 5.8 -0 7.5 -0 C10.1 -0 12.7 -0 15.3 -0.1 C16.9 -0.1 18.6 -0.1 20.2 -0.1 C21 -0.1 21.8 -0.1 22.6 -0.1 C26.3 -0 28.5 0.3 31.7 2.3 C33.7 4.4 33.7 4.4 33.8 7.9 C32.5 12 31 13.7 27.9 16.7 C27 17.5 26.1 18.3 25.2 19.2 C22.7 21.4 22.7 21.4 20.4 23 C18.7 24.4 18.7 24.4 18.2 26.5 C18.3 31.5 18.7 35.2 21.7 39.4 C28.7 45.6 33.9 46.8 43.2 46.7 C50.1 46.2 53.9 43.6 58.5 38.5 C61.7 34.6 64.2 31.1 65.7 26.3 C67.2 21.9 67.2 21.9 69.7 20.4 C76 20.8 76 20.8 78.7 23.4 C80 32.3 76.2 39.1 71.7 46.4 C65.7 54.5 55.5 60.6 45.7 62.4 C34.5 63.6 24.7 61.4 15.7 54.4 C15.3 54.1 15.3 54.1 13.6 52.1 C12.9 51.6 12.3 51 11.7 50.4 C8.4 50.8 6.6 52.1 4.2 54.2 C-3.2 59.8 -11.3 63.3 -20.6 62.8 C-27.7 61.8 -33.6 59.9 -39.3 55.4 C-39.9 55 -40.5 54.5 -41.1 54.1 C-46 50.2 -48.9 46.7 -49.7 40.2 C-49.3 37.4 -49.3 37.4 -48.2 35.6 C-45.1 33.7 -42.9 33.9 -39.3 34.4 C-36.7 36.6 -36.7 36.6 -34.3 39.4 C-30.1 44.1 -27.1 46.1 -20.8 46.7 C-14.4 47 -9.4 46.4 -4.3 42.4 C-0.4 38.8 2.1 35 2.8 29.6 C2.6 25.1 0.7 23 -2.5 19.9 C-5 17.7 -7.7 15.5 -10.3 13.4 C-12.9 10.9 -12.6 8.9 -12.8 5.4 C-12.3 3.4 -12.3 3.4 -10.8 1.8 C-7.3 -0.1 -3.9 -0 0 0 Z" fill="#020303" transform="translate(157.30859375,295.56640625)"/><path d="M0 0 C12.8 -0.9 25.7 3.9 35.5 12.1 C46.7 22.9 53 37.2 53.3 52.7 C53.5 64.1 52.3 73.4 48 84 C47.6 85 47.2 86 46.8 87.1 C37.9 108.2 20.8 122.4 0 131 C-5.1 133.1 -9.4 134.4 -15 134 C-14.6 133.6 -14.2 133.1 -13.8 132.7 C-10.6 128.9 -7.7 125.2 -5 121 C-4.7 121.7 -4.3 122.3 -4 123 C-4.2 123.3 -4.2 123.3 -5 125 C-4.6 124.8 -4.6 124.8 -2.8 123.6 C-0.5 122.3 1.7 121.1 4 120 C4 119.3 4 118.7 4 118 C5.7 117 7.3 116 9 115 C9.6 114.4 10.1 113.9 10.7 113.3 C11.1 112.9 11.6 112.4 12 112 C12.7 112 13.3 112 14 112 C14.2 111.5 14.2 111.5 15 109 C16.7 107.3 18.3 105.7 20 104 C27.5 94.9 31.4 83.4 34 72 C34.7 72 35.3 72 36 72 C35.9 68.1 35.8 64.2 35.7 60.2 C35.7 59.7 35.7 59.7 35.6 56.9 C35 37.8 28.4 20.4 14.5 7.1 C10.1 3.4 5.7 1.9 0 1 C0 0.7 0 0.3 0 0 Z" fill="#991835" transform="translate(421,78)"/><path d="M0 0 C5.4 2.5 9 6.9 12 12 C14.2 19.3 14.7 30.6 11.4 37.7 C8.7 42 4.6 45.7 0 48 C-5.2 48.8 -10 49.1 -14.7 46.6 C-21.1 41.2 -24.2 35.3 -25.4 27.1 C-25.9 19 -23.5 12.7 -19 6 C-13.4 -0.2 -8 -0.8 0 0 Z" fill="#020202" transform="translate(113,243)"/><path d="M0 0 C2 3 2 3 1.8 6 C0.9 9.2 0.7 10.1 -2 12 C-4.6 12.5 -7.1 12.8 -9.8 13.1 C-14.8 13.5 -19.2 14.2 -24 16 C-23.4 16.1 -22.8 16.3 -22.2 16.4 C-15.1 18.2 -9.6 21.3 -4 26 C-2.6 28.8 -2.7 30.9 -3 34 C-4.6 36.4 -4.6 36.4 -7 38 C-12 38 -15 35.8 -19 33 C-25.5 30.7 -35.3 30.8 -41.8 32.9 C-43.3 33.6 -44.7 34.3 -46.1 35.1 C-49.1 36.5 -51.7 36.5 -55 36 C-58 34.4 -58.1 32.7 -59.1 29.4 C-59.5 25.5 -58.4 23.6 -56.2 20.5 C-45.4 8.1 -16.9 -10.8 0 0 Z" fill="#020303" transform="translate(263,245)"/><path d="M0 0 C3 3.5 5 6.7 6.7 11 C7.1 12 7.5 13 7.9 14.1 C12.2 25.9 11.9 43.5 7 55 C4.5 59.2 2.1 62.3 -2 65 C-7.6 65.8 -12.3 65.2 -17 62 C-20.6 58.8 -22.8 56.6 -23.4 51.6 C-22.9 47.1 -21.5 45.5 -18.5 42.1 C-8.2 29.5 -3.6 15.7 0 0 Z" fill="#38373D" transform="translate(239,118)"/><path d="M0 0 C0.3 0 0.7 0 1 0 C1.1 1 1.3 2.1 1.4 3.2 C3.7 19.1 9.1 34.8 21.2 46.1 C23 48 23 48 23.5 51.9 C23.3 56.2 21.9 58.7 19 62 C14.3 65.6 10.4 66.8 4.4 66.5 C0.1 65.6 -2.4 63.6 -5 60 C-6.7 56.4 -7.9 52.8 -9 49 C-9.2 48.5 -9.2 48.5 -10 46 C-11.2 30.3 -10 12.8 0 0 Z" fill="#37363C" transform="translate(104,117)"/><path d="M0 0 C1.2 -0 2.5 -0 3.8 -0.1 C10.7 -0.1 17.4 0.1 23.2 4.4 C23.4 4.9 23.4 4.9 24.2 7.4 C20.4 8.3 16.8 8.5 12.9 8.6 C-10.6 9.2 -36.6 14.1 -55.8 28.4 C-56.7 29 -57.5 29.6 -58.4 30.2 C-62.1 33 -65.1 35.5 -67.8 39.4 C-72.2 38.9 -76.5 38.3 -80.8 37.4 C-77.7 26.2 -67.3 20 -57.7 14.4 C-39.3 4.1 -21.1 0 0 0 Z" fill="#59555E" transform="translate(517.8125,26.625)"/><path d="M0 0 C8.7 6 17 13.6 22 23 C22 23.7 22 24.3 22 25 C19.3 24.9 17.5 24.5 15.5 22.6 C14.9 22 14.4 21.4 13.8 20.8 C8.5 15.2 1.7 10.5 -6.1 9.8 C-22 9.5 -34.6 15.4 -46.1 26.1 C-46.7 26.8 -47.4 27.4 -48 28 C-48.5 28.5 -49.1 29 -49.6 29.5 C-51.7 31.6 -53.3 33.5 -55 36 C-59 34.2 -62.5 31.6 -66 29 C-60.4 16.4 -42.3 4.5 -30 -1 C-29.3 -1.3 -28.6 -1.6 -27.9 -2 C-18.5 -5.6 -8.6 -5.4 0 0 Z" fill="#59545E" transform="translate(620,299)"/><path d="M0 0 C3.9 -0.7 5.6 -0.3 8.9 1.8 C22.6 14.7 28.2 36.1 31 54 C31.1 54.5 31.1 54.5 31.5 57.3 C32.2 62.8 32.2 68.3 32.2 73.8 C32.2 75.8 32.2 77.8 32.2 79.8 C32.2 87.1 31.8 93.9 30 101 C28.4 100.7 26.7 100.3 25 100 C25 99.2 24.9 98.3 24.9 97.5 C23.2 63.2 18.4 34.2 -4 7 C-2.8 4.5 -1.5 2.3 0 0 Z" fill="#58555F" transform="translate(656,105)"/><path d="M0 0 C17 0.4 34.5 14 47.1 24.4 C48.1 25.3 49.2 26.1 50.2 26.9 C59.3 34.8 65.7 45.4 72.1 55.4 C72.7 56.3 73.3 57.2 73.9 58.2 C75.5 61.1 75.3 63.2 75.1 66.4 C71 64.9 69 62.2 66.3 58.8 C65.4 57.7 64.5 56.6 63.6 55.5 C63.2 55 62.8 54.5 62.3 53.9 C59.7 50.7 56.9 47.5 54.1 44.4 C53.9 44.2 53.9 44.2 52.6 42.7 C39.1 28.2 16.5 14.3 -3.5 13.5 C-4.3 13.5 -5.1 13.5 -5.9 13.4 C-6.1 11.6 -6.3 9.9 -6.5 8.1 C-6.6 7.1 -6.7 6.1 -6.9 5 C-6.9 4.2 -6.9 3.3 -6.9 2.4 C-4.4 -0.1 -3.5 0.1 0 0 Z" fill="#595660" transform="translate(567.875,31.5625)"/><path d="M0 0 C2.4 0.9 2.4 0.9 3.4 2.9 C2.9 2.9 2.9 2.9 0.6 3.2 C-8.6 4.4 -15.5 5.5 -22.6 11.9 C-32.6 29.6 -32.8 51 -33.6 70.9 C-37 69.6 -39.9 68.4 -42.6 65.9 C-43.7 62.7 -43.5 59.2 -43.6 55.9 C-43.6 55.1 -43.6 54.4 -43.6 53.6 C-44.1 35.8 -43.5 17.8 -32.6 2.9 C-23.7 -5.4 -10.9 -2.6 0 0 Z" fill="#57535D" transform="translate(668.5859375,218.1484375)"/><path d="M0 0 C0 0.3 0 0.7 0 1 C-0.5 1.1 -1.1 1.2 -1.6 1.4 C-12.7 4.5 -20.4 12.2 -26 22 C-32.3 35.4 -30.5 49.3 -26 63 C-22.9 70.3 -18.2 74.7 -12.3 79.8 C-7.2 84.7 -5.6 90.2 -5 97 C-6.1 95.4 -7.2 93.7 -8.2 92.1 C-12.7 84.8 -18.6 79.6 -25.2 74.2 C-35 66.2 -39.7 55.2 -41.5 42.8 C-42 32.3 -38.4 21.7 -31.8 13.5 C-22.5 4.1 -13.2 -0.7 0 0 Z" fill="#EC6266" transform="translate(426,79)"/><path d="M0 0 C0.6 -0 0.6 -0 3.6 -0 C11.7 -0.1 19.4 0.7 27.3 2.2 C28.7 6.9 27.5 10.5 26.3 15.2 C25.7 15.1 25.1 15 24.4 15 C16.9 14.2 9.5 14 2 14 C-0.1 14 -2.1 14 -4.1 14 C-12.5 14 -20.4 14.7 -28.7 16.2 C-29.3 11.9 -30 7.6 -30.7 3.2 C-29.4 2.9 -28 2.6 -26.7 2.2 C-25.9 2.1 -25.2 1.9 -24.4 1.7 C-16.3 0.1 -8.3 0 0 0 Z" fill="#56535C" transform="translate(172.6875,155.8125)"/><path d="M0 0 C3.5 2.7 4.7 4.2 5.5 8.5 C5.8 15.4 4.4 20.7 0 26 C-2.9 28.5 -5.9 29.8 -9.6 30.6 C-13.5 29.6 -14.8 28.3 -17 25 C-18 18.2 -17.7 11 -14 5 C-10 -0 -6.1 -1.1 0 0 Z" fill="#FA7171" transform="translate(421,96)"/><path d="M0 0 C0.7 0.7 1.3 1.3 2 2 C2 4.4 2 4.4 1 7 C-1.6 9 -1.6 9 -4.9 10.8 C-6.1 11.5 -7.3 12.2 -8.4 12.9 C-9 13.2 -9.6 13.6 -10.3 13.9 C-15.6 17.2 -20.4 21 -25.4 24.8 C-26.1 25.3 -26.8 25.9 -27.5 26.4 C-28.1 26.9 -28.7 27.4 -29.3 27.9 C-31 29 -31 29 -34 30 C-34.7 31.3 -35.4 32.7 -36 34 C-37.5 35.8 -37.5 35.8 -39 37 C-39.7 37 -40.3 37 -41 37 C-42.5 26.2 -42.5 26.2 -39.3 21.5 C-36.7 19.1 -34 17 -31 15 C-30.4 14.6 -29.8 14.2 -29.2 13.7 C-24.9 10.7 -20.4 7.8 -16 5 C-15.1 4.4 -14.3 3.9 -13.4 3.3 C-8.5 0.2 -5.7 -1.6 0 0 Z" fill="#57545F" transform="translate(307,124)"/><path d="M0 0 C12 1 22.2 10.6 31.3 17.8 C33 19 33 19 35.5 20.4 C37.6 22.6 37.4 24.6 37.4 27.6 C37.3 28.3 37.3 29 37.2 29.7 C37.2 30.4 37.2 31.1 37.2 31.8 C37.1 33.5 37.1 35.3 37 37 C30.6 31.5 30.6 31.5 27.9 28.9 C21.7 23.1 15.1 18.7 7.8 14.4 C4.1 12.1 0.5 9.6 -3 7 C-2.2 2.2 -2.2 2.2 0 0 Z" fill="#57545F" transform="translate(40,123)"/><path d="M0 0 C0.3 0 0.7 0 1 0 C6.3 22.6 -1.6 46.5 -13.1 65.6 C-26.2 86.5 -46.6 100.7 -70.5 106.9 C-80.4 108.9 -91 109.9 -101 108 C-101 107.7 -101 107.3 -101 107 C-100.4 107 -99.8 107 -99.2 107 C-70.5 106.4 -45.9 98.5 -25.4 77.5 C-5.1 55.5 -0.6 28.8 0 0 Z" fill="#D29596" transform="translate(490,121)"/><path d="M0 0 C1 0 2 0 3 0 C4.7 6.8 3.4 13.5 1 20 C-1.1 21.9 -1.1 21.9 -3 23 C-2.8 22.3 -2.6 21.7 -2.3 21 C-0.2 13.9 0.4 7.5 0 0 Z" fill="#A51E31" transform="translate(420,176)"/></g></g></g></g><g id="cat-plate"><g transform="translate(3.92 9.38) scale(0.03053)"><rect x="-10" y="900" width="1850" height="540" rx="140" fill="#0f766e" stroke="#000000" stroke-width="40"/><rect x="150" y="1035" width="820" height="92" rx="46" fill="#ffffff"/><rect x="150" y="1205" width="500" height="92" rx="46" fill="#ffffff"/></g></g><filter id="cat-halo" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius="1.1" result="d"/><feFlood flood-color="#e6e6e2"/><feComposite in2="d" operator="in" result="h"/><feMerge><feMergeNode in="h"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="cat-halo-only" x="-8%" y="-8%" width="116%" height="116%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius="1.1" result="d"/><feFlood flood-color="#e6e6e2"/><feComposite in2="d" operator="in"/></filter><clipPath id="cat-window"><rect x="-2" y="-2" width="68" height="40.1"/></clipPath><clipPath id="cat-clip-tail"><rect x="30.75" y="-2" width="35.25" height="42"/></clipPath><clipPath id="cat-clip-head"><path clip-rule="evenodd" d="M-2-2H30.75V28H31V40H-2ZM3.5 14.5H10.7L10.15 20.8 9.8 22.8H3.5ZM23.1 14.5H30.75V22.8H23.1L23 21.6Z"/></clipPath><clipPath id="cat-clip-ear-l"><path d="M3.5 14.5H10.7L10.15 20.8 9.6 24H3.5Z"/></clipPath><clipPath id="cat-clip-ear-r"><path d="M23.1 14.5H30.75V24H23.6L23 21.6Z"/></clipPath></defs><use href="#cat-plate" class="cat__halo"/><g clip-path="url(#cat-window)"><g class="cat__body"><g class="cat__tail"><use href="#cat-ink" class="cat__ink" clip-path="url(#cat-clip-tail)"/></g><use href="#cat-ink" class="cat__ink" clip-path="url(#cat-clip-head)"/><g class="cat__ear cat__ear--l"><use href="#cat-ink" class="cat__ink" clip-path="url(#cat-clip-ear-l)"/></g><g class="cat__ear cat__ear--r"><use href="#cat-ink" class="cat__ink" clip-path="url(#cat-clip-ear-r)"/></g><g class="cat__lid"><ellipse cx="12.12" cy="29.77" rx="1.95" ry="2.1" fill="#36353C"/><path d="M10.6 29.9Q12.12 31.5 13.65 29.9" fill="none" stroke="#020202" stroke-width="0.85" stroke-linecap="round"/></g><g class="cat__zz" fill="none" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path class="cat__z" d="M15.2 12.6h2l-2 2h2"/><path class="cat__z" d="M18.6 9.4h2.6l-2.6 2.6h2.6"/></g></g></g><use href="#cat-plate" class="cat__plate"/><rect class="cat__scan" x="5.6" y="38.6" width="1" height="13" rx="0.5" fill="#ffffff"/></svg></span>
         </button>
+        <span class="relay" aria-hidden="true" data-relay><svg class="relay__svg" viewBox="0 0 320 188" width="320" height="188" focusable="false"><defs><linearGradient id="relay-scroll-shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a4632" stop-opacity="0.22"/><stop offset="0.12" stop-color="#5a4632" stop-opacity="0"/><stop offset="0.88" stop-color="#5a4632" stop-opacity="0"/><stop offset="1" stop-color="#5a4632" stop-opacity="0.22"/></linearGradient><linearGradient id="relay-scroll-rod" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b5848"/><stop offset="0.45" stop-color="#3a2f2a"/><stop offset="1" stop-color="#241c18"/></linearGradient></defs><g id="relay-scroll-paper"><rect x="20" y="12" width="280" height="164" fill="#f6eedc"/><rect x="20" y="12" width="280" height="164" fill="url(#relay-scroll-shade)"/><path d="M20.5 12V176M299.5 12V176" stroke="#e2d3b1" stroke-width="1"/><g id="relay-scroll-mark" opacity="0"><rect x="26" y="68" width="268" height="38" rx="6" fill="#ffe08a" fill-opacity="0.85"/></g><g id="relay-scroll-lines"><text x="34" y="38" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9" fill="#8a7356">[00:00:02] 說話者 2</text><text x="34" y="54" font-family="'Noto Sans TC Web', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif" font-size="11.5" font-weight="500" fill="#3b3226">API 文件，昨天更新了， 熱詞也加好了。</text><text x="34" y="82" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9" fill="#8a7356">[00:00:06] 說話者 1</text><text x="34" y="98" font-family="'Noto Sans TC Web', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif" font-size="11.5" font-weight="500" fill="#3b3226">那 Docker 映像檔就下週發佈</text><text x="34" y="126" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9" fill="#8a7356">[00:00:09] 說話者 2</text><text x="34" y="142" font-family="'Noto Sans TC Web', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif" font-size="11.5" font-weight="500" fill="#3b3226">測試報告我週五前補上</text></g><g id="relay-scroll-cite" opacity="0"><rect x="258" y="86" width="28" height="16" rx="5" fill="#e12933"/><text x="272" y="97.5" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="9.5" font-weight="700" fill="#ffffff">[1]</text></g></g><g id="relay-scroll-roller-bottom"><rect x="14" y="172" width="292" height="16" rx="8" fill="url(#relay-scroll-rod)"/><rect x="22" y="175" width="276" height="2.5" rx="1.25" fill="#8a7462" fill-opacity="0.55"/><circle cx="10" cy="180" r="8" fill="#c8963e"/><circle cx="310" cy="180" r="8" fill="#c8963e"/><circle cx="8" cy="177.5" r="2.4" fill="#ebc77a"/><circle cx="308" cy="177.5" r="2.4" fill="#ebc77a"/></g><g id="relay-scroll-roller-top"><rect x="14" y="0" width="292" height="16" rx="8" fill="url(#relay-scroll-rod)"/><rect x="22" y="3" width="276" height="2.5" rx="1.25" fill="#8a7462" fill-opacity="0.55"/><circle cx="10" cy="8" r="8" fill="#c8963e"/><circle cx="310" cy="8" r="8" fill="#c8963e"/><circle cx="8" cy="5.5" r="2.4" fill="#ebc77a"/><circle cx="308" cy="5.5" r="2.4" fill="#ebc77a"/></g></svg></span>
         <p class="closing__title">Listen<span>Miao</span></p>
         <p class="closing__text">開源、MIT 授權，在你自己的電腦上執行。</p>
         <div class="closing__actions">
           <a class="btn btn--primary btn--lg" href="#install" data-magnetic>安裝 ListenMiao</a>
           <a class="btn btn--ghost btn--lg" href="https://github.com/Scorpio-meow/ListenMiao">在 GitHub 查看原始碼</a>
         </div>
+        <p class="closing__sister"><a href="https://scorpio-meow.github.io/AskMiao/" data-sister>姊妹作：AskMiao<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5"/></svg></a></p>
       </div>
       <div class="closing__links">
         <nav aria-label="文件">

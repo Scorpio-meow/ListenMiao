@@ -56,6 +56,41 @@ const BGM_FADE_OUT = 0.6;
 const SUSPEND_DELAY_MS = 900;
 const SETTLE_FRAMES = 8;
 const STAGE_SEEN = 0.3;
+const REPLAY_MS = 12000;
+const REPLAY_SEEN = 0.35;
+const DIAR_STEP_MS = 1500;
+const DIAR_SEEN = 0.5;
+const CAT_SEEN = 0.6;
+const CAT_BLINK_MIN_MS = 2600;
+const CAT_BLINK_SPREAD_MS = 4400;
+const CAT_SLEEP_MS = 25000;
+const CAT_POKE_MS = 500;
+const RELAY_LISTEN_AT_MS = 700;
+const RELAY_SCAN_MS = 1200;
+const RELAY_SCAN_REACH = "51px 0";
+const RELAY_SCAN_LEVEL = 0.85;
+const RELAY_SWAP_MS = 180;
+const RELAY_UNROLL_MS = 520;
+const RELAY_ROLLED = { scale: "1 0", translate: "0 -156px" };
+const RELAY_LINE_MS = 280;
+const RELAY_LINE_AT = 0.6;
+const RELAY_LINE_GAP_MS = 60;
+const RELAY_HOLD_MS = 1200;
+const RELAY_CARRY_MS = 520;
+const RELAY_MOUTH_X = -0.2422;
+const RELAY_MOUTH_Y = -0.0759;
+const RELAY_ROD = 0.05;
+const RELAY_FLING_MS = 520;
+const RELAY_FLING_TURN = "540deg";
+const RELAY_FLING_EASE = "cubic-bezier(0.55, 0, 1, 0.45)";
+const RELAY_POP_MS = 520;
+const RELAY_POP_FROM = 0.85;
+const RELAY_GLISS_FROM = "D4";
+const RELAY_GLISS_TO = "D6";
+const RELAY_GLISS_GAP = 0.028;
+const RELAY_GLISS_VELOCITY = 0.6;
+const EST_SECONDS_UNTIL = 90;
+const EST_MINUTES_UNTIL = 5400;
 const COPY_FEEDBACK_MS = 1800;
 const EGG_CUE_SECONDS = 2.4;
 const EGG_SHOW_MS = 2800;
@@ -101,24 +136,62 @@ const ZHENG_TAP_VELOCITY = 0.7;
 const ZHENG_KEY_VELOCITY = 0.75;
 const ZHENG_GLISS_MS = 32;
 const ZHENG_INVITE_VELOCITY = 0.4;
-const ZHENG_INVITE_DELAY_MS = 500;
+const ZHENG_INVITE_DELAY_MS = 200;
 const ZHENG_INVITE_THRESHOLD = 0.6;
+const ZHENG_RES_AMP = 1.6;
+const ZHENG_RES_GLOW = 0.4;
+const ZHENG_RES_CURVE = 2;
+const PLUCK_PHRASE_GAP = 0.9;
+const PLUCK_TAIL = 1.2;
+const PLUCK_HOLD_MS = 700;
+const PLUCK_MAX_NOTES = 8;
+const A4_HZ = 440;
+const A4_MIDI = 69;
+const NOTE_STEPS = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+const CHIMES = { up: ["D5", "A5"], down: ["A5", "D5"], done: ["D5", "F♯5", "A5"] };
+const CHIME_GAP = 0.11;
+const CHIME_VELOCITY = 0.5;
+const CHIME_POSITION = 0.5;
+const CHIME_SHORT = 0.32;
+const CHIME_DAMP = 0.08;
+const CHIME_LATE_MS = 1200;
+const CHIME_TAIL_MS = 2600;
+const ANALYSER_FFT = 4096;
+const ANALYSER_SMOOTHING = 0.82;
+const ANALYSER_MIN_DB = -88;
+const ANALYSER_MAX_DB = -24;
+function midiOf(name) {
+  const [, letter, sharp, octave] = name.match(/^([A-G])(♯?)(\d)$/);
+  return 12 * (Number(octave) + 1) + NOTE_STEPS[letter] + (sharp ? 1 : 0);
+}
+function noteFrequency(name) {
+  return A4_HZ * 2 ** ((midiOf(name) - A4_MIDI) / 12);
+}
 const sound = (() => {
   const wrap = document.querySelector("[data-sound]");
   const menuBtn = wrap.querySelector("[data-sound-menu]");
   const panel = document.getElementById(menuBtn.getAttribute("aria-controls"));
   const media = new Set();
   const zhengEl = document.querySelector("[data-zheng]");
-  const stringCount = zhengEl.dataset.notes.split(" ").length;
-  const strings = new Array(stringCount);
-  const voices = new Array(stringCount);
+  const notes = zhengEl.dataset.notes.split(" ");
+  const samples = zhengEl.dataset.samples.split(" ");
+  const rates = notes.map((name, i) => 2 ** ((midiOf(name) - midiOf(samples[i])) / 12));
+  const pitches = notes.map(noteFrequency);
+  const strings = new Array(notes.length);
+  const voices = new Array(notes.length);
   const zhengListeners = new Set();
+  const audibleListeners = new Set();
+  const blipListeners = new Set();
   const pendingNote = menuBtn.querySelector("[data-sound-pending]");
   const music = { key: "breeze-site:music", on: false, armed: false, btn: wrap.querySelector('[data-sound-toggle="music"]') };
   const zheng = { key: "breeze-site:zheng", on: false, armed: false, btn: wrap.querySelector('[data-sound-toggle="zheng"]') };
   const channels = [music, zheng];
   let ctx = null;
   let mix = null;
+  let analyser = null;
+  let spectrum = null;
+  let tailUntil = 0;
+  let audible = false;
   let bgmGain = null;
   let bgm = null;
   let musicLoading = null;
@@ -158,6 +231,9 @@ const sound = (() => {
       mix = createMix(ctx);
       bgmGain = new GainNode(ctx, { gain: 0 });
       bgmGain.connect(mix.music);
+      analyser = new AnalyserNode(ctx, { fftSize: ANALYSER_FFT, smoothingTimeConstant: ANALYSER_SMOOTHING, minDecibels: ANALYSER_MIN_DB, maxDecibels: ANALYSER_MAX_DB });
+      bgmGain.connect(analyser);
+      spectrum = new Uint8Array(analyser.frequencyBinCount);
     }
     if (ctx.state === "suspended") ctx.resume().catch(() => { });
   }
@@ -186,7 +262,7 @@ const sound = (() => {
     return buffer;
   }
   function loadStrings() {
-    if (stringsLoading) return;
+    if (stringsLoading) return stringsLoading;
     stringsLoading = Promise.all(
       [...strings.keys()].map(async (i) => {
         const buffer = await fetchBuffer(`${STRING_DIR}string-${String(i + 1).padStart(2, "0")}.mp3`);
@@ -196,6 +272,7 @@ const sound = (() => {
       stringsLoading = null;
       console.warn("弦音載入失敗", err);
     });
+    return stringsLoading;
   }
   function loadMeows() {
     meowsLoading ??= Promise.all(
@@ -228,11 +305,37 @@ const sound = (() => {
   function pluck(i, velocity, delay, position) {
     const item = strings[i];
     if (!live(zheng) || document.hidden || !ctx || !item) return;
-    const voice = stringVoice(ctx, mix.strings, item.buffer, item.offset, ctx.currentTime + delay, velocity, position, voices[i]);
+    const voice = stringVoice(ctx, mix.strings, item.buffer, item.offset, ctx.currentTime + delay, velocity, position, voices[i], rates[i]);
     voices[i] = voice;
     voice.node.addEventListener("ended", () => {
       if (voices[i] === voice) voices[i] = null;
     });
+    blip();
+  }
+  function blip() {
+    for (const fn of blipListeners) fn();
+  }
+  async function chime(kind, force) {
+    const allowed = () => (force || live(zheng)) && !document.hidden && ctx;
+    if (!allowed()) return;
+    const asked = performance.now();
+    await loadStrings();
+    if (!allowed() || performance.now() - asked > CHIME_LATE_MS) return;
+    const at = ctx.currentTime;
+    const tune = CHIMES[kind];
+    tune.forEach((name, k) => {
+      const i = notes.indexOf(name);
+      const item = strings[i];
+      if (!item) return;
+      const start = at + k * CHIME_GAP;
+      const voice = stringVoice(ctx, mix.strings, item.buffer, item.offset, start, CHIME_VELOCITY, CHIME_POSITION, null, rates[i]);
+      if (k === tune.length - 1) return;
+      voice.gain.gain.setTargetAtTime(0, start + CHIME_SHORT, CHIME_DAMP);
+      voice.node.stop(start + CHIME_SHORT + CHIME_DAMP * 8);
+    });
+    tailUntil = performance.now() + CHIME_TAIL_MS;
+    blip();
+    sync();
   }
   function ramp(target, seconds) {
     const now = ctx.currentTime;
@@ -270,17 +373,26 @@ const sound = (() => {
       src = null;
     }, BGM_FADE_OUT * 1000);
   }
+  function hear() {
+    const now = media.size > 0 || (Boolean(src) && !pauseTimer && !document.hidden);
+    if (now === audible) return;
+    audible = now;
+    menuBtn.toggleAttribute("data-hearing", audible);
+    for (const fn of audibleListeners) fn(audible);
+  }
   function sync() {
+    hear();
     if (!ctx) return;
     clearTimeout(suspendTimer);
     if (anyLive() && !document.hidden) {
       if (ctx.state === "suspended") ctx.resume().catch(() => { });
     } else {
-      suspendTimer = setTimeout(() => ctx.suspend(), SUSPEND_DELAY_MS);
+      suspendTimer = setTimeout(() => ctx.suspend(), Math.max(SUSPEND_DELAY_MS, tailUntil - performance.now()));
     }
     if (!bgm) return;
     if (live(music) && !document.hidden && media.size === 0) bgmIn();
     else bgmOut();
+    hear();
   }
   function arm(...list) {
     for (const ch of list) if (ch.on) ch.armed = true;
@@ -296,9 +408,12 @@ const sound = (() => {
     sync();
   }
   function toggle(ch) {
+    const was = live(zheng);
     ch.on = !ch.on;
     persist(ch);
     arm(...channels);
+    if (ch.on) chime("up", false);
+    else if (was) chime("down", true);
   }
   function setOpen(open) {
     menuBtn.setAttribute("aria-expanded", String(open));
@@ -350,7 +465,31 @@ const sound = (() => {
       const item = meows[kind];
       if (!item || !live(zheng) || performance.now() - asked > MEOW_LATE_MS) return;
       effectVoice(ctx, mix.effects, item.buffer, item.offset, ctx.currentTime, MEOW_GAIN);
+      blip();
     },
+    chime: (kind) => chime(kind, false),
+    glissando(from, to, gap, velocity) {
+      const last = notes.indexOf(to);
+      for (let i = notes.indexOf(from), k = 0; i <= last; i++, k++) pluck(i, velocity, k * gap, i / (notes.length - 1));
+    },
+    resonance(out) {
+      if (!analyser || !src || pauseTimer || document.hidden) return false;
+      analyser.getByteFrequencyData(spectrum);
+      const hz = ctx.sampleRate / analyser.fftSize;
+      pitches.forEach((pitch, i) => {
+        const bin = Math.round(pitch / hz);
+        out[i] = Math.max(spectrum[bin - 1], spectrum[bin], spectrum[bin + 1]) / 255;
+      });
+      return true;
+    },
+    onAudible(fn) {
+      audibleListeners.add(fn);
+      fn(audible);
+    },
+    onBlip(fn) {
+      blipListeners.add(fn);
+    },
+    musicLive: () => live(music),
     zhengOn: () => zheng.on,
     armZheng() {
       if (zheng.on && !zheng.armed && navigator.userActivation?.isActive !== false) arm(zheng);
@@ -365,6 +504,11 @@ const sound = (() => {
   };
 })();
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const pad = (n, size) => String(n).padStart(size, "0");
+function srtTime(seconds) {
+  const ms = Math.round(seconds * 1000);
+  return `${pad(Math.floor(ms / 3600000), 2)}:${pad(Math.floor(ms / 60000) % 60, 2)}:${pad(Math.floor(ms / 1000) % 60, 2)},${pad(ms % 1000, 3)}`;
+}
 const easeOutCubic = (t) => 1 - (1 - t) ** 3;
 const easeOutExpo = (t) => (t >= 1 ? 1 : 1 - 2 ** (-10 * t));
 function timecode(seconds) {
@@ -442,23 +586,9 @@ function countUp(el) {
     el.textContent = format(from + (to - from) * easeOutExpo(t));
   });
 }
-function scrambleIn(el, delay) {
-  const target = el.textContent;
-  withSrCopy(el);
-  if (motion.paused) return;
-  el.textContent = scrambleText(target, 0, 0);
-  setTimeout(() => {
-    let frame = 0;
-    animate(900, (t) => {
-      frame++;
-      el.textContent = t >= 1 ? target : scrambleText(target, easeOutCubic(t), Math.floor(frame / 3));
-    });
-  }, delay);
-}
 function onReveal(el) {
   for (const node of el.querySelectorAll("[data-count-to]")) countUp(node);
   if (el.matches("[data-count-to]")) countUp(el);
-  el.querySelectorAll("[data-scramble]").forEach((node, i) => scrambleIn(node, 250 + i * 260));
   const term = el.matches("[data-typewriter]") ? el : el.querySelector("[data-typewriter]");
   if (term) typewriter(term);
 }
@@ -1006,6 +1136,7 @@ function tabs() {
         if (on && panel.matches("[data-typewriter]") && panel.closest(".is-in")) typewriter(panel);
       }
       if (focus) tab.focus();
+      list.dispatchEvent(new CustomEvent("tabchange", { detail: tab }));
     };
     items.forEach((tab, i) => {
       tab.addEventListener("click", () => select(tab, false));
@@ -1110,28 +1241,93 @@ function film() {
   if (!frame) return;
   const video = frame.querySelector("[data-film-video]");
   const cover = frame.querySelector("[data-film-play]");
+  const seeks = [...document.querySelectorAll("[data-chapters] [data-start]")];
+  let raf = 0;
   video.inert = true;
-  cover.addEventListener("click", () => {
+  const mark = () => {
+    const t = video.currentTime;
+    for (const btn of seeks) {
+      const start = Number(btn.dataset.start);
+      const end = Number(btn.dataset.end);
+      const on = cover.hidden && t >= start && t < end;
+      btn.parentElement.classList.toggle("is-now", on);
+      btn.parentElement.style.setProperty("--p", on ? String((t - start) / (end - start)) : "0");
+      if (on) btn.setAttribute("aria-current", "true");
+      else btn.removeAttribute("aria-current");
+    }
+  };
+  const loop = () => {
+    mark();
+    raf = video.paused ? 0 : requestAnimationFrame(loop);
+  };
+  const play = (focusVideo) => {
     cover.hidden = true;
     video.inert = false;
-    video.focus();
+    if (focusVideo) video.focus();
     video.play().catch(() => {
       cover.hidden = false;
       video.inert = true;
+      mark();
     });
+  };
+  cover.addEventListener("click", () => play(true));
+  for (const btn of seeks) {
+    btn.addEventListener("click", () => {
+      video.currentTime = Number(btn.dataset.start);
+      play(false);
+      mark();
+      const r = frame.getBoundingClientRect();
+      if (r.top < parseFloat(getComputedStyle(root).scrollPaddingTop) || r.bottom > innerHeight) frame.scrollIntoView({ block: "nearest", behavior: motion.paused ? "instant" : "smooth" });
+    });
+  }
+  video.addEventListener("play", () => {
+    if (!raf) raf = requestAnimationFrame(loop);
   });
+  for (const type of ["pause", "seeked"]) video.addEventListener(type, mark);
   video.addEventListener("ended", () => {
     const hadFocus = frame.contains(document.activeElement);
     video.inert = true;
     cover.hidden = false;
+    mark();
     if (hadFocus) cover.focus();
   });
 }
 film();
+function pluckCaption(box) {
+  const tc = box.querySelector("[data-pluck-tc]");
+  const text = box.querySelector("[data-pluck-notes]");
+  let count = 0;
+  let phrase = null;
+  let hideTimer = 0;
+  return (note, delay) => {
+    const at = (performance.now() + delay) / 1000;
+    if (!phrase || at - phrase.last > PLUCK_PHRASE_GAP) {
+      count++;
+      phrase = { start: at, last: at, notes: [] };
+    }
+    phrase.last = Math.max(phrase.last, at);
+    phrase.notes.push(note.replace(/\d/g, ""));
+    const shown = phrase.notes.slice(-PLUCK_MAX_NOTES);
+    tc.textContent = `${count}　${srtTime(phrase.start)} --> ${srtTime(phrase.last + PLUCK_TAIL)}`;
+    text.textContent = `${phrase.notes.length > shown.length ? "…" : ""}${shown.join("　")}`;
+    box.classList.add("is-on");
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(
+      () => {
+        box.classList.remove("is-on");
+        phrase = null;
+      },
+      (phrase.last + PLUCK_TAIL) * 1000 - performance.now() + PLUCK_HOLD_MS,
+    );
+  };
+}
 function zheng(root) {
   const canvas = root.querySelector("canvas");
   const g = canvas.getContext("2d");
   const notes = root.dataset.notes.split(" ");
+  const caption = pluckCaption(root.querySelector("[data-pluck]"));
+  const res = new Float32Array(notes.length);
+  let visible = false;
   const range = document.querySelector("[data-zheng-range]");
   const hint = document.querySelector("[data-zheng-hint]");
   const all = notes.map((note, index) => ({ note, index, frac: index / (notes.length - 1), x: 0, v: 0, t0: -Infinity }));
@@ -1155,6 +1351,7 @@ function zheng(root) {
     const bottom = height - ZHENG_LABEL_BAND;
     const still = motion.paused;
     const focused = root.matches(":focus-visible");
+    const resonating = !still && visible && sound.resonance(res);
     let alive = false;
     g.lineWidth = 1;
     g.strokeStyle = colors.rail;
@@ -1171,11 +1368,13 @@ function zheng(root) {
       if (s.t0 > now || e > ZHENG_FLOOR) alive = true;
       const yb = top + (bottom - top) * (ZHENG_BRIDGE_LOW - (ZHENG_BRIDGE_LOW - ZHENG_BRIDGE_HIGH) * s.frac);
       const amp = still ? 0 : e * Math.min(spacing * ZHENG_AMP_RATIO, ZHENG_AMP_MAX);
-      const d = amp * Math.sin((2 * Math.PI * (ZHENG_HZ_LOW + (ZHENG_HZ_HIGH - ZHENG_HZ_LOW) * s.frac) * (now - s.t0)) / 1000);
+      const hz = ZHENG_HZ_LOW + (ZHENG_HZ_HIGH - ZHENG_HZ_LOW) * s.frac;
+      const r = resonating ? res[s.index] ** ZHENG_RES_CURVE : 0;
+      const d = amp * Math.sin((2 * Math.PI * hz * (now - s.t0)) / 1000) + r * ZHENG_RES_AMP * Math.sin((2 * Math.PI * hz * now) / 1000 + s.index);
       g.lineWidth = ZHENG_WIDTH_LOW - (ZHENG_WIDTH_LOW - ZHENG_WIDTH_HIGH) * s.frac;
       for (const [color, alpha] of [
         [colors.string, 1],
-        [colors.hot, Math.min(1, e * ZHENG_GLOW)],
+        [colors.hot, Math.min(1, Math.max(e * ZHENG_GLOW, r * ZHENG_RES_GLOW))],
       ]) {
         if (alpha <= ZHENG_FLOOR) continue;
         g.globalAlpha = alpha;
@@ -1204,7 +1403,7 @@ function zheng(root) {
         g.fillRect(s.x - 8, height - 2, 16, 2);
       }
     }
-    return alive;
+    return alive || resonating;
   }
   function frame(now) {
     raf = 0;
@@ -1242,6 +1441,7 @@ function zheng(root) {
   }
   function pluck(s, velocity, delay) {
     if (!vibrate(s, velocity, delay)) return;
+    caption(s.note, delay);
     sound.pluck(s.index, velocity, delay / 1000, s.x / width);
     if (!sound.zhengOn()) hint.hidden = false;
   }
@@ -1332,11 +1532,395 @@ function zheng(root) {
     kick();
   });
   motion.on(kick);
+  sound.onAudible(kick);
+  new IntersectionObserver((entries) => {
+    visible = entries[0].isIntersecting;
+    kick();
+  }).observe(root);
   readColors();
   new ResizeObserver(layout).observe(root);
 }
 const zhengEl = document.querySelector("[data-zheng]");
 if (zhengEl) zheng(zhengEl);
+function listen() {
+  const root = document.querySelector("[data-listen]");
+  const audio = root.querySelector("[data-listen-audio]");
+  const cues = [...root.querySelectorAll(".cue")];
+  const tablist = root.querySelector("[data-tabs]");
+  const race = root.querySelector("[data-race]");
+  const length = Number(race.dataset.length);
+  const lane = race.querySelector("[data-race-lm]");
+  const bar = { play: race.querySelector("[data-race-play]"), proc: race.querySelector("[data-race-proc]") };
+  const val = { play: race.querySelector("[data-race-play-val]"), proc: race.querySelector("[data-race-proc-val]") };
+  const seconds = (v) => `${v.toFixed(1)} 秒`;
+  let measured = tablist.querySelector('[aria-selected="true"]').dataset.proc;
+  let proc = Number(measured);
+  let before = 0;
+  let raf = 0;
+  const run = (t) => {
+    const done = t >= proc;
+    bar.play.style.setProperty("--p", String(clamp(t / length, 0, 1)));
+    bar.proc.style.setProperty("--p", String(clamp(t / proc, 0, 1)));
+    val.play.textContent = `${seconds(Math.min(t, length))}／${seconds(length)}`;
+    val.proc.textContent = done ? `完成・${measured} 秒` : seconds(t);
+    lane.classList.toggle("is-done", done);
+    if (!audio.paused && !audio.seeking && before < proc && done) sound.chime("done");
+    before = t;
+  };
+  const sync = () => {
+    const t = audio.currentTime;
+    run(t);
+    for (const cue of cues) {
+      const on = t >= Number(cue.dataset.start) && t < Number(cue.dataset.end);
+      cue.classList.toggle("is-now", on);
+      if (on) cue.setAttribute("aria-current", "true");
+      else cue.removeAttribute("aria-current");
+    }
+  };
+  const loop = () => {
+    sync();
+    raf = audio.paused ? 0 : requestAnimationFrame(loop);
+  };
+  audio.addEventListener("play", () => {
+    if (!raf) raf = requestAnimationFrame(loop);
+  });
+  for (const type of ["pause", "ended"]) audio.addEventListener(type, sync);
+  audio.addEventListener("seeked", () => {
+    before = audio.currentTime;
+    sync();
+  });
+  tablist.addEventListener("tabchange", (e) => {
+    measured = e.detail.dataset.proc;
+    proc = Number(measured);
+    before = audio.currentTime;
+    sync();
+  });
+  sync();
+  for (const cue of cues) {
+    cue.addEventListener("click", () => {
+      audio.currentTime = Number(cue.dataset.start);
+      audio.play().catch(() => sync());
+    });
+  }
+}
+listen();
+function compare() {
+  for (const box of document.querySelectorAll("[data-compare]")) {
+    const range = box.querySelector("[data-compare-range]");
+    const sync = () => {
+      box.style.setProperty("--pos", `${range.value}%`);
+      range.setAttribute("aria-valuetext", `左邊 ${range.value}% 是燒錄前，右邊是燒錄後`);
+    };
+    range.addEventListener("input", sync);
+    sync();
+  }
+}
+compare();
+function fill(range) {
+  const span = Number(range.max) - Number(range.min);
+  range.style.setProperty("--fill", `${((Number(range.value) - Number(range.min)) / span) * 100}%`);
+}
+function estimator() {
+  const box = document.querySelector("[data-est]");
+  const machines = JSON.parse(box.querySelector("[data-est-machines]").textContent);
+  const len = box.querySelector("[data-est-len]");
+  const hw = box.querySelector("[data-est-hw]");
+  const out = {
+    len: box.querySelector("[data-est-len-out]"),
+    hw: box.querySelector("[data-est-hw-out]"),
+    time: box.querySelector("[data-est-time]"),
+    pick: box.querySelector("[data-est-pick]"),
+    speed: box.querySelector("[data-est-speed]"),
+  };
+  const bars = [...document.querySelectorAll(".bars__row")];
+  const minutesText = (m) => (m < 60 ? `${m} 分鐘` : `${Math.floor(m / 60)} 小時${m % 60 ? ` ${m % 60} 分鐘` : ""}`);
+  const timeText = (s) => {
+    if (s < EST_SECONDS_UNTIL) return `約 ${Math.max(1, Math.round(s))} 秒`;
+    if (s < EST_MINUTES_UNTIL) return `約 ${Math.round(s / 60)} 分鐘`;
+    return `約 ${minutesText(Math.round(s / 60))}`;
+  };
+  const sync = () => {
+    const minutes = Number(len.value);
+    const machine = machines[Number(hw.value)];
+    out.len.textContent = minutesText(minutes);
+    out.hw.textContent = machine.name;
+    out.time.textContent = timeText(minutes * 60 * machine.speed);
+    out.pick.textContent = machine.pick;
+    out.speed.textContent = String(machine.speed);
+    len.setAttribute("aria-valuetext", minutesText(minutes));
+    hw.setAttribute("aria-valuetext", `${machine.name}，${machine.pick}`);
+    for (const row of bars) row.classList.toggle("is-est", row.dataset.tipName.startsWith(machine.name));
+    fill(len);
+    fill(hw);
+  };
+  len.addEventListener("input", sync);
+  hw.addEventListener("input", sync);
+  sync();
+}
+estimator();
+function replay() {
+  const box = document.querySelector("[data-replay]");
+  const items = [...box.querySelectorAll("[data-at]")];
+  const pick = box.querySelector("[data-pick-at]");
+  const end = Math.max(...items.map((el) => Number(el.dataset.at)));
+  let raf = 0;
+  const show = (t) => {
+    for (const el of items) el.classList.toggle("is-shown", Number(el.dataset.at) <= t);
+    pick.classList.toggle("is-pick", t >= Number(pick.dataset.pickAt));
+  };
+  const finish = () => {
+    cancelAnimationFrame(raf);
+    box.classList.remove("is-playing");
+    show(end);
+  };
+  const run = () => {
+    cancelAnimationFrame(raf);
+    if (motion.paused) {
+      finish();
+      return;
+    }
+    box.classList.add("is-playing");
+    const t0 = performance.now();
+    const pickAt = Number(pick.dataset.pickAt);
+    let picked = false;
+    const tick = (now) => {
+      const t = ((now - t0) / REPLAY_MS) * end;
+      show(t);
+      if (!picked && t >= pickAt) {
+        picked = true;
+        sound.chime("done");
+      }
+      if (t < end) raf = requestAnimationFrame(tick);
+      else finish();
+    };
+    raf = requestAnimationFrame(tick);
+  };
+  box.querySelector("[data-replay-play]").addEventListener("click", run);
+  new IntersectionObserver(
+    (entries, io) => {
+      if (!entries[0].isIntersecting) return;
+      io.disconnect();
+      run();
+    },
+    { threshold: REPLAY_SEEN },
+  ).observe(box);
+  motion.on((paused) => {
+    if (paused) finish();
+  });
+}
+replay();
+function diarization() {
+  const box = document.querySelector("[data-diar]");
+  const stage = box.querySelector("[data-diar-stage]");
+  const steps = [...box.querySelectorAll("[data-diar-step]")];
+  const names = [...stage.querySelectorAll("[data-name-a]")];
+  const last = steps.length;
+  let timers = [];
+  const set = (n) => {
+    stage.dataset.step = String(n);
+    for (const s of steps) {
+      const k = Number(s.dataset.diarStep);
+      s.classList.toggle("is-on", k === n);
+      s.classList.toggle("is-done", k < n);
+    }
+    for (const b of names) b.textContent = n === last ? b.dataset.nameB : b.dataset.nameA;
+  };
+  const stop = () => {
+    for (const t of timers) clearTimeout(t);
+    timers = [];
+  };
+  const run = () => {
+    stop();
+    if (motion.paused) {
+      set(last);
+      return;
+    }
+    set(1);
+    for (let n = 2; n <= last; n++) timers.push(setTimeout(() => set(n), DIAR_STEP_MS * (n - 1)));
+  };
+  box.querySelector("[data-diar-play]").addEventListener("click", run);
+  if (!motion.paused) set(1);
+  new IntersectionObserver(
+    (entries, io) => {
+      if (!entries[0].isIntersecting) return;
+      io.disconnect();
+      run();
+    },
+    { threshold: DIAR_SEEN },
+  ).observe(stage);
+  motion.on((paused) => {
+    if (!paused) return;
+    stop();
+    set(last);
+  });
+}
+diarization();
+function mascot() {
+  const cat = document.querySelector("[data-cat]");
+  const art = cat.querySelector(".cat__art");
+  const plates = [...cat.querySelectorAll(".cat__plate, .cat__halo")];
+  const scan = cat.querySelector(".cat__scan");
+  const relay = document.querySelector("[data-relay]");
+  const paper = relay.querySelector("#relay-scroll-paper");
+  const roller = relay.querySelector("#relay-scroll-roller-bottom");
+  const lines = [...relay.querySelectorAll("#relay-scroll-lines text")];
+  const sister = document.querySelector("[data-sister]");
+  let visible = false;
+  let hearing = false;
+  let blinkTimer = 0;
+  let sleepTimer = 0;
+  let poked = 0;
+  let run = 0;
+  let playing = false;
+  let anims = [];
+  const token = (name) => getComputedStyle(root).getPropertyValue(name).trim();
+  const restart = (name) => {
+    cat.classList.remove(name);
+    void cat.getBoundingClientRect();
+    cat.classList.add(name);
+  };
+  const play = (el, keyframes, options) => {
+    const a = el.animate(keyframes, { fill: "forwards", ...options });
+    anims.push(a);
+    return a.finished.catch(() => null);
+  };
+  const reset = () => {
+    run++;
+    playing = false;
+    for (const a of anims) a.cancel();
+    anims = [];
+    relay.removeAttribute("style");
+    relay.classList.remove("is-flying");
+    sister.classList.remove("is-caught");
+    cat.classList.remove("is-listening");
+    relay.classList.toggle("is-static", motion.paused);
+  };
+  async function fling(carry, pop) {
+    const stage = relay.offsetParent.getBoundingClientRect();
+    const left = stage.left + relay.offsetLeft;
+    const top = stage.top + relay.offsetTop;
+    const w = relay.offsetWidth;
+    const from = { x: left + carry[0] + w / 2, y: top + carry[1] + w * RELAY_ROD };
+    const link = sister.getBoundingClientRect();
+    let dir = [0, -1];
+    if (link.width && link.bottom > 0 && link.top < innerHeight && link.top + link.height / 2 < from.y) {
+      dir = [link.left + link.width / 2 - from.x, link.top + link.height / 2 - from.y];
+      sister.classList.add("is-caught");
+    }
+    const reach = (Math.hypot(innerWidth, innerHeight) + w) / Math.hypot(...dir);
+    Object.assign(relay.style, { position: "fixed", left: `${left}px`, top: `${top}px` });
+    relay.classList.add("is-flying");
+    sound.glissando(RELAY_GLISS_FROM, RELAY_GLISS_TO, RELAY_GLISS_GAP, RELAY_GLISS_VELOCITY);
+    for (const el of plates) play(el, [{ opacity: 0, scale: RELAY_POP_FROM }, { opacity: 1, scale: 1 }], { duration: RELAY_POP_MS, easing: pop });
+    await play(
+      relay,
+      [
+        { translate: `${carry[0]}px ${carry[1]}px`, rotate: "0deg" },
+        { translate: `${carry[0] + dir[0] * reach}px ${carry[1] + dir[1] * reach}px`, rotate: RELAY_FLING_TURN },
+      ],
+      { duration: RELAY_FLING_MS, easing: RELAY_FLING_EASE },
+    );
+  }
+  async function relayRun() {
+    reset();
+    const id = run;
+    const live = () => id === run;
+    const ease = token("--ease-out");
+    const pop = token("--spring-pop");
+    playing = true;
+    cat.classList.remove("is-hiding");
+    cat.classList.add("is-peek");
+    await wait(RELAY_LISTEN_AT_MS);
+    if (!live()) return;
+    cat.classList.add("is-listening");
+    await play(scan, [{ opacity: 0, translate: "0 0" }, { opacity: RELAY_SCAN_LEVEL, offset: 0.12 }, { opacity: RELAY_SCAN_LEVEL, offset: 0.88 }, { opacity: 0, translate: RELAY_SCAN_REACH }], { duration: RELAY_SCAN_MS, easing: "linear" });
+    if (!live()) return;
+    for (const el of plates) play(el, [{ opacity: 1 }, { opacity: 0 }], { duration: RELAY_SWAP_MS, easing: ease });
+    await play(relay, [{ opacity: 0 }, { opacity: 1 }], { duration: RELAY_SWAP_MS, easing: ease });
+    if (!live()) return;
+    play(paper, [{ scale: RELAY_ROLLED.scale }, { scale: "1 1" }], { duration: RELAY_UNROLL_MS, easing: ease });
+    play(roller, [{ translate: RELAY_ROLLED.translate }, { translate: "0 0" }], { duration: RELAY_UNROLL_MS, easing: ease });
+    lines.forEach((el, k) => play(el, [{ opacity: 0 }, { opacity: 1 }], { duration: RELAY_LINE_MS, delay: RELAY_UNROLL_MS * RELAY_LINE_AT + k * RELAY_LINE_GAP_MS, easing: ease }));
+    await wait(RELAY_UNROLL_MS + RELAY_HOLD_MS);
+    if (!live()) return;
+    for (const el of lines) play(el, [{ opacity: 1 }, { opacity: 0 }], { duration: RELAY_SWAP_MS, easing: ease });
+    play(paper, [{ scale: "1 1" }, { scale: RELAY_ROLLED.scale }], { duration: RELAY_UNROLL_MS, easing: ease });
+    await play(roller, [{ translate: "0 0" }, { translate: RELAY_ROLLED.translate }], { duration: RELAY_UNROLL_MS, easing: ease });
+    if (!live()) return;
+    const size = art.getBoundingClientRect().width;
+    const carry = [size * RELAY_MOUTH_X, size * RELAY_MOUTH_Y];
+    await play(relay, [{ translate: "0 0" }, { translate: `${carry[0]}px ${carry[1]}px` }], { duration: RELAY_CARRY_MS, easing: pop });
+    if (!live()) return;
+    cat.classList.remove("is-listening");
+    await fling(carry, pop);
+    if (live()) reset();
+  }
+  const scheduleBlink = () => {
+    clearTimeout(blinkTimer);
+    if (motion.paused || !visible || cat.classList.contains("is-sleeping")) return;
+    blinkTimer = setTimeout(() => {
+      restart("is-blink");
+      scheduleBlink();
+    }, CAT_BLINK_MIN_MS + Math.random() * CAT_BLINK_SPREAD_MS);
+  };
+  const sleep = () => {
+    if (motion.paused) return;
+    cat.classList.add("is-sleeping");
+    clearTimeout(blinkTimer);
+  };
+  const wake = () => {
+    poked = performance.now();
+    clearTimeout(sleepTimer);
+    cat.classList.remove("is-sleeping");
+    if (motion.paused) return;
+    sleepTimer = setTimeout(sleep, CAT_SLEEP_MS);
+    scheduleBlink();
+  };
+  const poke = () => {
+    if (cat.classList.contains("is-sleeping") || performance.now() - poked > CAT_POKE_MS) wake();
+  };
+  const sync = () => {
+    cat.classList.toggle("is-hearing", hearing && !motion.paused);
+    reset();
+    if (motion.paused) {
+      clearTimeout(blinkTimer);
+      clearTimeout(sleepTimer);
+      cat.classList.remove("is-hiding", "is-sleeping", "is-blink", "is-twitch");
+    } else wake();
+  };
+  for (const type of ["pointerdown", "pointermove", "keydown", "wheel", "touchstart", "scroll"]) addEventListener(type, poke, { passive: true });
+  cat.addEventListener("animationend", (e) => {
+    if (e.animationName === "blink") cat.classList.remove("is-blink");
+    if (e.animationName === "twitch-r") cat.classList.remove("is-twitch");
+  });
+  sound.onAudible((on) => {
+    hearing = on;
+    cat.classList.toggle("is-hearing", hearing && !motion.paused);
+  });
+  sound.onBlip(() => {
+    if (motion.paused || cat.classList.contains("is-twitch")) return;
+    restart("is-twitch");
+  });
+  motion.on(sync);
+  if (!motion.paused) cat.classList.add("is-hiding");
+  new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0];
+      visible = entry.isIntersecting;
+      if (!visible) {
+        reset();
+        if (!motion.paused) {
+          cat.classList.remove("is-peek");
+          cat.classList.add("is-hiding");
+        }
+      } else if (entry.intersectionRatio >= CAT_SEEN && !playing && !motion.paused) relayRun();
+      scheduleBlink();
+    },
+    { threshold: [0, CAT_SEEN] },
+  ).observe(cat);
+  sync();
+}
+mascot();
 function eggs() {
   const sub = document.querySelector("[data-egg-sub]");
   const tc = sub.querySelector("[data-egg-tc]");
@@ -1344,11 +1928,6 @@ function eggs() {
   const text = sub.querySelector("[data-egg-text]");
   const cat = document.querySelector("[data-cat]");
   const brand = document.querySelector(".brand");
-  const pad = (n, size) => String(n).padStart(size, "0");
-  const srt = (seconds) => {
-    const ms = Math.round(seconds * 1000);
-    return `${pad(Math.floor(ms / 3600000), 2)}:${pad(Math.floor(ms / 60000) % 60, 2)}:${pad(Math.floor(ms / 1000) % 60, 2)},${pad(ms % 1000, 3)}`;
-  };
   let cue = 0;
   let catLine = 0;
   let typed = "";
@@ -1357,7 +1936,7 @@ function eggs() {
   function say(line) {
     const start = cue * EGG_CUE_SECONDS;
     cue++;
-    tc.textContent = `${cue}　${srt(start)} --> ${srt(start + EGG_CUE_SECONDS)}`;
+    tc.textContent = `${cue}　${srtTime(start)} --> ${srtTime(start + EGG_CUE_SECONDS)}`;
     who.textContent = `${EGG_SPEAKER}喵：`;
     text.textContent = line;
     sub.classList.remove("is-on");
@@ -1384,6 +1963,7 @@ function eggs() {
     el.classList.add("is-hop");
   }
   for (const el of [cat, brand]) el.addEventListener("animationend", () => el.classList.remove("is-hop"));
+  document.addEventListener("play", () => hop(brand), true);
   cat.addEventListener("click", () => {
     hop(cat);
     meow(CAT_LINES[catLine % CAT_LINES.length]);

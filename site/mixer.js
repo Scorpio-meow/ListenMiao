@@ -54,12 +54,12 @@ export function effectVoice(ctx, bus, buffer, offset, at, gain) {
   node.start(at, offset);
   node.addEventListener("ended", () => level.disconnect());
 }
-export function stringVoice(ctx, bus, buffer, offset, at, velocity, position, previous) {
+export function stringVoice(ctx, bus, buffer, offset, at, velocity, position, previous, rate) {
   if (previous) {
     previous.gain.gain.setTargetAtTime(0, at, STRING_DAMP);
     previous.node.stop(at + STRING_DAMP * 8);
   }
-  const node = new AudioBufferSourceNode(ctx, { buffer });
+  const node = new AudioBufferSourceNode(ctx, { buffer, playbackRate: rate });
   const gain = new GainNode(ctx, { gain: velocity });
   const pan = new StereoPannerNode(ctx, { pan: (position * 2 - 1) * STRING_PAN });
   node.connect(gain).connect(pan).connect(bus);
