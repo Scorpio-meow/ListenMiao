@@ -7,7 +7,7 @@
   <meta name="color-scheme" content="light dark">
   <meta name="google-site-verification" content="jjQRA2mVrlVkjlSTMgxrNE9bMVfG6cNSKgpwz3CQm6Y">
   <title>ListenMiao：在自己的電腦上把錄音轉成字幕與逐字稿</title>
-  <meta name="description" content="開源的本機語音辨識與字幕編輯器，可在 Windows、macOS、Linux 與 Docker 上執行。用 Breeze ASR 25／26 辨識臺灣華語、中英夾雜與臺灣台語，自動加標點、分辨說話者，在波形時間軸上校對後匯出字幕檔或 Word 逐字稿。">
+  <meta name="description" content="開源的本機語音辨識與字幕編輯器，可在 Windows、macOS、Linux 與 Docker 上執行。用 Breeze ASR 25 / 26 辨識臺灣華語、中英夾雜與臺灣台語，自動加標點、分辨說話者，在波形時間軸上校對後匯出字幕檔或 Word 逐字稿。">
   <link rel="canonical" href="./" data-absolute>
   <meta name="theme-color" content="#f3f3f0" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#101010" media="(prefers-color-scheme: dark)">
@@ -66,12 +66,12 @@
           </button>
           <div class="sound__panel" id="sound-panel" role="group" aria-labelledby="sound-title" hidden>
             <p class="sound__title" id="sound-title">聲音</p>
-            <button class="sound__opt" type="button" aria-pressed="false" aria-labelledby="sound-music" aria-describedby="sound-music-note" data-sound-toggle="music">
-              <span class="sound__text"><b id="sound-music">背景音樂</b><span id="sound-music-note">兩首古箏曲隨機播一首，播放影片時暫停</span></span>
+            <button class="sound__opt" type="button" aria-pressed="false" aria-labelledby="sound-music" data-sound-toggle="music">
+              <span class="sound__text"><b id="sound-music">背景音樂</b></span>
               <span class="sound__switch" aria-hidden="true"></span>
             </button>
             <button class="sound__opt" type="button" aria-pressed="false" aria-labelledby="sound-zheng" aria-describedby="sound-zheng-note" data-sound-toggle="zheng">
-              <span class="sound__text"><b id="sound-zheng">古箏弦</b><span id="sound-zheng-note">首頁古箏撥弦與黑貓的叫聲</span></span>
+              <span class="sound__text"><b id="sound-zheng">古箏弦</b><span id="sound-zheng-note">古箏撥弦與黑貓的叫聲</span></span>
               <span class="sound__switch" aria-hidden="true"></span>
             </button>
           </div>
@@ -90,17 +90,17 @@
   <main id="main">
     <section class="hero" id="top" aria-labelledby="hero-title">
       <div class="wrap hero__text">
-        <p class="hero__notice"><span class="tag" data-release="version"></span><span><span data-release="date"></span> 發布</span><span class="dot" aria-hidden="true"></span><span>開源・MIT 授權</span></p>
+        <p class="hero__notice"><span class="tag" data-release="version"></span><span><span data-release="date"></span> 發布</span><span class="dot" aria-hidden="true"></span><span>開源，MIT 授權</span></p>
         <h1 class="hero__title" id="hero-title">在自己的電腦上，<br>把錄音轉成字幕與逐字稿</h1>
-        <p class="hero__lead">用 MediaTek Research 的 Breeze ASR 25／26 辨識臺灣華語、中英夾雜與臺灣台語，自動加標點、分辨說話者；在波形時間軸上校對，再匯出字幕檔或 Word 逐字稿。錄音不必上傳到任何雲端服務。</p>
+        <p class="hero__lead">用 MediaTek Research 的 Breeze ASR 25 / 26 辨識臺灣華語、中英夾雜與臺灣台語，自動加標點、分辨說話者；在波形時間軸上校對，再匯出字幕檔或 Word 逐字稿。錄音不必上傳到任何雲端服務。</p>
         <div class="hero__actions">
           <a class="btn btn--primary btn--lg" href="#install" data-magnetic>安裝 ListenMiao</a>
           <a class="btn btn--ghost btn--lg" href="https://github.com/Scorpio-meow/ListenMiao">在 GitHub 查看原始碼</a>
         </div>
         <dl class="hero__facts">
-          <div><dt>系統</dt><dd>Windows・macOS・Linux・Docker</dd></div>
-          <div><dt>加速</dt><dd>Intel 內顯・NVIDIA・AMD・CPU</dd></div>
-          <div><dt>語言</dt><dd>臺灣華語・中英夾雜・臺灣台語</dd></div>
+          <div><dt>系統</dt><dd>Windows、macOS、Linux、Docker</dd></div>
+          <div><dt>加速</dt><dd>Intel 內顯、NVIDIA、AMD、CPU</dd></div>
+          <div><dt>語言</dt><dd>臺灣華語、中英夾雜、臺灣台語</dd></div>
         </dl>
       </div>
       <div class="wrap hero__zheng">
@@ -110,7 +110,7 @@
         </div>
         <div class="zheng__meta">
           <p class="zheng__label" id="zheng-label"><b>古箏</b> <span data-zheng-range>D 五聲定弦</span></p>
-          <p class="zheng__help" id="zheng-help"><span class="zheng__fine">滑鼠滑過弦就會撥動，快速刮過是刮奏</span><span class="zheng__touch">手指左右撥過弦，弦就會振動</span><span class="zheng__keys" aria-hidden="true">← → 撥弦，Home／End 刮奏</span><span class="sr">。聚焦後用左右方向鍵撥弦，Home 或 End 刮奏。</span></p>
+          <p class="zheng__help" id="zheng-help"><span class="zheng__keys" aria-hidden="true">← → 撥弦，Home / End 刮奏</span><span class="sr">聚焦後用左右方向鍵撥弦，Home 或 End 刮奏。</span></p>
           <div class="zheng__status" aria-live="polite">
             <p class="zheng__hint" data-zheng-hint hidden>古箏弦的聲音關著，<button class="link" type="button" data-zheng-sound>打開「古箏弦」</button>就聽得到撥弦聲</p>
           </div>
@@ -240,7 +240,6 @@
         <header class="sec-head" data-reveal>
           <p class="eyebrow"><span>01:01</span>介紹影片</p>
           <h2 id="film-title">一分鐘看完 ListenMiao</h2>
-          <p class="sec-lead" id="film-desc">從錄音、辨識、熱詞、校對到匯出，61&nbsp;秒看完整個流程。影片沒有口播，只有配樂。</p>
         </header>
         <div class="film__frame" data-reveal data-film>
           <video class="film__video" controls playsinline preload="none" width="1920" height="1080" aria-label="ListenMiao 介紹影片，1 分 1 秒" aria-describedby="film-desc" data-film-video>
@@ -252,7 +251,7 @@
           </button>
         </div>
         <div class="chapters" data-reveal data-chapters>
-          <p class="chapters__head" id="chapters-title">章節<span>按時間從那一段播放，或到頁面上自己操作</span></p>
+          <p class="chapters__head" id="chapters-title">章節</p>
           <ol class="chapters__list" aria-labelledby="chapters-title">
             <li class="chap"><button type="button" class="chap__seek" data-start="16" data-end="21.333"><span class="chap__tc">0:16</span><span class="chap__title">自動加標點，分辨說話者</span></button><a class="chap__go" href="#features">到頁面上玩<span class="sr">：分辨說話者示意動畫</span></a><span class="chap__bar" aria-hidden="true"></span></li>
             <li class="chap"><button type="button" class="chap__seek" data-start="21.333" data-end="26.667"><span class="chap__tc">0:21</span><span class="chap__title">先給熱詞，辨識時比較容易寫對</span></button><a class="chap__go" href="#listen">到頁面上玩<span class="sr">：實測給熱詞前後</span></a><span class="chap__bar" aria-hidden="true"></span></li>
@@ -270,7 +269,6 @@
         <header class="sec-head" data-reveal>
           <p class="eyebrow"><span>01</span>流程</p>
           <h2 id="workflow-title">從錄音到字幕，四個步驟</h2>
-          <p class="sec-lead">上傳、辨識、校對、匯出都在同一個網頁完成，服務跑在你自己的電腦上。</p>
         </header>
         <div class="story__grid">
           <ol class="story__steps" data-steps>
@@ -365,7 +363,6 @@
         <header class="sec-head" data-reveal>
           <p class="eyebrow"><span>02</span>功能</p>
           <h2 id="features-title">校對與交付需要的工具</h2>
-          <p class="sec-lead">介面以 WCAG 2.2 AA 為目標，主要工作只用鍵盤就能完成。</p>
         </header>
         <article class="diar" data-diar>
           <div class="diar__text">
@@ -429,7 +426,7 @@
               <p class="ui-punct" data-punct>我們先確認這週的上線時程<b>。</b>API 文件昨天更新了<b>，</b>熱詞也加好了<b>。</b></p>
             </div>
             <h3>辨識完自動加標點</h3>
-            <p>用獨立的標點模型補上全形標點，在 CPU 上執行，和辨識分開處理。</p>
+            <p>用獨立的標點模型補上全形標點。</p>
           </article>
           <article class="card" data-reveal>
             <div class="card__ui" aria-hidden="true">
@@ -457,7 +454,7 @@
         <div class="hot__stats" data-reveal>
           <div class="stat">
             <p class="stat__label">罕見詞寫對</p>
-            <p class="stat__value"><span class="from">9</span><span class="arrow" aria-hidden="true">→</span><span data-count-to="18" data-count-from="9" data-decimals="0" data-suffix="">18</span><span class="unit">／23&nbsp;處</span></p>
+            <p class="stat__value"><span class="from">9</span><span class="arrow" aria-hidden="true">→</span><span data-count-to="18" data-count-from="9" data-decimals="0" data-suffix="">18</span><span class="unit"> / 23&nbsp;處</span></p>
           </div>
           <div class="stat">
             <p class="stat__label">字元錯誤率</p>
@@ -471,7 +468,7 @@
           <li><s>superbase</s>Supabase</li>
           <li><s>Piano</s>pyannote</li>
         </ul>
-        <p class="hot__link">另一段 22 秒週會錄音給熱詞前後的逐字差別，可以到<a href="#listen">實測</a>邊聽邊看。</p>
+        <p class="hot__link">另一段 22 秒週會錄音給熱詞前後的差別，到<a href="#listen">實測</a>邊聽邊看。</p>
       </div>
     </section>
     <section class="section listen" id="listen" aria-labelledby="listen-title">
@@ -479,7 +476,7 @@
         <header class="sec-head" data-reveal>
           <p class="eyebrow"><span>04</span>實測</p>
           <h2 id="listen-title">聽一段真實的辨識結果</h2>
-          <p class="sec-lead">22&nbsp;秒的兩人週會錄音，用 ListenMiao 0.7.6 在 Core Ultra 7 155U 的內顯（int8）實際辨識兩次：一次不給熱詞，一次給熱詞。播放時字幕會跟著亮起，標出來的字是兩次結果不同的地方。</p>
+          <p class="sec-lead">22&nbsp;秒的兩人週會錄音，用 ListenMiao 0.7.6 在 Core Ultra 7 155U 的內顯（int8）實際辨識兩次：一次不給熱詞，一次給熱詞。標出來的字是兩次結果不同的地方。</p>
         </header>
         <div class="listen__grid">
           <div class="player" data-listen>
@@ -492,7 +489,7 @@
                 <div class="race__row"><span class="race__name">錄音播放</span><span class="race__track"><span class="race__fill" data-race-play></span></span><span class="race__val" data-race-play-val></span></div>
                 <div class="race__row race__row--lm" data-race-lm><span class="race__name">ListenMiao 處理</span><span class="race__track"><span class="race__fill" data-race-proc></span></span><span class="race__val" data-race-proc-val></span></div>
               </div>
-              <p class="race__note">處理時間是實測值（給熱詞 13.9&nbsp;秒、不給熱詞 14.84&nbsp;秒，跟著下面選的分頁）；兩條進度只是照播放時間示意快慢，不是即時處理。</p>
+              <p class="race__note">處理時間是實測值；進度條只示意快慢，不是即時處理。</p>
             </div>
             <div class="steps__tabs player__tabs" role="tablist" aria-label="辨識結果" data-tabs>
               <button type="button" role="tab" id="tab-plain" aria-controls="cues-plain" aria-selected="false" tabindex="-1" data-proc="14.84">不給熱詞<small>9&nbsp;段</small></button>
@@ -529,10 +526,10 @@
           <div class="listen__side">
             <dl class="listen__facts">
               <div><dt>兩次結果不同</dt><dd><b>3</b>&nbsp;處</dd></div>
-              <div><dt>處理時間</dt><dd><b>13.9</b>&nbsp;秒<small>給熱詞；不給熱詞 14.84&nbsp;秒，錄音 22.0&nbsp;秒</small></dd></div>
+              <div><dt>處理時間</dt><dd><b>13.9</b>&nbsp;秒<small>給熱詞；不給熱詞 14.84&nbsp;秒</small></dd></div>
             </dl>
             <div class="hw">
-              <p class="hw__label">給熱詞那次用的熱詞</p>
+              <p class="hw__label">熱詞</p>
               <p class="hw__input">會中提到 Docker 映像檔、SRT 字幕檔、Word 逐字稿與 OpenVINO。</p>
             </div>
           </div>
@@ -544,7 +541,7 @@
         <header class="sec-head" data-reveal>
           <p class="eyebrow"><span>05</span>匯出</p>
           <h2 id="exports-title">同一份逐字稿，七種格式</h2>
-          <p class="sec-lead">下面都是上一段「給熱詞」那次結果直接從 ListenMiao 匯出的檔案，沒有改過一個字；字幕也能直接燒進影片。</p>
+          <p class="sec-lead">上一段「給熱詞」那次結果直接匯出的檔案，一字未改。</p>
         </header>
         <div class="exports__grid">
           <div class="fmt">
@@ -762,7 +759,7 @@ Dialogue: 0,0:00:20.00,0:00:22.00,Default,說話者 1,0,0,0,,說話者 1：那�
           </div>
           <div class="burn-cmp">
             <h3 class="burn-cmp__title">燒錄字幕前後</h3>
-            <p class="burn-cmp__text">把宣傳影片的前 22&nbsp;秒配上這段錄音，辨識後用 <code>render</code> 燒錄；畫面是燒錄前後同一格。左右拖曳，或聚焦後按方向鍵比較。</p>
+            <p class="burn-cmp__text">把宣傳影片的前 22&nbsp;秒配上這段錄音，辨識後用 <code>render</code> 燒錄，比較同一格畫面。</p>
             <div class="compare" data-compare style="--pos: 50%">
               <img class="compare__img" src="media/burn-before-640.webp" srcset="media/burn-before-640.webp 640w, media/burn-before.webp 1280w" sizes="(max-width: 1023px) 92vw, 560px" alt="燒錄前的畫面：深色背景中央是 ListenMiao 標誌" width="1280" height="720" loading="lazy" decoding="async">
               <img class="compare__img compare__after" src="media/burn-after-640.webp" srcset="media/burn-after-640.webp 640w, media/burn-after.webp 1280w" sizes="(max-width: 1023px) 92vw, 560px" alt="燒錄後的同一格畫面：標誌下方多了白色字幕「那 Docker 映像檔就下週發佈」" width="1280" height="720" loading="lazy" decoding="async">
@@ -841,7 +838,7 @@ Dialogue: 0,0:00:20.00,0:00:22.00,Default,說話者 1,0,0,0,,說話者 1：那�
           <div class="est__result" aria-live="polite">
             <p class="est__time" data-est-time>約 23 分鐘</p>
             <p class="est__pick">自動調校選中 <b data-est-pick>內顯・int8</b>，速度 <b data-est-speed>0.38</b></p>
-            <p class="est__note">用<a href="https://github.com/Scorpio-meow/ListenMiao/blob/main/docs/benchmarks.md#辨識速度與自動調校">效能實測</a>裡各機器選中設定的速度乘上錄音長度，只算辨識。分辨說話者在 CPU 上另外跑，多人長錄音約 0.34&nbsp;倍，和內顯辨識同時進行時整體約 0.4&nbsp;倍。</p>
+            <p class="est__note">用<a href="https://github.com/Scorpio-meow/ListenMiao/blob/main/docs/benchmarks.md#辨識速度與自動調校">效能實測</a>裡各機器選中設定的速度乘上錄音長度，只算辨識，不含分辨說話者。</p>
           </div>
           <script type="application/json" data-est-machines>[
             { "name": "Core i7-9700", "pick": "CPU・int8", "speed": 0.66 },
@@ -854,7 +851,7 @@ Dialogue: 0,0:00:20.00,0:00:22.00,Default,說話者 1,0,0,0,,說話者 1：那�
           <div class="replay__head">
             <div>
               <h3 class="replay__title">重播一次真實的自動調校</h3>
-              <p class="replay__sub">Core Ultra 7 155U（32&nbsp;GB）在 2026-11-14 20:52–20:57 用 ListenMiao 0.7.6 重新調校的推論日誌，5 分半壓縮成十幾秒；速度是處理秒數 ÷ 音訊秒數，越小越快。上面長條圖與估算器的 0.38 取自效能實測文件 2026-10-31 那次調校，這裡是同一台電腦 2026-11-14 用內附 29&nbsp;秒範例語音重新調校的結果，所以數字不同。</p>
+              <p class="replay__sub">Core Ultra 7 155U（32&nbsp;GB）2026-11-14 用 ListenMiao 0.7.6 重新調校的推論日誌，5 分半壓縮成十幾秒。上面的 0.38 來自 2026-10-31 那次調校，所以數字不同。</p>
             </div>
             <button type="button" class="btn btn--ghost btn--sm" data-replay-play>重播</button>
           </div>
@@ -935,7 +932,7 @@ Dialogue: 0,0:00:20.00,0:00:22.00,Default,說話者 1,0,0,0,,說話者 1：那�
           <header class="sec-head" data-reveal>
             <p class="eyebrow"><span>08</span>命令列、MCP 與 Skill</p>
             <h2 id="cli-title">批次轉檔，或讓 AI 助理直接呼叫</h2>
-            <p class="sec-lead">命令列工具、MCP server 與 Agent Skill 都直接連這台電腦上執行中的服務，不經過系統設定的 proxy，也不跟著轉址，錄音與存取權杖不會送到別的主機。</p>
+            <p class="sec-lead">命令列工具、MCP server 與 Agent Skill 都只連這台電腦上的服務，錄音與存取權杖不會送到別的主機。</p>
           </header>
           <ul class="cli__list" data-reveal>
             <li><code>transcribe</code>一次送出多個檔案，結果寫在原檔旁邊</li>
@@ -1006,7 +1003,7 @@ Dialogue: 0,0:00:20.00,0:00:22.00,Default,說話者 1,0,0,0,,說話者 1：那�
         <header class="sec-head" data-reveal>
           <p class="eyebrow"><span>09</span>安裝</p>
           <h2 id="install-title">安裝與系統需求</h2>
-          <p class="sec-lead">下載 zip 就能安裝，不需要 git。安裝腳本會自動安裝 uv 與符合顯示卡的 PyTorch；啟動後開啟 <code>http://127.0.0.1:7860</code>，把音訊或影片拖進視窗，再按「辨識」。</p>
+          <p class="sec-lead">啟動後開啟 <code>http://127.0.0.1:7860</code>，把音訊或影片拖進視窗，再按「辨識」。</p>
         </header>
         <div class="install__grid">
           <div class="steps" data-reveal>
@@ -1130,9 +1127,9 @@ Dialogue: 0,0:00:20.00,0:00:22.00,Default,說話者 1,0,0,0,,說話者 1：那�
         </nav>
       </div>
       <div class="closing__legal">
-        <p>© 2026 Scorpio-meow・程式碼以 MIT 授權釋出</p>
+        <p>© 2026 Scorpio-meow，程式碼以 MIT 授權釋出</p>
         <p>非官方專案，與 MediaTek 無關；Breeze ASR 是 MediaTek Research 的模型名稱。</p>
-        <p>字型：Noto Sans TC（<a href="fonts/OFL.txt">SIL Open Font License 1.1</a>）・貓叫聲：Joseph Sardin，<a href="https://bigsoundbank.com/">BigSoundBank</a>（CC0）</p>
+        <p>字型：Noto Sans TC（<a href="fonts/OFL.txt">SIL Open Font License 1.1</a>）；貓叫聲：Joseph Sardin，<a href="https://bigsoundbank.com/">BigSoundBank</a>（CC0）</p>
       </div>
     </div>
   </footer>

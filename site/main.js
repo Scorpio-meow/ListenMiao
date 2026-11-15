@@ -899,16 +899,23 @@ function story() {
     });
     if (n === 3) runTyping();
   }
-  const lineAt = () => innerHeight * (narrow.matches ? 0.57 : 0.5);
+  const wrap = stage.parentElement;
+  function stuckBottom() {
+    const style = getComputedStyle(wrap);
+    return style.position === "sticky" ? parseFloat(style.top) + wrap.offsetHeight : null;
+  }
+  function lineAt() {
+    if (!narrow.matches) return innerHeight * 0.5;
+    const bottom = stuckBottom();
+    return bottom === null ? innerHeight * 0.57 : bottom + (innerHeight - bottom) / 2;
+  }
   function offsetFor(step) {
     const r = step.getBoundingClientRect();
-    const line = lineAt();
-    if (!narrow.matches) return r.top + r.height / 2 - line;
-    const wrap = stage.parentElement;
-    const style = getComputedStyle(wrap);
-    const cover = style.position === "sticky" ? parseFloat(style.top) + wrap.offsetHeight : document.querySelector("[data-nav]").offsetHeight;
+    if (!narrow.matches) return r.top + r.height / 2 - lineAt();
+    const bottom = stuckBottom();
+    if (bottom !== null) return r.top - bottom;
     const gap = parseFloat(getComputedStyle(step).paddingTop) / 2;
-    return r.top - Math.min(cover + gap, line - gap);
+    return r.top - Math.min(document.querySelector("[data-nav]").offsetHeight + gap, lineAt() - gap);
   }
   function activateNearest() {
     const line = lineAt();
@@ -974,7 +981,8 @@ function story() {
   }
   function observe() {
     observer?.disconnect();
-    const margin = narrow.matches ? "-56% 0px -42% 0px" : "-46% 0px -46% 0px";
+    const line = Math.round(lineAt());
+    const margin = narrow.matches ? `-${line}px 0px -${innerHeight - line - 1}px 0px` : "-46% 0px -46% 0px";
     observer = new IntersectionObserver(
       (entries) => {
         for (const e of entries) if (e.isIntersecting) activate(Number(e.target.dataset.step));
@@ -986,6 +994,7 @@ function story() {
   watchStage();
   observe();
   narrow.addEventListener("change", observe);
+  addEventListener("resize", observe);
   steps[0].classList.add("is-on");
   return () => {
     const r = list.getBoundingClientRect();
@@ -1428,7 +1437,7 @@ function zheng(root) {
       s.x = spacing * (k + 0.5);
     });
     if (!shown.includes(focus)) focus = shown[Math.floor(n / 2)];
-    range.textContent = `D 五聲定弦・${shown[0].note}–${shown.at(-1).note}・${n}\u00a0弦`;
+    range.textContent = `D 五聲定弦，${shown[0].note}–${shown.at(-1).note}，${n}\u00a0弦`;
     draw(performance.now());
   }
   function vibrate(s, velocity, delay) {

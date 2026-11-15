@@ -1025,29 +1025,12 @@ button {
   font-weight: 700;
 }
 
-.zheng__touch,
 .zheng__keys {
   display: none;
 }
 
-@media (hover: none),
-(pointer: coarse) {
-  .zheng__fine {
-    display: none;
-  }
-
-  .zheng__touch {
-    display: inline;
-  }
-}
-
 .hero__zheng:has(.zheng:focus-visible) .zheng__keys {
   display: inline;
-}
-
-.hero__zheng:has(.zheng:focus-visible) .zheng__fine,
-.hero__zheng:has(.zheng:focus-visible) .zheng__touch {
-  display: none;
 }
 
 .zheng__status {
@@ -2628,6 +2611,11 @@ button {
 }
 
 @media (max-width: 899px) {
+  .story {
+    --stage-h: 360px;
+    --stage-gap: 8px;
+  }
+
   .story__grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;
@@ -2636,14 +2624,14 @@ button {
   .story__stage {
     order: -1;
     position: sticky;
-    top: calc(var(--nav-h) + 8px);
+    top: calc(var(--nav-h) + var(--stage-gap));
     z-index: 2;
   }
 
   .stage {
     position: relative;
     top: 0;
-    height: 360px;
+    height: var(--stage-h);
     min-height: 0;
   }
 
@@ -2693,23 +2681,16 @@ button {
     height: 64px;
   }
 
-  .step {
-    justify-content: flex-start;
-    min-height: 58svh;
-    padding-top: 28px;
-  }
-
-  .step::before {
-    top: 36px;
-  }
-
-  .step:first-child {
-    min-height: 58svh;
-    padding-top: 48px;
+  .step,
+  .step:first-child,
+  .step:last-child {
+    justify-content: center;
+    min-height: calc(100svh - var(--nav-h) - var(--stage-gap) - var(--stage-h));
+    padding-block: 24px;
   }
 
   .step:first-child::before {
-    top: 56px;
+    top: calc(50% - 6px);
   }
 
   .mini-row {
@@ -2747,6 +2728,12 @@ button {
   .story__stage {
     position: relative;
     top: 0;
+  }
+
+  .step,
+  .step:first-child,
+  .step:last-child {
+    min-height: 0;
   }
 }
 
@@ -4929,12 +4916,6 @@ button {
   font-weight: 700;
 }
 
-.chapters__head span {
-  color: var(--ink-3);
-  font-size: 0.8125rem;
-  font-weight: 400;
-}
-
 .chapters__list {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -5664,6 +5645,7 @@ button {
   color: var(--ink-3);
   font-size: 0.75rem;
   line-height: 1.6;
+  text-wrap: pretty;
 }
 
 @media (max-width: 479px) {
