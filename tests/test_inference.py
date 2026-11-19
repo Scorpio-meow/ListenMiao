@@ -74,3 +74,16 @@ def test_cancel_during_a_crash_restart_leaves_one_inference_process(monkeypatch,
     cancel.join(5)
     assert sum(process.is_alive() for process in spawned) == 1
     assert client._pending["job"].error == "工作已取消"
+
+
+def test_cpu_meter_restarts_when_transcription_begins():
+    import queue
+
+    restarts = []
+    meter = SimpleNamespace(restart=lambda: restarts.append("restart"))
+    events = queue.Queue()
+    inference_module._enter_stage(events, meter, "abc", "loading")
+    assert restarts == []
+    inference_module._enter_stage(events, meter, "abc", "transcribing")
+    assert restarts == ["restart"]
+    assert [events.get_nowait(), events.get_nowait()] == [("stage", "abc", "loading"), ("stage", "abc", "transcribing")]

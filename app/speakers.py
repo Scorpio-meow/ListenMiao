@@ -16,7 +16,7 @@ from pathlib import Path
 from .catalog import HubFile, SpeakerConfig
 from .logsetup import log_stderr
 from .transcript import Segment, Speaker, Transcript
-from .voices import VoiceLibrary, Voiceprint
+from .voices import Match, VoiceLibrary, Voiceprint
 
 log = logging.getLogger(__name__)
 
@@ -198,15 +198,18 @@ class SpeakerService:
         }
         return DiarizationRun(args, on_progress)
 
-    def label(self, transcript: Transcript, raw: list[RawSpeaker]) -> tuple[Transcript, dict[str, Voiceprint]]:
+    def label(
+        self, transcript: Transcript, raw: list[RawSpeaker]
+    ) -> tuple[Transcript, dict[str, Voiceprint], dict[str, list[Match]]]:
         if not raw:
-            return replace(transcript, speakers_error=NO_SPEECH), {}
+            return replace(transcript, speakers_error=NO_SPEECH), {}, {}
         owners = [_owner(segment, raw) for segment in transcript.segments]
         numbering: dict[int, str] = {}
         for owner in owners:
             numbering.setdefault(owner, f"S{len(numbering) + 1}")
         voiceprints = {sid: raw[k].voiceprint for k, sid in numbering.items()}
-        matches = self.voices.match(voiceprints, self._config.match_threshold)
+        ranking = self.voices.ranking(voiceprints)
+        matches = self.voices.match(ranking, self._config.match_threshold)
         speakers = []
         for k, sid in numbering.items():
             match = matches.get(sid)
@@ -223,4 +226,4 @@ class SpeakerService:
             replace(segment, speaker=numbering[owner])
             for segment, owner in zip(transcript.segments, owners, strict=True)
         ]
-        return replace(transcript, segments=segments, speakers=speakers), voiceprints
+        return replace(transcript, segments=segments, speakers=speakers), voiceprints, ranking

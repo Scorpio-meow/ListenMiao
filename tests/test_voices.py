@@ -54,7 +54,7 @@ def test_match_assigns_each_voice_to_at_most_one_speaker(tmp_path):
         "S2": _print(_unit(0.95, 0.05, 0)),
         "S3": _print(_unit(0.05, 1, 0)),
     }
-    matches = library.match(speakers, threshold=0.7)
+    matches = library.match(library.ranking(speakers), threshold=0.7)
     assert matches["S2"].name == "Alice"
     assert matches["S3"].name == "Bob"
     assert "S1" not in matches
@@ -63,7 +63,7 @@ def test_match_assigns_each_voice_to_at_most_one_speaker(tmp_path):
 def test_match_respects_threshold(tmp_path):
     library = VoiceLibrary(tmp_path / "voices.json")
     library.remember("Alice", _print(ALICE))
-    assert library.match({"S1": _print(_unit(1, 1, 0))}, threshold=0.8) == {}
+    assert library.match(library.ranking({"S1": _print(_unit(1, 1, 0))}), threshold=0.8) == {}
 
 
 def test_outdated_voices_are_listed_but_not_matched(tmp_path):
@@ -74,7 +74,7 @@ def test_outdated_voices_are_listed_but_not_matched(tmp_path):
     [entry] = library.entries()
     assert entry["outdated"] is True
     assert entry["samples"] == 0
-    assert library.match({"S1": _print(ALICE)}, threshold=0.1) == {}
+    assert library.match(library.ranking({"S1": _print(ALICE)}), threshold=0.1) == {}
     assert library.remember("Carol", _print(ALICE))["samples"] == 1
     assert library.entries()[0]["outdated"] is False
 
@@ -85,3 +85,41 @@ def test_delete_removes_only_known_voices(tmp_path):
     assert library.delete("missing") is False
     assert library.delete(voice["id"]) is True
     assert library.entries() == []
+
+
+def test_ranking_lists_every_voice_from_most_to_least_similar(tmp_path):
+    library = VoiceLibrary(tmp_path / "voices.json")
+    alice = library.remember("Alice", _print(ALICE))
+    bob = library.remember("Bob", _print(BOB))
+    [first, second] = library.ranking({"S1": _print(_unit(1, 0.2, 0))})["S1"]
+    assert (first.voice_id, second.voice_id) == (alice["id"], bob["id"])
+    assert first.similarity > second.similarity
+
+
+def test_closer_voice_reports_another_person_who_sounds_more_alike(tmp_path):
+    library = VoiceLibrary(tmp_path / "voices.json")
+    library.remember("Alice", _print(ALICE))
+    bob = library.remember("Bob", _print(BOB))
+    mostly_bob = _print(_unit(0.2, 1, 0))
+    other, own = library.closer_voice("Alice", mostly_bob, [mostly_bob])
+    assert other.voice_id == bob["id"]
+    assert other.similarity > own
+    assert library.closer_voice("Alice", _print(_unit(1, 0.2, 0)), []) is None
+    assert library.closer_voice("Carol", mostly_bob, []) is None
+
+
+def test_closer_voice_ignores_voices_remembered_from_the_same_recording(tmp_path):
+    library = VoiceLibrary(tmp_path / "voices.json")
+    library.remember("Alice", _print(ALICE))
+    colleague = _print(_unit(0.2, 1, 0))
+    library.remember("Bob", colleague)
+    speaker = _print(_unit(0.3, 1, 0))
+    assert library.closer_voice("Alice", speaker, []) is not None
+    assert library.closer_voice("Alice", speaker, [speaker, colleague]) is None
+
+
+def test_without_drops_only_the_shared_vectors():
+    kept = _print(ALICE, BOB).without([_print(BOB)])
+    assert kept.similarity(_print(ALICE)) == pytest.approx(1.0)
+    assert len(kept.weights) == 1
+    assert _print(BOB).without([_print(BOB)]) is None

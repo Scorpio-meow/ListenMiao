@@ -28,6 +28,8 @@ const STORAGE_KEYS = {
   job: "breeze-asr:job",
 };
 const NEW_SPEAKER = "__new__";
+const REMEMBER_LABEL = "記住聲音";
+const REMEMBER_ANYWAY_LABEL = "仍要記住";
 const LEADING_MARKS = /[\s，。？！、；：,.?!;:]/;
 const SPEAKER_COLORS = 8;
 const CONFIRM_MS = 5000;
@@ -2102,7 +2104,7 @@ function speakerItem(speaker) {
     }
   });
   input.addEventListener("change", () => saveSpeakerName(speaker.id, input, status));
-  const remember = el("button", "link-btn speaker-remember", "記住聲音");
+  const remember = el("button", "link-btn speaker-remember", REMEMBER_LABEL);
   remember.type = "button";
   remember.title = "存進語者庫，之後自動認出";
   remember.addEventListener("click", () => rememberVoice(speaker.id, input, status, remember));
@@ -2195,11 +2197,14 @@ function saveSpeakerName(speakerId, input, status) {
 async function rememberVoice(speakerId, input, status, button) {
   if (nameSaves.has(input) && !(await nameSaves.get(input))) return;
   if (input.value.trim() !== input.dataset.saved && !(await saveSpeakerName(speakerId, input, status))) return;
+  const body = { job_id: state.job.id, speaker_id: speakerId };
+  if (button.dataset.confirmFor === input.dataset.saved) body.confirm = true;
+  delete button.dataset.confirmFor;
+  button.textContent = REMEMBER_LABEL;
   button.disabled = true;
   setSpeakerStatus(status, "記住中…");
-  const jobId = state.job.id;
   const saving = settle()
-    .then(() => api("/api/voices", { method: "POST", body: { job_id: jobId, speaker_id: speakerId } }))
+    .then(() => api("/api/voices", { method: "POST", body }))
     .then((data) => {
       applySpeakerUpdate(data.job);
       const message =
@@ -2210,11 +2215,17 @@ async function rememberVoice(speakerId, input, status, button) {
     })
     .catch((err) => {
       setSpeakerStatus(status, err.message, "error");
+      if (err.status === 409) {
+        button.dataset.confirmFor = input.dataset.saved;
+        button.textContent = REMEMBER_ANYWAY_LABEL;
+        return;
+      }
       input.focus();
       input.select();
     })
     .finally(() => {
       button.disabled = false;
+      if (button.dataset.confirmFor !== undefined) button.focus();
       if (state.pendingSave === saving) state.pendingSave = null;
     });
   state.pendingSave = saving;

@@ -6,6 +6,7 @@ import os
 import secrets
 import threading
 import time
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -15,6 +16,10 @@ log = logging.getLogger(__name__)
 
 _MAX_VOICE_MEMBERS = 128
 _VECTOR_DECIMALS = 4
+
+
+def _vector_keys(vectors: np.ndarray) -> list[bytes]:
+    return [row.tobytes() for row in np.rint(vectors * 10**_VECTOR_DECIMALS).astype(np.int32)]
 
 
 @dataclass(frozen=True)
@@ -28,6 +33,13 @@ class Voiceprint:
 
     def keep_last(self, limit: int) -> Voiceprint:
         return Voiceprint(vectors=self.vectors[-limit:], weights=self.weights[-limit:])
+
+    def without(self, others: Iterable[Voiceprint]) -> Voiceprint | None:
+        seen = {key for other in others for key in _vector_keys(other.vectors)}
+        keep = np.array([key not in seen for key in _vector_keys(self.vectors)])
+        if not keep.any():
+            return None
+        return Voiceprint(vectors=self.vectors[keep], weights=self.weights[keep])
 
     def __add__(self, other: Voiceprint) -> Voiceprint:
         return Voiceprint(
@@ -86,17 +98,62 @@ class VoiceLibrary:
                 for v in self._voices
             ]
 
-    def match(self, voiceprints: dict[str, Voiceprint], threshold: float) -> dict[str, Match]:
+    def _known(self) -> list[tuple[str, str, Voiceprint]]:
         with self._lock:
-            known = [
+            return [
                 (v["id"], v["name"], Voiceprint.from_json(v["voiceprint"])) for v in self._voices if not _outdated(v)
             ]
-        candidates = []
-        for speaker_id, voiceprint in voiceprints.items():
-            for voice_id, name, stored in known:
-                similarity = voiceprint.similarity(stored)
-                if similarity >= threshold:
-                    candidates.append((similarity, speaker_id, voice_id, name))
+
+    def ranking(self, voiceprints: dict[str, Voiceprint]) -> dict[str, list[Match]]:
+        known = self._known()
+        return {
+            speaker_id: sorted(
+                (
+                    Match(voice_id=voice_id, name=name, similarity=voiceprint.similarity(stored))
+                    for voice_id, name, stored in known
+                ),
+                key=lambda match: match.similarity,
+                reverse=True,
+            )
+            for speaker_id, voiceprint in voiceprints.items()
+        }
+
+    def closer_voice(
+        self, name: str, voiceprint: Voiceprint, same_recording: Iterable[Voiceprint]
+    ) -> tuple[Match, float] | None:
+        known = self._known()
+        own = next(((voice_id, stored) for voice_id, known_name, stored in known if known_name == name), None)
+        if own is None:
+            return None
+        same_recording = list(same_recording)
+        others = [
+            Match(voice_id=voice_id, name=other_name, similarity=voiceprint.similarity(rest))
+            for voice_id, other_name, stored in known
+            if other_name != name and (rest := stored.without(same_recording)) is not None
+        ]
+        if not others:
+            return None
+        closest = max(others, key=lambda match: match.similarity)
+        own_similarity = voiceprint.similarity(own[1])
+        if closest.similarity <= own_similarity:
+            return None
+        log.info(
+            "要記進語者庫 %s 的聲紋比較像 %s（相似度 %.3f 對 %.3f）",
+            own[0],
+            closest.voice_id,
+            closest.similarity,
+            own_similarity,
+        )
+        return closest, own_similarity
+
+    @staticmethod
+    def match(ranking: dict[str, list[Match]], threshold: float) -> dict[str, Match]:
+        candidates = [
+            (match.similarity, speaker_id, match.voice_id, match.name)
+            for speaker_id, ranked in ranking.items()
+            for match in ranked
+            if match.similarity >= threshold
+        ]
         matches: dict[str, Match] = {}
         taken: set[str] = set()
         for similarity, speaker_id, voice_id, name in sorted(candidates, reverse=True):

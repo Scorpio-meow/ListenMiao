@@ -1,6 +1,7 @@
 import json
 import subprocess
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -185,3 +186,31 @@ def test_torch_allocator_uses_expandable_segments(monkeypatch):
     monkeypatch.setenv("PYTORCH_ALLOC_CONF", "")
     configure_torch_allocator()
     assert hardware.os.environ["PYTORCH_ALLOC_CONF"] == "expandable_segments:True"
+
+
+@pytest.mark.parametrize(
+    ("battery", "expected"),
+    [
+        (None, "電源：沒有電池資訊"),
+        (SimpleNamespace(power_plugged=True, percent=100), "電源：接電"),
+        (SimpleNamespace(power_plugged=False, percent=41.6), "電源：電池 42%"),
+    ],
+)
+def test_power_source_says_whether_the_computer_is_plugged_in(monkeypatch, battery, expected):
+    monkeypatch.setattr(hardware.psutil, "sensors_battery", lambda: battery)
+    assert hardware.power_source() == expected
+
+
+def test_power_source_survives_a_host_without_battery_files(monkeypatch):
+    def missing():
+        raise FileNotFoundError("/sys/class/power_supply")
+
+    monkeypatch.setattr(hardware.psutil, "sensors_battery", missing)
+    assert hardware.power_source() == "電源：讀不到"
+
+
+def test_cpu_meter_splits_this_process_from_everything_else(monkeypatch):
+    monkeypatch.setattr(hardware.psutil, "cpu_count", lambda: 8)
+    monkeypatch.setattr(hardware.psutil, "cpu_percent", lambda: 50.0)
+    monkeypatch.setattr(hardware.psutil, "Process", lambda: SimpleNamespace(cpu_percent=lambda: 150.0))
+    assert hardware.CpuMeter().report() == "CPU 平均忙碌 4.0 核（本行程 1.5 核，本行程以外 2.5 核）"

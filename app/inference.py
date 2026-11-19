@@ -19,7 +19,15 @@ import psutil
 
 from .catalog import Catalog, model_status
 from .config import ConfigError, Settings
-from .hardware import HardwareProfile, configure_torch_allocator, memory_usage, save_profile, system_memory
+from .hardware import (
+    CpuMeter,
+    HardwareProfile,
+    configure_torch_allocator,
+    memory_usage,
+    power_source,
+    save_profile,
+    system_memory,
+)
 from .logsetup import capture_native_stderr, log_crashes_to, log_to_file, set_level, setup_logging, versions
 from .telemetry import disable_openvino_telemetry
 from .transcript import Transcript
@@ -62,6 +70,12 @@ def _kill(processes: list[psutil.Process]) -> None:
 
 def _put_event(events: Queue, kind: str, job_id: str, value: object) -> None:
     events.put((kind, job_id, value))
+
+
+def _enter_stage(events: Queue, meter: CpuMeter, job_id: str, stage: str) -> None:
+    if stage == "transcribing":
+        meter.restart()
+    _put_event(events, "stage", job_id, stage)
 
 
 def _hardware_config(settings: Settings, catalog: Catalog, events: Queue):
@@ -160,15 +174,18 @@ def _serve(settings: Settings, requests: Queue, events: Queue) -> None:
                 len(hotwords),
                 memory_usage(),
             )
-            on_stage = functools.partial(_put_event, events, "stage", job_id)
+            meter = CpuMeter()
+            on_stage = functools.partial(_enter_stage, events, meter, job_id)
             on_progress = functools.partial(_put_event, events, "progress", job_id)
             transcript = manager.transcribe(model_id, audio, hotwords, on_stage, on_progress)
             log.info(
-                "工作 %s 辨識完成：%d 段，耗時 %.1f 秒；%s",
+                "工作 %s 辨識完成：%d 段，耗時 %.1f 秒；%s；%s；%s",
                 job_id,
                 len(transcript.segments),
                 transcript.processing_seconds,
                 memory_usage(),
+                meter.report(),
+                power_source(),
             )
             events.put(("done", job_id, transcript.to_dict()))
         except Exception as exc:

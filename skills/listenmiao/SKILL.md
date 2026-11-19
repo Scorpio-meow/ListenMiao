@@ -110,6 +110,8 @@ Both are shared by everyone using the service (web app, CLI, watched folder), so
 
 **Voice library** (voiceprints that auto-fill speaker names in later recordings): `<asr> voices list`, `<asr> voices remember <job-id> S1`, `<asr> voices forget <voice-id>`. A voiceprint is biometric personal data: remember a voice only when the user explicitly asks **and** confirms the person agreed, after renaming the speaker (the voice is stored under the current name). Don't delete voices unless asked.
 
+`voices remember` stops without saving when the voice sounds more like a different person already in the library than like the person of that name; the message names both and their similarity scores. Show that message to the user and ask whether it is really the same person. Rerun with `--force` only after they say yes: forcing it on your own can mix someone else's voice into that person's voiceprint, and later recordings would then be labelled wrongly. A service older than this check never stops, and ignores `--force`.
+
 ## 7. Ground rules
 
 - **Confidential recordings.** The audio stays local, but any transcript text you see enters this conversation and goes to the AI provider. When the user says the content is confidential or must not reach an AI service, produce the files with `<asr>` and keep their text out of the conversation: don't open the exported files, don't export to stdout, don't call `get_transcript`, and don't paste or summarize content. Confirm success from the command output (written paths, segment and speaker counts) and file sizes, then tell the user where the files are and that you didn't read them. If you'd normally ask for hotwords, ask the user for names and terms instead of looking at a draft.

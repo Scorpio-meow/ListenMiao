@@ -131,6 +131,31 @@ def memory_usage() -> str:
     return f"行程記憶體 {gb(psutil.Process().memory_info().rss)} GB，{system_memory()}"
 
 
+class CpuMeter:
+    def __init__(self) -> None:
+        self._process = psutil.Process()
+        self.restart()
+
+    def restart(self) -> None:
+        self._process.cpu_percent()
+        psutil.cpu_percent()
+
+    def report(self) -> str:
+        busy = psutil.cpu_percent() * psutil.cpu_count() / 100
+        own = self._process.cpu_percent() / 100
+        return f"CPU 平均忙碌 {busy:.1f} 核（本行程 {own:.1f} 核，本行程以外 {max(busy - own, 0.0):.1f} 核）"
+
+
+def power_source() -> str:
+    try:
+        battery = psutil.sensors_battery()
+    except OSError:
+        return "電源：讀不到"
+    if battery is None:
+        return "電源：沒有電池資訊"
+    return "電源：接電" if battery.power_plugged else f"電源：電池 {battery.percent:.0f}%"
+
+
 def max_loaded(config: EngineConfig, memory_bytes: int, local_models: int) -> tuple[int, str]:
     if local_models == 1:
         return 1, "只有 1 個本機模型"

@@ -37,7 +37,7 @@ Git Bash, Linux and macOS shells send UTF-8 and are fine. Prefer `<asr>` wheneve
 | `PATCH /api/jobs/{id}/speakers/{speaker_id}` | `{"name": "..."}` (≤ 40 characters) |
 | `POST /api/jobs/{id}/renders`, `GET /api/renders/{id}`, `GET /api/renders/{id}/file`, `DELETE /api/renders/{id}` | Burn-in: upload the original video as multipart `file`, poll, download, cancel |
 | `GET`/`PUT /api/glossary` | `{"hotwords": "...", "replacements": [{"find": "...", "replace": "..."}]}`; `PUT` replaces the whole glossary |
-| `GET`/`POST /api/voices`, `DELETE /api/voices/{id}` | Voice library; `POST` body `{"job_id": "...", "speaker_id": "S1"}` |
+| `GET`/`POST /api/voices`, `DELETE /api/voices/{id}` | Voice library; `POST` body `{"job_id": "...", "speaker_id": "S1"}`. `POST` answers 409 without saving when the voice sounds more like another person in the library; send it again with `"confirm": true` only after the user confirms it is the same person |
 | `POST /api/hardware/retune` | Re-detect hardware and re-tune (7–35 min, no transcription meanwhile). Only on the user's request. |
 | `POST /api/hardware/settings` | `{"label": "<hardware.tuning.candidates[].label from /api/config>"}`: switch to another measured profile. Only on the user's request. |
 

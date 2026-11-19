@@ -3,7 +3,7 @@ $self: https://raw.githubusercontent.com/Scorpio-meow/ListenMiao/main/docs/opena
 info:
   title: ListenMiao
   summary: 本機語音辨識服務的 HTTP API：上傳錄音、取得逐字稿、編輯字幕、匯出檔案與燒錄字幕。
-  version: 0.7.6
+  version: 0.7.7
   license:
     name: MIT
     identifier: MIT
@@ -1493,6 +1493,8 @@ paths:
         把某個結果裡的說話者，以目前的名字記進語者庫；語者庫已有同名的人時累加聲紋（每人最多保留最近的 128 個聲紋向量）。之後辨識遇到相似的聲音（相似度達 `models.json` 的 `speakers.match_threshold`）會自動帶入這個名字。
 
         說話者必須先改掉預設名字（「說話者 1」這類），而且要有聲紋（見 `result.voiceprint_speakers`；手動新增的說話者沒有）。成功後這位說話者的 `voice_id` 會指向語者庫的這個人，`result.revision` 加一。
+
+        語者庫已有同名的人、而這段聲音卻比較像語者庫裡的另一個人時，回 409 而不寫入，避免把別人的聲音混進去；確定是本人就帶 `confirm: true` 再送一次。比較時不算同一場錄音裡其他說話者記下的聲紋。
       requestBody:
         required: true
         content:
@@ -1504,6 +1506,12 @@ paths:
                 dataValue:
                   job_id: 3f9a1c0b7d2e4a6f8b1c9d0e
                   speaker_id: S1
+              confirmed:
+                summary: 被 409 提醒後，確定是本人
+                dataValue:
+                  job_id: 3f9a1c0b7d2e4a6f8b1c9d0e
+                  speaker_id: S1
+                  confirm: true
       responses:
         "201":
           summary: 已記住
@@ -1540,6 +1548,16 @@ paths:
                 noVoiceprint:
                   dataValue:
                     detail: 這位說話者沒有聲紋（手動新增的說話者，或改版前產生的結果），無法記住聲音
+        "409":
+          summary: 這段聲音比較像語者庫裡的另一個人，沒有寫入
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                closerVoice:
+                  dataValue:
+                    detail: 這段聲音比較像語者庫裡的「陳美玲」（相似度 0.306），和「王小明」原有的聲音只有 0.270，還沒有記住
         "422":
           summary: 欄位缺少，或說話者還是預設名字
           content:
@@ -3060,6 +3078,10 @@ components:
         speaker_id:
           type: string
           examples: [S1]
+        confirm:
+          type: boolean
+          default: false
+          description: 這段聲音比較像語者庫裡的另一個人時仍然記住。
     RememberVoiceResult:
       type: object
       required: [voice, job]

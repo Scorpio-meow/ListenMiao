@@ -16,6 +16,9 @@ from .transcript import Segment
 
 log = logging.getLogger(__name__)
 
+_MICROSECONDS = 1_000_000
+_MILLISECONDS = 1_000
+
 
 class OpenVinoEngine:
     def __init__(self, settings: Settings, config: EngineConfig) -> None:
@@ -64,6 +67,10 @@ class OpenVinoEngine:
         if local.sentence_segments is not None:
             options["word_timestamps"] = True
         result = pipeline.generate(audio, **options)
+        try:
+            self._log_breakdown(spec, result.perf_metrics)
+        except Exception:
+            log.warning("%s 的辨識分項時間讀不出來", spec.id, exc_info=True)
         segments = []
         for chunk in result.chunks or []:
             text = chunk.text.strip()
@@ -75,6 +82,22 @@ class OpenVinoEngine:
         if local.sentence_segments is not None:
             segments = self._sentence_segments(spec, result, segments, audio_seconds)
         return segments, result.texts[0].strip()
+
+    @staticmethod
+    def _log_breakdown(spec: ModelSpec, metrics) -> None:
+        raw = metrics.whisper_raw_metrics
+        encode = sum(raw.encode_inference_durations) / _MICROSECONDS
+        decode = sum(raw.decode_inference_durations) / _MICROSECONDS
+        total = metrics.get_generate_duration().mean / _MILLISECONDS
+        log.info(
+            "%s 辨識分項：%d 個視窗，encoder %.1f 秒，decoder %.1f 秒（%d 個 token），其他 %.1f 秒",
+            spec.id,
+            len(raw.encode_inference_durations),
+            encode,
+            decode,
+            metrics.get_num_generated_tokens(),
+            total - encode - decode,
+        )
 
     @staticmethod
     def _sentence_segments(spec: ModelSpec, result, segments: list[Segment], audio_seconds: float) -> list[Segment]:

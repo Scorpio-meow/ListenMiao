@@ -20,7 +20,7 @@ from .logsetup import remove_tree
 from .punctuation import PunctuationError, PunctuationService
 from .speakers import NO_SPEECH, DiarizationError, DiarizationRun, SpeakerService
 from .transcript import Segment, Speaker, Transcript
-from .voices import Voiceprint
+from .voices import Match, Voiceprint
 
 log = logging.getLogger(__name__)
 
@@ -390,6 +390,10 @@ class JobQueue:
                 raise SpeakerNotFound("這位說話者沒有聲紋（手動新增的說話者，或改版前產生的結果），無法記住聲音")
             return name, voiceprint
 
+    def recording_voiceprints(self, job_id: str) -> list[Voiceprint]:
+        with self._cond:
+            return list(self._finished(job_id).speaker_voiceprints.values())
+
     def link_voice(self, job_id: str, speaker_id: str, voice_id: str) -> Job:
         with self._cond:
             job = self._finished(job_id)
@@ -546,11 +550,21 @@ class JobQueue:
                 stats["skipped_seconds"],
             )
         try:
-            labelled, voiceprints = self._speakers.label(transcript, raw)
+            labelled, voiceprints, ranking = self._speakers.label(transcript, raw)
         except Exception as exc:
             log.exception("工作 %s 標示說話者失敗", job.id)
             return replace(transcript, speakers_error=f"標示說話者失敗：{exc}")
         for speaker in labelled.speakers or []:
+            if ranking[speaker.id]:
+                log.info(
+                    "工作 %s 的說話者 %s（說話 %.1f 秒，聲紋 %d 段）比對語者庫 %d 人：%s",
+                    job.id,
+                    speaker.id,
+                    speaker.seconds,
+                    len(voiceprints[speaker.id].weights),
+                    len(ranking[speaker.id]),
+                    _describe_ranking(ranking[speaker.id]),
+                )
             if speaker.voice_id is not None:
                 log.info(
                     "工作 %s 的說話者 %s 認出是語者庫的 %s（相似度 %.3f）",
@@ -710,6 +724,14 @@ def _without_empty_speakers(transcript: Transcript) -> Transcript:
     if transcript.speakers == []:
         return replace(transcript, speakers=None, speakers_error=NO_SPEECH)
     return transcript
+
+
+def _describe_ranking(ranked: list[Match]) -> str:
+    first = f"第一名 {ranked[0].voice_id} {ranked[0].similarity:.3f}"
+    if len(ranked) == 1:
+        return first
+    gap = ranked[0].similarity - ranked[1].similarity
+    return f"{first}，第二名 {ranked[1].voice_id} {ranked[1].similarity:.3f}，差距 {gap:.3f}"
 
 
 def _check_transcript(

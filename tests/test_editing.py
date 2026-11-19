@@ -131,6 +131,74 @@ def test_voiceprint_speakers_stay_listed_after_a_merge(tmp_path):
     assert result["voiceprint_speakers"] == ["S1"]
 
 
+def test_remembering_a_voice_that_sounds_like_someone_else_needs_confirmation(tmp_path, monkeypatch):
+    import numpy as np
+
+    from app.catalog import load_catalog
+    from app.voices import VoiceLibrary, Voiceprint
+    from tests.test_access_token import ROOT
+
+    def voice(*values):
+        return Voiceprint(np.asarray([values], dtype=np.float32), np.ones(1, dtype=np.float32))
+
+    slug = load_catalog(ROOT / "models.json").speakers.embedding.slug
+    library = VoiceLibrary(tmp_path / "voices" / f"{slug}.json")
+    library.remember("小明", voice(1, 0))
+    library.remember("美玲", voice(0, 1))
+    sounds_like_meiling = voice(0.6, 0.8)
+
+    class FakeQueue:
+        def __init__(self, *_args) -> None:
+            pass
+
+        def speaker_voice(self, job_id, speaker_id):
+            return "小明", sounds_like_meiling
+
+        def recording_voiceprints(self, job_id):
+            return [sounds_like_meiling]
+
+        def link_voice(self, job_id, speaker_id, voice_id):
+            return job_id
+
+        def describe(self, job_id):
+            return {"id": job_id}
+
+    monkeypatch.setattr(main_module, "JobQueue", FakeQueue)
+    client = TestClient(_app(tmp_path, None))
+    body = {"job_id": "abc", "speaker_id": "S1"}
+    refused = client.post("/api/voices", json=body)
+    assert refused.status_code == 409
+    assert (
+        refused.json()["detail"]
+        == "這段聲音比較像語者庫裡的「美玲」（相似度 0.800），和「小明」原有的聲音只有 0.600，還沒有記住"
+    )
+    assert [v["samples"] for v in client.get("/api/voices").json()["voices"]] == [1, 1]
+    accepted = client.post("/api/voices", json=body | {"confirm": True})
+    assert accepted.status_code == 201
+    assert accepted.json()["voice"]["samples"] == 2
+
+
+def test_recording_voiceprints_cover_every_speaker_of_the_job(tmp_path):
+    import numpy as np
+
+    from app.voices import Voiceprint
+
+    queue, job = _finished(tmp_path, speakers=True)
+    first = Voiceprint(np.ones((1, 2), dtype=np.float32), np.ones(1, dtype=np.float32))
+    second = Voiceprint(np.zeros((1, 2), dtype=np.float32), np.ones(1, dtype=np.float32))
+    job.speaker_voiceprints = {"S1": first, "S2": second}
+    assert queue.recording_voiceprints(job.id) == [first, second]
+
+
+def test_ranking_is_logged_with_the_runner_up_and_the_gap():
+    from app.jobs import _describe_ranking
+    from app.voices import Match
+
+    ranked = [Match("v1", "小明", 0.506), Match("v2", "美玲", 0.183)]
+    assert _describe_ranking(ranked) == "第一名 v1 0.506，第二名 v2 0.183，差距 0.323"
+    assert _describe_ranking(ranked[:1]) == "第一名 v1 0.506"
+
+
 def test_editing_keeps_the_result_past_its_original_expiry(tmp_path):
     queue, job = _finished(tmp_path)
     finished = time.time() - 3600 - 1

@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+## [0.7.7] - 2026-11-19
+
+### Added
+
+- 「記住聲音」寫入前先檢查：語者庫已有同名的人、而這段聲音卻比較像語者庫裡的另一個人時，先提醒而不寫入，避免把別人的聲音混進去。網頁上按「仍要記住」確認；命令列工具加 `--force`；API 帶 `"confirm": true`。比較時不算同一場錄音裡其他說話者剛記下的聲紋。
+- 日誌多記三樣，方便查速度與認人的問題：辨識完成時記下這段期間 CPU 平均忙碌幾個核心（分成本行程與本行程以外）與電源狀態；OpenVINO 每次辨識記下視窗數、encoder 與 decoder 各花幾秒、產生幾個 token；分辨說話者完成時記下每位說話者在語者庫裡最像的兩個人、相似度與差距（只記編號，沒過門檻的也記）。
+
 ## [0.7.6] - 2026-11-14
 
 ### Fixed
@@ -387,7 +394,8 @@
 - 在不能錄音的網址按「錄音」，狀態列說明原因與瀏覽器的設定方式。
 - 所有回應加上 `Cache-Control: no-cache`，更新版本後瀏覽器不會繼續使用舊的前端程式。
 
-[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.6...HEAD
+[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.7...HEAD
+[0.7.7]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.6...v0.7.7
 [0.7.6]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.5...v0.7.6
 [0.7.5]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.4...v0.7.5
 [0.7.4]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.3...v0.7.4

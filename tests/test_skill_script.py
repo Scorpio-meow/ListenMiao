@@ -441,6 +441,26 @@ def test_a_reply_that_is_not_json_points_at_the_url(local_service):
         cli.AsrClient(local_service, None).glossary()
 
 
+def test_remember_sends_confirm_only_when_forced(capsys):
+    sent = []
+
+    def reply(request):
+        sent.append(json.loads(request.data))
+        return {"voice": {"id": "v1", "name": "王小明", "samples": 2}}
+
+    client = _client({("POST", "/api/voices"): reply})
+    assert _printed(client, ["voices", "remember", "abc", "S1"], capsys) == ["v1	王小明	2 次"]
+    assert _printed(client, ["voices", "remember", "abc", "S1", "--force"], capsys) == ["v1	王小明	2 次"]
+    assert sent == [{"job_id": "abc", "speaker_id": "S1"}, {"job_id": "abc", "speaker_id": "S1", "confirm": True}]
+
+
+def test_remember_points_at_force_when_the_voice_sounds_like_someone_else():
+    routes = {("POST", "/api/voices"): lambda _: _http_error(409, "這段聲音比較像語者庫裡的「陳美玲」")}
+    args = cli.parser().parse_args(["voices", "remember", "abc", "S1"])
+    with pytest.raises(cli.ServiceError, match="比較像語者庫裡的「陳美玲」。確定是本人的話，加上 --force 再執行一次"):
+        args.run(_client(routes), args)
+
+
 def test_missing_job_raises_not_found():
     routes = {("GET", "/api/jobs/gone"): lambda _: _http_error(404, "找不到這個工作")}
     with pytest.raises(cli.NotFoundError, match="找不到這個工作"):

@@ -61,26 +61,31 @@ def test_label_numbers_speakers_by_first_appearance(tmp_path):
         Segment(5.5, 8.0, "後", None),
         Segment(4.2, 4.6, "沒重疊", None),
     )
-    labelled, voiceprints = service.label(transcript, raw)
+    labelled, voiceprints, ranking = service.label(transcript, raw)
     assert [s.speaker for s in labelled.segments] == ["S1", "S2", "S1"]
     assert [(s.id, s.name, s.seconds) for s in labelled.speakers] == [("S1", "說話者 1", 4.0), ("S2", "說話者 2", 4.0)]
     assert set(voiceprints) == {"S1", "S2"}
+    assert ranking == {"S1": [], "S2": []}
 
 
 def test_label_fills_names_from_voice_library(tmp_path):
     service = SpeakerService(_config(), tmp_path)
     service.voices.remember("小明", Voiceprint(vectors=_unit(1, 0)[None, :], weights=np.ones(1, np.float32)))
-    labelled, _ = service.label(_transcript(Segment(0.0, 1.0, "你好", None)), [_raw(_unit(1, 0), (0.0, 1.0))])
+    labelled, _, ranking = service.label(_transcript(Segment(0.0, 1.0, "你好", None)), [_raw(_unit(1, 0), (0.0, 1.0))])
     [speaker] = labelled.speakers
     assert speaker.name == "小明"
     assert speaker.similarity == pytest.approx(1.0)
+    assert [match.name for match in ranking["S1"]] == ["小明"]
 
 
 def test_label_without_speech_reports_it_instead_of_an_empty_list(tmp_path):
-    labelled, voiceprints = SpeakerService(_config(), tmp_path).label(_transcript(Segment(0, 1, "x", None)), [])
+    labelled, voiceprints, ranking = SpeakerService(_config(), tmp_path).label(
+        _transcript(Segment(0, 1, "x", None)), []
+    )
     assert labelled.speakers is None
     assert labelled.speakers_error == NO_SPEECH
     assert voiceprints == {}
+    assert ranking == {}
 
 
 def test_overlapped_spans_where_two_speakers_talk():

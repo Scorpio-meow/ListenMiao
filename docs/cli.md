@@ -33,7 +33,7 @@ uv run --no-sync --env-file .env python -m app.cli transcribe 週會.m4a 訪談.
 | `rename 工作id S1=王小明 [S2=陳美玲…]` | 替說話者改名，會解除這位說話者和語者庫的對應 |
 | `render 工作id 影片 [--output 檔案]` | 把目前的字幕燒進原始影片（長度要相差 2 秒以內），完成後下載 MP4；沒給 `--output` 時寫在影片旁邊，例如 `週會-字幕.mp4` |
 | `glossary [--set 檔案]` | 印出詞彙表（熱詞與取代規則）的 JSON；`--set` 用 UTF-8 的 JSON 檔整份取代 |
-| `voices list`、`voices remember 工作id S1`、`voices forget 語者id` | 列出語者庫、以目前的名字記住說話者的聲音、從語者庫刪除 |
+| `voices list`、`voices remember 工作id S1`、`voices forget 語者id` | 列出語者庫、以目前的名字記住說話者的聲音、從語者庫刪除。這段聲音比較像語者庫裡的另一個人時，`remember` 會停下來說明；確定是本人再加 `--force` |
 
 `transcribe` 的參數：
 

@@ -46,6 +46,10 @@ class NotFoundError(ServiceError):
     pass
 
 
+class ConflictError(ServiceError):
+    pass
+
+
 def service_url(explicit: str | None) -> str:
     if explicit:
         return explicit.rstrip("/")
@@ -122,7 +126,7 @@ class AsrClient:
             detail = json.loads(exc.read().decode("utf-8")).get("detail")
         except (ValueError, AttributeError, OSError, http.client.HTTPException):
             detail = None
-        error = NotFoundError if exc.code == 404 else ServiceError
+        error = {404: NotFoundError, 409: ConflictError}.get(exc.code, ServiceError)
         return error(detail if isinstance(detail, str) else f"HTTP {exc.code}")
 
     def _read(self, method: str, path: str, body=None, headers: dict | None = None, timeout: float | None = None):
@@ -187,8 +191,11 @@ class AsrClient:
     def voices(self) -> list[dict]:
         return self._json("GET", "/api/voices")["voices"]
 
-    def remember_voice(self, job_id: str, speaker_id: str) -> dict:
-        return self._json("POST", "/api/voices", {"job_id": job_id, "speaker_id": speaker_id})["voice"]
+    def remember_voice(self, job_id: str, speaker_id: str, confirm: bool) -> dict:
+        payload = {"job_id": job_id, "speaker_id": speaker_id}
+        if confirm:
+            payload["confirm"] = True
+        return self._json("POST", "/api/voices", payload)["voice"]
 
     def forget_voice(self, voice_id: str) -> list[dict]:
         return self._json("DELETE", f"/api/voices/{voice_id}")["voices"]
@@ -454,7 +461,10 @@ def _voices(client: AsrClient, _: argparse.Namespace) -> int:
 
 
 def _remember(client: AsrClient, args: argparse.Namespace) -> int:
-    voice = client.remember_voice(args.job_id, args.speaker_id)
+    try:
+        voice = client.remember_voice(args.job_id, args.speaker_id, args.force)
+    except ConflictError as exc:
+        raise ServiceError(f"{exc}。確定是本人的話，加上 --force 再執行一次") from exc
     print(f"{voice['id']}\t{voice['name']}\t{voice['samples']} 次")
     return 0
 
@@ -519,6 +529,7 @@ def parser() -> argparse.ArgumentParser:
     remember = voice_commands.add_parser("remember", help="以目前的名字記住某個工作裡說話者的聲音")
     remember.add_argument("job_id")
     remember.add_argument("speaker_id", help="說話者編號，例如 S1")
+    remember.add_argument("--force", action="store_true", help="服務提醒這段聲音比較像語者庫裡的別人時，仍然記住")
     remember.set_defaults(run=_remember)
     forget = voice_commands.add_parser("forget", help="從語者庫刪除一個人")
     forget.add_argument("voice_id")

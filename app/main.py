@@ -249,6 +249,7 @@ class HotwordsQuery(BaseModel):
 class RememberVoice(BaseModel):
     job_id: str
     speaker_id: str
+    confirm: bool = False
 
 
 class HardwareChoice(BaseModel):
@@ -780,6 +781,20 @@ def create_app(settings: Settings) -> FastAPI:
             name, voiceprint = queue.speaker_voice(body.job_id, body.speaker_id)
             if name == default_speaker_name(body.speaker_id):
                 raise HTTPException(status_code=422, detail="請先替這位說話者取名，再記住聲音")
+            closer = (
+                None
+                if body.confirm
+                else service.voices.closer_voice(name, voiceprint, queue.recording_voiceprints(body.job_id))
+            )
+            if closer is not None:
+                other, own = closer
+                raise HTTPException(
+                    status_code=409,
+                    detail=(
+                        f"這段聲音比較像語者庫裡的「{other.name}」（相似度 {other.similarity:.3f}），"
+                        f"和「{name}」原有的聲音只有 {own:.3f}，還沒有記住"
+                    ),
+                )
             voice = service.voices.remember(name, voiceprint)
             job = queue.link_voice(body.job_id, body.speaker_id, voice["id"])
         except SpeakerNotFound as exc:
