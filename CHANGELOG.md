@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [0.7.8] - 2026-11-20
+
+### Changed
+
+- 相依套件 FastAPI 升到 0.163.1，開發用的 ruff 升到 0.17.5。
+
 ## [0.7.7] - 2026-11-19
 
 ### Added
@@ -394,7 +400,8 @@
 - 在不能錄音的網址按「錄音」，狀態列說明原因與瀏覽器的設定方式。
 - 所有回應加上 `Cache-Control: no-cache`，更新版本後瀏覽器不會繼續使用舊的前端程式。
 
-[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.7...HEAD
+[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.8...HEAD
+[0.7.8]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.7...v0.7.8
 [0.7.7]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.6...v0.7.7
 [0.7.6]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.5...v0.7.6
 [0.7.5]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.4...v0.7.5
