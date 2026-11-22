@@ -1,11 +1,13 @@
 import json
+import unicodedata
+from dataclasses import replace
 
 import pytest
 
-from app.exports import ExportContext, render
+from app.exports import ExportContext, render, text_columns, wrap_line
 from app.transcript import Segment, Speaker, Transcript
 
-CONTEXT = ExportContext(title="會議.m4a", font="Microsoft JhengHei")
+CONTEXT = ExportContext(title="會議.m4a", font="Microsoft JhengHei", video_size=None)
 
 
 def _with_speakers() -> Transcript:
@@ -141,3 +143,79 @@ def test_docx_is_a_word_document():
         assert "[Content_Types].xml" in archive.namelist()
     assert "會議.m4a" in document
     assert "小明：" in document
+
+
+LONG_LINE = "這支影片的每一句字幕都很長而且中間完全沒有任何標點符號"
+
+
+def _ass_layout(text: str) -> tuple[int, int, int, int, list[list[str]]]:
+    lines = text.splitlines()
+    resolution = dict(line.split(": ", 1) for line in lines if line.startswith(("PlayResX: ", "PlayResY: ")))
+    style = next(line for line in lines if line.startswith("Style: ")).split(",")
+    dialogues = [line.split(",", 9)[9].split("\\N") for line in lines if line.startswith("Dialogue: ")]
+    margins = int(style[19]) + int(style[20])
+    return int(resolution["PlayResX"]), int(resolution["PlayResY"]), int(style[2]), margins, dialogues
+
+
+def _widest_possible(line: str, font_size: int) -> float:
+    return sum(font_size if unicodedata.east_asian_width(ch) in "WFA" else font_size / 2 for ch in line)
+
+
+@pytest.mark.parametrize(
+    "video_size", [(720, 1280), (1080, 1920), (1080, 1350), (1080, 1080), (1440, 1080), (1920, 1080), (3840, 2160)]
+)
+def test_ass_lines_stay_inside_the_frame_for_every_aspect(video_size):
+    transcript = _without_speakers([Segment(0.0, 4.0, LONG_LINE * 2, None)])
+    width, height, font_size, margins, dialogues = _ass_layout(
+        render(transcript, "ass", ExportContext("影片.mp4", "Font", video_size))
+    )
+    _, reference_height, reference_font, _, _ = _ass_layout(render(transcript, "ass", CONTEXT))
+    assert width / height == pytest.approx(video_size[0] / video_size[1], rel=0.005)
+    assert font_size / min(width, height) == reference_font / reference_height
+    assert all(_widest_possible(line, font_size) <= width - margins for line in dialogues[0])
+    assert "".join(dialogues[0]) == LONG_LINE * 2
+
+
+def test_portrait_video_gets_a_portrait_canvas_and_two_even_lines():
+    transcript = _without_speakers([Segment(0.0, 4.0, LONG_LINE, None)])
+    text = render(transcript, "ass", ExportContext("影片.mp4", "Font", (720, 1280)))
+    assert "PlayResX: 1080\nPlayResY: 1920\n" in text
+    assert text.endswith(",,這支影片的每一句字幕都很長而\\N且中間完全沒有任何標點符號\n")
+
+
+@pytest.mark.parametrize("video_size", [(1920, 1080), None])
+def test_landscape_video_and_audio_keep_the_1080p_canvas_and_unwrapped_lines(video_size):
+    transcript = _without_speakers([Segment(0.0, 4.0, LONG_LINE, None)])
+    text = render(transcript, "ass", ExportContext("影片.mp4", "Font", video_size))
+    assert "PlayResX: 1920\nPlayResY: 1080\n" in text
+    assert text.endswith(f",,{LONG_LINE}\n")
+
+
+def test_speaker_name_counts_toward_the_line_width():
+    transcript = _with_speakers()
+    long = replace(transcript, segments=[replace(transcript.segments[0], text=LONG_LINE)])
+    _, _, _, _, dialogues = _ass_layout(render(long, "ass", ExportContext("影片.mp4", "Font", (720, 1280))))
+    assert dialogues[0] == ["小明：這支影片的每一", "句字幕都很長而且中間", "完全沒有任何標點符號"]
+
+
+def test_line_breaks_typed_by_the_user_are_kept():
+    transcript = _without_speakers([Segment(0.0, 1.0, "第一行\n第二行", None)])
+    assert render(transcript, "ass", CONTEXT).endswith(",,第一行\\N第二行\n")
+
+
+def test_wrapping_keeps_latin_words_whole_and_punctuation_off_line_starts():
+    text = "最近 KOIZUMI 他們家的無線離子夾出第二代了，用起來超滑順不會卡頭髮「真的」很好用"
+    for limit in range(14, 40):
+        lines = wrap_line(text, limit)
+        assert all(text_columns(line) <= limit for line in lines)
+        assert any("KOIZUMI" in line for line in lines)
+        assert not any(line[0] in "，」" or line[-1] == "「" for line in lines)
+        assert "".join(lines).replace(" ", "") == text.replace(" ", "")
+
+
+def test_wrapping_breaks_a_word_longer_than_the_line():
+    assert wrap_line("a" * 25, 10) == ["a" * 9, "a" * 9, "a" * 7]
+
+
+def test_wrapping_leaves_blank_text_alone():
+    assert wrap_line(" " * 40, 10) == [" " * 40]

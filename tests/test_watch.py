@@ -11,6 +11,7 @@ from app.watch import FolderWatcher, error_path, output_path
 class FakeJob:
     id: str
     status: JobStatus = JobStatus.QUEUED
+    video_size: tuple[int, int] | None = None
     transcript: Transcript | None = None
     error: str | None = None
 

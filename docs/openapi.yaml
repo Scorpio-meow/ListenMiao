@@ -3,7 +3,7 @@ $self: https://raw.githubusercontent.com/Scorpio-meow/ListenMiao/main/docs/opena
 info:
   title: ListenMiao
   summary: 本機語音辨識服務的 HTTP API：上傳錄音、取得逐字稿、編輯字幕、匯出檔案與燒錄字幕。
-  version: 0.7.8
+  version: 0.7.9
   license:
     name: MIT
     identifier: MIT
@@ -1123,7 +1123,7 @@ paths:
         | --- | --- |
         | `txt` | 純文字；有說話者時同一人連續說的話併成一段，前面加「名字：」 |
         | `srt`、`vtt` | 字幕；說話者以「名字：」或 VTT 的 `<v 名字>` 標示 |
-        | `ass` | 字幕，1920×1080，字型取自 `ASR_SUBTITLE_FONT`；說話者名字放在 `Name` 欄位與文字前 |
+        | `ass` | 字幕，字型取自 `ASR_SUBTITLE_FONT`；說話者名字放在 `Name` 欄位與文字前。畫布短邊 1080、比例跟送出辨識的影片相同（純音訊是 1920×1080），超出畫面寬度的句子事先斷成幾行 |
         | `md` | 逐字稿：檔名、長度、說話者清單，內文是 `[時:分:秒] **說話者**：…`，同一人連續的話併成一段、每段最長約 2 分鐘 |
         | `docx` | Word 逐字稿，內容同 `md` |
         | `json` | 每段的起訖秒數、文字、說話者 |
@@ -1244,7 +1244,7 @@ paths:
       tags: [renders]
       summary: 把字幕燒進原始影片
       description: |
-        上傳這份字幕的原始影片，服務把目前已儲存的字幕（樣式同 ASS 匯出）燒進畫面，輸出 H.264／AAC 的 MP4。影片長度必須和辨識時的音訊相差 2 秒以內。
+        上傳這份字幕的原始影片，服務把目前已儲存的字幕（樣式同 ASS 匯出，畫布與斷行依這支影片的尺寸）燒進畫面，輸出 H.264／AAC 的 MP4。影片長度必須和辨識時的音訊相差 2 秒以內；只有封面圖的音訊檔不算影片。
 
         一次燒一支，其他排隊；進度用 `GET /api/renders/{render_id}` 查詢。
       parameters:

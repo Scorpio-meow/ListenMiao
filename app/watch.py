@@ -96,7 +96,7 @@ class FolderWatcher:
 
     def _finish(self, source: Path, job: Job) -> None:
         if job.status is JobStatus.SUCCEEDED and job.transcript is not None:
-            context = ExportContext(title=source.name, font=self._font)
+            context = ExportContext(title=source.name, font=self._font, video_size=job.video_size)
             for fmt in self._settings.formats:
                 target = output_path(source, fmt)
                 if not target.exists():

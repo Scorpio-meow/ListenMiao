@@ -42,10 +42,38 @@ class AudioDecodeError(ValueError):
     pass
 
 
+_STREAM_START = re.compile(r"\n(?=\s*Stream #)")
+_VIDEO_STREAM = re.compile(r"\s*Stream #\S+.*: Video:")
+_FRAME_SIZE = re.compile(r", ([1-9]\d*)x([1-9]\d*)(?=[ ,]|$)")
+_ROTATION = re.compile(r"display ?matrix: rotation of (-?\d+(?:\.\d+)?) degrees", re.IGNORECASE)
+_ATTACHED_PICTURE = "(attached pic)"
+_QUARTER_TURN = 90
+
+
 @dataclass(frozen=True)
 class MediaInfo:
     seconds: float | None
-    has_video: bool
+    video_size: tuple[int, int] | None
+
+    @property
+    def has_video(self) -> bool:
+        return self.video_size is not None
+
+
+def video_size(probe_output: str) -> tuple[int, int] | None:
+    for block in _STREAM_START.split(probe_output):
+        head = block.split("\n", 1)[0]
+        if not _VIDEO_STREAM.match(head) or _ATTACHED_PICTURE in head:
+            continue
+        size = _FRAME_SIZE.search(head)
+        if size is None:
+            return None
+        width, height = int(size[1]), int(size[2])
+        rotation = _ROTATION.search(block)
+        if rotation and round(float(rotation[1])) % (2 * _QUARTER_TURN) == _QUARTER_TURN:
+            width, height = height, width
+        return width, height
+    return None
 
 
 def probe_media(path: Path) -> MediaInfo:
@@ -64,7 +92,7 @@ def probe_media(path: Path) -> MediaInfo:
     output = proc.stderr.decode("utf-8", errors="replace")
     found = re.search(r"Duration: (\d+):(\d{2}):(\d{2}(?:\.\d+)?)", output)
     seconds = int(found[1]) * 3600 + int(found[2]) * 60 + float(found[3]) if found else None
-    return MediaInfo(seconds=seconds, has_video=re.search(r"Stream #\S+.*: Video:", output) is not None)
+    return MediaInfo(seconds=seconds, video_size=video_size(output))
 
 
 def decode_to_file(path: Path, max_seconds: int, target: Path) -> tuple[float, list[str]]:

@@ -1,3 +1,4 @@
+import json
 import threading
 import time
 from pathlib import Path
@@ -47,7 +48,7 @@ def _queue(tmp_path: Path, inference: FakeInference, ttl_seconds: int = 3600) ->
 def _submit(queue: JobQueue, tmp_path: Path):
     decoded = tmp_path / "decoded.f32"
     decoded.write_bytes(bytes(64))
-    return queue.submit("org/model", "a.wav", decoded, 1.0, "off", False, "")
+    return queue.submit("org/model", "a.wav", decoded, 1.0, None, "off", False, "")
 
 
 def _wait(condition) -> None:
@@ -66,6 +67,21 @@ def test_results_survive_restart_until_they_expire(tmp_path):
     assert _queue(tmp_path, inference).get(job.id).transcript.text == "你好"
     assert _queue(tmp_path, inference, ttl_seconds=0).get(job.id) is None
     assert not saved.exists()
+
+
+def test_video_size_survives_restart_and_older_results_have_none(tmp_path):
+    inference = FakeInference(finish=True)
+    decoded = tmp_path / "decoded.f32"
+    decoded.write_bytes(bytes(64))
+    job = _queue(tmp_path, inference).submit("org/model", "a.mp4", decoded, 1.0, (720, 1280), "off", False, "")
+    saved = tmp_path / "results" / f"{job.id}.json"
+    _wait(saved.exists)
+    assert _queue(tmp_path, inference).get(job.id).video_size == (720, 1280)
+
+    record = json.loads(saved.read_text(encoding="utf-8"))
+    del record["video_size"]
+    saved.write_text(json.dumps(record), encoding="utf-8")
+    assert _queue(tmp_path, inference).get(job.id).video_size is None
 
 
 def test_locked_result_file_does_not_stop_the_queue(tmp_path, monkeypatch):
@@ -138,7 +154,7 @@ def test_cancel_while_the_speaker_model_is_not_ready_skips_transcription(tmp_pat
     queue.start()
     decoded = tmp_path / "decoded.f32"
     decoded.write_bytes(bytes(64))
-    job = queue.submit("org/model", "a.wav", decoded, 1.0, "auto", False, "")
+    job = queue.submit("org/model", "a.wav", decoded, 1.0, None, "auto", False, "")
     assert speakers.waiting.wait(5)
 
     assert queue.cancel(job.id)

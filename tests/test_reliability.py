@@ -57,7 +57,7 @@ def _queue(tmp_path: Path, inference) -> JobQueue:
 def _submit(queue: JobQueue, tmp_path: Path):
     decoded = tmp_path / "decoded.f32"
     decoded.write_bytes(bytes(64))
-    return queue.submit("org/model", "a.wav", decoded, 1.0, "off", False, "")
+    return queue.submit("org/model", "a.wav", decoded, 1.0, None, "off", False, "")
 
 
 def test_localhost_binds_every_address_it_resolves_to():
@@ -153,7 +153,9 @@ def test_watch_write_error_survives_until_the_next_scan(tmp_path, monkeypatch):
     jobs = {}
 
     def enqueue(source: Path):
-        job = SimpleNamespace(id="job0", status=JobStatus.QUEUED, transcript=None, error=None, done=False)
+        job = SimpleNamespace(
+            id="job0", status=JobStatus.QUEUED, video_size=None, transcript=None, error=None, done=False
+        )
         jobs[job.id] = job
         return job
 

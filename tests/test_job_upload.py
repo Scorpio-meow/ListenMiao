@@ -2,11 +2,13 @@ import errno
 import io
 import logging
 import os
+import subprocess
 import sys
 import wave
 from collections.abc import Iterator
 from pathlib import Path
 
+import imageio_ffmpeg
 import numpy as np
 import pytest
 from fastapi.testclient import TestClient
@@ -188,3 +190,48 @@ def test_rejected_upload_leaves_no_scratch_files(service, jobs_dir):
 
     assert response.status_code == 422
     assert list(jobs_dir.iterdir()) == []
+
+
+@pytest.mark.parametrize(("upload", "expected"), [("video", (72, 128)), ("audio", None)])
+def test_upload_records_the_video_size_for_subtitle_exports(service, tmp_path, monkeypatch, upload, expected):
+    recorded = []
+    submit = JobQueue.submit
+
+    def recording(self, *args):
+        job = submit(self, *args)
+        recorded.append(job.video_size)
+        return job
+
+    monkeypatch.setattr(JobQueue, "submit", recording)
+    if upload == "video":
+        source = tmp_path / "portrait.mp4"
+        subprocess.run(
+            [
+                imageio_ffmpeg.get_ffmpeg_exe(),
+                "-nostdin",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-f",
+                "lavfi",
+                "-i",
+                "color=black:size=72x128:rate=10:duration=1",
+                "-f",
+                "lavfi",
+                "-i",
+                "sine=duration=1",
+                "-c:v",
+                "libx264",
+                "-c:a",
+                "aac",
+                "-shortest",
+                str(source),
+            ],
+            check=True,
+        )
+        data = source.read_bytes()
+    else:
+        data = _tone()
+
+    assert _post(service, data).status_code == 202
+    assert recorded == [expected]

@@ -4,6 +4,7 @@ import io
 import itertools
 import json
 import re
+import unicodedata
 import zipfile
 from dataclasses import asdict, dataclass
 from xml.sax.saxutils import escape
@@ -27,6 +28,11 @@ _ASS_OUTLINE = 3
 _ASS_SHADOW = 1
 _ASS_MARGIN_SIDE = 80
 _ASS_MARGIN_BOTTOM = 60
+_ASS_WIDE_WIDTHS = frozenset("WFA")
+_ASS_COLUMNS_PER_EM = 2
+_ASS_LINE_BREAK = "\\N"
+_NO_LINE_START = frozenset(",.;:!?)]}%、。，．；：！？）］｝」』】〕〉》…～")
+_NO_LINE_END = frozenset("([{（［｛「『【〔〈《")
 _PARAGRAPH_SECONDS = 120
 _XML_INVALID = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 
@@ -35,6 +41,7 @@ _XML_INVALID = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 class ExportContext:
     title: str
     font: str
+    video_size: tuple[int, int] | None
 
 
 def _timestamp(seconds: float, separator: str) -> str:
@@ -62,7 +69,7 @@ def _vtt_escape(text: str) -> str:
 
 
 def _ass_escape(text: str) -> str:
-    return text.replace("\\", "＼").replace("{", "｛").replace("}", "｝").replace("\n", "\\N")
+    return text.replace("\\", "＼").replace("{", "｛").replace("}", "｝")
 
 
 def turns(transcript: Transcript) -> list[tuple[str | None, list[Segment]]]:
@@ -86,14 +93,85 @@ def paragraphs(transcript: Transcript) -> list[tuple[float, str | None, str]]:
     return result
 
 
+def ass_canvas(video_size: tuple[int, int] | None) -> tuple[int, int]:
+    if video_size is None:
+        return _ASS_PLAY_WIDTH, _ASS_PLAY_HEIGHT
+    width, height = video_size
+    scale = min(_ASS_PLAY_WIDTH, _ASS_PLAY_HEIGHT) / min(width, height)
+    return round(width * scale), round(height * scale)
+
+
+def _ass_line_columns(canvas_width: int) -> int:
+    return (canvas_width - 2 * _ASS_MARGIN_SIDE) * _ASS_COLUMNS_PER_EM // _ASS_FONT_SIZE
+
+
+def text_columns(text: str) -> int:
+    return sum(_ASS_COLUMNS_PER_EM if unicodedata.east_asian_width(ch) in _ASS_WIDE_WIDTHS else 1 for ch in text)
+
+
+def _atoms(text: str, limit: int) -> list[tuple[bool, str]]:
+    atoms: list[tuple[bool, str]] = []
+    spaced = False
+    for ch in text:
+        if ch.isspace():
+            spaced = True
+            continue
+        if atoms and not spaced:
+            previous = atoms[-1][1]
+            latin = text_columns(ch) == 1 and text_columns(previous[-1]) == 1
+            if latin or ch in _NO_LINE_START or previous[-1] in _NO_LINE_END:
+                atoms[-1] = (atoms[-1][0], previous + ch)
+                continue
+        atoms.append((spaced, ch))
+        spaced = False
+    result: list[tuple[bool, str]] = []
+    for spaced, atom in atoms:
+        if text_columns(atom) > limit:
+            result.extend((spaced and i == 0, ch) for i, ch in enumerate(atom))
+        else:
+            result.append((spaced, atom))
+    return result
+
+
+def _fill(atoms: list[tuple[bool, str]], limit: int) -> list[str]:
+    lines: list[str] = []
+    line, width = "", 0
+    for spaced, atom in atoms:
+        piece = f" {atom}" if spaced and line else atom
+        size = text_columns(piece)
+        if line and width + size > limit:
+            lines.append(line)
+            line, width = atom, text_columns(atom)
+        else:
+            line, width = line + piece, width + size
+    lines.append(line)
+    return lines
+
+
+def wrap_line(text: str, limit: int) -> list[str]:
+    if text_columns(text) <= limit or text.isspace():
+        return [text]
+    atoms = _atoms(text, limit)
+    count = len(_fill(atoms, limit))
+    total = sum(text_columns(atom) for _, atom in atoms)
+    widest = max(text_columns(atom) for _, atom in atoms)
+    for target in range(max(-(-total // count), widest), limit):
+        lines = _fill(atoms, target)
+        if len(lines) == count:
+            return lines
+    return _fill(atoms, limit)
+
+
 def _ass(transcript: Transcript, context: ExportContext) -> str:
     font = context.font.replace(",", " ")
+    width, height = ass_canvas(context.video_size)
+    limit = _ass_line_columns(width)
     head = [
         "[Script Info]",
         f"Title: {context.title.replace(chr(10), ' ')}",
         "ScriptType: v4.00+",
-        f"PlayResX: {_ASS_PLAY_WIDTH}",
-        f"PlayResY: {_ASS_PLAY_HEIGHT}",
+        f"PlayResX: {width}",
+        f"PlayResY: {height}",
         "WrapStyle: 0",
         "ScaledBorderAndShadow: yes",
         "",
@@ -113,8 +191,10 @@ def _ass(transcript: Transcript, context: ExportContext) -> str:
         who = name(seg.speaker) if seg.speaker else None
         text = f"{who}：{seg.text}" if who else seg.text
         speaker = (who or "").replace(",", "，")
+        lines = [line for part in text.split("\n") for line in wrap_line(_ass_escape(part), limit)]
         events.append(
-            f"Dialogue: 0,{_ass_time(seg.start)},{_ass_time(seg.end)},Default,{speaker},0,0,0,,{_ass_escape(text)}"
+            f"Dialogue: 0,{_ass_time(seg.start)},{_ass_time(seg.end)},Default,{speaker},0,0,0,,"
+            f"{_ASS_LINE_BREAK.join(lines)}"
         )
     return "\n".join(head + events) + "\n"
 

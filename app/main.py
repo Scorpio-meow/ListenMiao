@@ -409,7 +409,8 @@ def create_app(settings: Settings) -> FastAPI:
         try:
             seconds, problems = decode_to_file(source, settings.max_audio_seconds, decoded)
             peaks = waveform(decoded, _WAVEFORM_BUCKETS) if with_peaks else None
-            job = queue.submit(model, filename, decoded, seconds, mode, punctuation, hotwords)
+            video_size = probe_media(source).video_size
+            job = queue.submit(model, filename, decoded, seconds, video_size, mode, punctuation, hotwords)
         finally:
             _discard(decoded)
         if problems:
@@ -816,7 +817,7 @@ def create_app(settings: Settings) -> FastAPI:
             raise HTTPException(status_code=404, detail=f"不支援的格式：{fmt}")
         _finished_or_409(job)
         download_name = f"{Path(job.filename).stem or 'transcript'}.{fmt}"
-        context = ExportContext(title=job.filename, font=settings.subtitle_font)
+        context = ExportContext(title=job.filename, font=settings.subtitle_font, video_size=job.video_size)
         return Response(
             content=render(job.transcript, fmt, context),
             media_type=FORMATS[fmt],
@@ -841,7 +842,8 @@ def create_app(settings: Settings) -> FastAPI:
                     status_code=422,
                     detail=f"影片長度 {info.seconds:.1f} 秒和這份字幕的 {job.audio_seconds:.1f} 秒不符，請選擇原始影片",
                 )
-            subtitles = render(job.transcript, "ass", ExportContext(title=job.filename, font=settings.subtitle_font))
+            context = ExportContext(title=job.filename, font=settings.subtitle_font, video_size=info.video_size)
+            subtitles = render(job.transcript, "ass", context)
             stem = Path(job.filename).stem or "video"
             created = renders.submit(render_id, directory, job.id, subtitles, f"{stem}-字幕.mp4", info.seconds)
         except RenderQueueFull as exc:

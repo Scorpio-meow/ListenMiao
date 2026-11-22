@@ -306,7 +306,7 @@ curl -o meeting.srt http://127.0.0.1:7860/api/jobs/<id>/export/srt
 | --- | --- |
 | `txt` | 純文字，同一人連續說的話併成一段 |
 | `srt`、`vtt` | 字幕；說話者以「名字：」或 VTT 的 `<v 名字>` 標示 |
-| `ass` | 字幕，字型取自 `ASR_SUBTITLE_FONT`，說話者名字放在 `Name` 欄位與文字前 |
+| `ass` | 字幕，字型取自 `ASR_SUBTITLE_FONT`，說話者名字放在 `Name` 欄位與文字前；畫布短邊 1080、比例跟送出辨識的影片相同（純音訊用 1920×1080），超出畫面寬度的句子事先斷成幾行（見[燒錄字幕](how-it-works.md#燒錄字幕)） |
 | `md` | 逐字稿：檔名、長度、說話者清單，內文是 `[時:分:秒] **說話者**：…`，同一人連續的話併成一段、每段最長約 2 分鐘 |
 | `docx` | Word 逐字稿，內容同 `md` |
 | `json` | 每段的起訖秒數、文字、說話者 |
@@ -320,7 +320,7 @@ curl -o meeting.srt http://127.0.0.1:7860/api/jobs/<id>/export/srt
 
 ### POST /api/jobs/{id}/renders
 
-把目前已儲存的字幕燒進影片畫面。輸出是 H.264／AAC 的 MP4，字幕樣式同 ASS 匯出；一次燒一支，其他排隊。
+把目前已儲存的字幕燒進影片畫面。輸出是 H.264／AAC 的 MP4，字幕樣式同 ASS 匯出，畫布與斷行依這次上傳的影片尺寸計算；一次燒一支，其他排隊。
 
 **請求：** `multipart/form-data`，欄位 `file` 是這份字幕的原始影片，長度必須和辨識時的音訊相差 2 秒以內。
 
@@ -330,7 +330,7 @@ curl -o meeting.srt http://127.0.0.1:7860/api/jobs/<id>/export/srt
 - 409：工作還沒有辨識結果
 - 411：請求缺少 `Content-Length`
 - 413：檔案超過 `ASR_MAX_UPLOAD_MB`
-- 422：檔案沒有影像、讀不到長度，或長度不符
+- 422：檔案沒有影像（只有封面圖的音訊檔也算）、讀不到長度，或長度不符
 - 503：排隊的燒錄工作已達 `ASR_MAX_QUEUE`
 
 ### GET /api/renders/{id}

@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+## [0.7.9] - 2026-11-23
+
+### Fixed
+
+- 直式影片燒錄字幕時，長句左右兩邊超出畫面被切掉。原因有兩個：ASS 的畫布固定是 1920×1080，燒到 720×1280 這類直式影片時字級按高度放大、換行寬度卻還是照 1920 算；而且內建 ffmpeg 的 libass 不會在沒有空白的中文之間換行，長句只能整行超出畫面。現在畫布跟著影片比例（短邊 1080，例如直式影片是 1080×1920）。超出畫面寬度的句子先依可用寬度斷成幾行，各行長度接近，英文單字與數字不拆開，句尾標點不放到行首。
+
+  橫式 16:9 影片的畫布與字級不變。但寬度估得比較寬鬆，好讓換了字型也一定放得下：一行最多 27 個全形字，直式 9:16 最多 14 個。所以 28 到約 37 字的句子（含說話者名字）以前會擠在一行，現在會分成兩行。
+- 手機影片以橫式儲存、靠旋轉資訊直立播放時，依轉正後的尺寸排字幕。
+
+### Changed
+
+- ASS 匯出依送出辨識的那支影片調整畫布比例與斷行；純音訊、或更新前留下的辨識結果，維持 1920×1080。
+- 燒錄字幕時，只有封面圖的音訊檔（例如帶專輯封面的 MP3）視為沒有影像，回 422。原本會排進燒錄，再以看不懂的 ffmpeg 錯誤失敗。
+
 ## [0.7.8] - 2026-11-20
 
 ### Changed
@@ -400,7 +414,8 @@
 - 在不能錄音的網址按「錄音」，狀態列說明原因與瀏覽器的設定方式。
 - 所有回應加上 `Cache-Control: no-cache`，更新版本後瀏覽器不會繼續使用舊的前端程式。
 
-[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.8...HEAD
+[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.9...HEAD
+[0.7.9]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.8...v0.7.9
 [0.7.8]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.7...v0.7.8
 [0.7.7]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.6...v0.7.7
 [0.7.6]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.5...v0.7.6

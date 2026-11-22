@@ -68,6 +68,7 @@ class Job:
     filename: str
     audio_path: Path
     audio_seconds: float
+    video_size: tuple[int, int] | None
     speakers_mode: str
     punctuation: bool
     hotwords: str
@@ -142,6 +143,7 @@ class JobQueue:
             "model_id": job.model_id,
             "filename": job.filename,
             "audio_seconds": job.audio_seconds,
+            "video_size": job.video_size,
             "speakers_mode": job.speakers_mode,
             "punctuation": job.punctuation,
             "hotwords": job.hotwords,
@@ -175,6 +177,7 @@ class JobQueue:
                     filename=record["filename"],
                     audio_path=self._work_dir / f"{record['id']}.f32",
                     audio_seconds=record["audio_seconds"],
+                    video_size=_video_size(record.get("video_size")),
                     speakers_mode=record.get("speakers_mode", SPEAKERS_OFF),
                     punctuation=record.get("punctuation", False),
                     hotwords=record.get("hotwords", ""),
@@ -209,6 +212,7 @@ class JobQueue:
         filename: str,
         decoded: Path,
         audio_seconds: float,
+        video_size: tuple[int, int] | None,
         speakers_mode: str,
         punctuation: bool,
         hotwords: str,
@@ -227,6 +231,7 @@ class JobQueue:
                 filename=filename,
                 audio_path=audio_path,
                 audio_seconds=audio_seconds,
+                video_size=video_size,
                 speakers_mode=speakers_mode,
                 punctuation=punctuation,
                 hotwords=hotwords,
@@ -724,6 +729,15 @@ def _without_empty_speakers(transcript: Transcript) -> Transcript:
     if transcript.speakers == []:
         return replace(transcript, speakers=None, speakers_error=NO_SPEECH)
     return transcript
+
+
+def _video_size(saved: list[int] | None) -> tuple[int, int] | None:
+    if saved is None:
+        return None
+    width, height = saved
+    if not isinstance(width, int) or not isinstance(height, int) or width < 1 or height < 1:
+        raise ValueError(f"影片尺寸格式不正確：{saved!r}")
+    return width, height
 
 
 def _describe_ranking(ranked: list[Match]) -> str:
