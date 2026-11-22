@@ -29,7 +29,7 @@
 
 用 MediaTek Research 的 Breeze ASR 25／26 模型辨識臺灣華語、中英夾雜與臺灣台語，自動加標點、分辨說話者，在網頁上校對後匯出字幕檔或 Word 逐字稿。可以完全在本機執行，錄音不必上傳到任何雲端服務。
 
-https://github.com/user-attachments/assets/c193e0a1-94d4-4cf1-b923-9589382603f6
+https://github.com/user-attachments/assets/21ef72a4-efcb-4d96-98b9-fec20fdd01df
 
 > [!NOTE]
 > 這是使用 MediaTek Research 釋出的 [Breeze ASR](https://huggingface.co/MediaTek-Research/Breeze-ASR-25) 模型的非官方專案，與 MediaTek 無關。
