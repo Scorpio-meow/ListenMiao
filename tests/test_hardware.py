@@ -209,6 +209,19 @@ def test_power_source_survives_a_host_without_battery_files(monkeypatch):
     assert hardware.power_source() == "電源：讀不到"
 
 
+@pytest.mark.parametrize(
+    ("battery", "expected"),
+    [
+        (None, None),
+        (SimpleNamespace(power_plugged=True, percent=100), False),
+        (SimpleNamespace(power_plugged=False, percent=41.6), True),
+    ],
+)
+def test_on_battery_is_unknown_without_a_battery(monkeypatch, battery, expected):
+    monkeypatch.setattr(hardware.psutil, "sensors_battery", lambda: battery)
+    assert hardware.on_battery() is expected
+
+
 def test_cpu_meter_splits_this_process_from_everything_else(monkeypatch):
     monkeypatch.setattr(hardware.psutil, "cpu_count", lambda: 8)
     monkeypatch.setattr(hardware.psutil, "cpu_percent", lambda: 50.0)

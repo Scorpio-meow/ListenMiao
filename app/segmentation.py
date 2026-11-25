@@ -33,6 +33,19 @@ class _Unit:
     space_before: bool
 
 
+def chunk_segments(chunks: list[tuple[float, float | None, str]], audio_seconds: float) -> list[Segment]:
+    segments = []
+    for (start, end, text), following in zip(chunks, [*chunks[1:], None], strict=True):
+        text = text.strip()
+        if not text:
+            continue
+        start = min(start, audio_seconds)
+        if end is None or end <= start:
+            end = following[0] if following is not None and following[0] >= start else audio_seconds
+        segments.append(Segment(start=round(start, 2), end=round(min(end, audio_seconds), 2), text=text, speaker=None))
+    return segments
+
+
 def split_sentences(
     words: list[Word],
     reference: str,

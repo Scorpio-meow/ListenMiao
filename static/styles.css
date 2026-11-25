@@ -1106,6 +1106,11 @@ th.c-num {
   max-width: none;
 }
 
+.cue-speaker-add {
+  grid-column: 2 / 4;
+  justify-self: start;
+}
+
 .cue-actions {
   grid-column: 1 / -1;
   display: flex;
@@ -1368,6 +1373,16 @@ body.is-dragover::after {
 .table-wrap {
   overflow-x: auto;
   border: 1px solid var(--line-soft);
+}
+
+.runs-wrap {
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.runs-wrap th {
+  position: sticky;
+  top: 0;
 }
 
 .bench {

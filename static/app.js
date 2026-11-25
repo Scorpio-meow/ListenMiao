@@ -56,6 +56,7 @@ const TOUCH_SLOP_PX = 8;
 const RULER_STEPS = [1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600];
 const state = {
   config: null,
+  performance: null,
   audio: null,
   batch: null,
   previewUrl: null,
@@ -171,6 +172,14 @@ function bytes(n) {
   if (n < 1024 * 1024) return `${Math.max(1, Math.round(n / 1024))} KB`;
   if (n < 1024 ** 3) return `${(n / 1024 ** 2).toFixed(1)} MB`;
   return `${(n / 1024 ** 3).toFixed(1)} GB`;
+}
+function shortDateTime(unixSeconds) {
+  return new Date(unixSeconds * 1000).toLocaleString("zh-TW", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 function uploadLimit(mb) {
   return mb >= 1024 && mb % 1024 === 0 ? `${mb / 1024} GB` : `${mb} MB`;
@@ -311,6 +320,7 @@ async function refreshConfig() {
     updateModelStates(config);
   }
   renderHardware(config.hardware);
+  refreshPerformance();
   renderNotice(config);
   renderWatch(config.watch);
   refreshJobs();
@@ -548,6 +558,7 @@ function renderHardware(hardware) {
   $("runtime").textContent = hardwareLabel(hardware);
   $("hardware-btn").hidden = !(hardware.state === "ready" || hardware.state === "failed");
   $("retune-btn").disabled = hardware.state === "tuning";
+  $("hardware-live").hidden = hardware.state !== "ready";
   if (hardware.state !== "ready") {
     $("hardware-summary").textContent = hardware.state === "failed" ? "設定失敗" : "";
     $("hardware-facts").replaceChildren();
@@ -586,6 +597,54 @@ function renderHardwareFacts(hardware) {
   }
   facts.push(["設定檔", hardware.path]);
   renderProps($("hardware-facts"), facts);
+}
+async function refreshPerformance() {
+  if (!$("hardware-dialog").open || loginOpen()) return;
+  try {
+    state.performance = await api("/api/performance");
+  } catch {
+    return;
+  }
+  renderPerformance();
+}
+function modelSummary(model) {
+  const label = MODEL_STATE_LABELS[model.state] || model.state;
+  const speed = model.seconds_per_audio_second;
+  return speed === null ? `${model.name}：${label}` : `${model.name}：${label}，每秒音訊約 ${speed.toFixed(2)} 秒`;
+}
+function performanceRow(run) {
+  const row = el("tr", "");
+  const name = el("td", "");
+  name.append(
+    el("span", "", modelById(run.model)?.name ?? run.model),
+    el("span", "bench-reason", `${run.settings ?? "外部服務"}${run.on_battery ? "・電池供電" : ""}`),
+  );
+  row.append(
+    name,
+    el("td", "", shortDateTime(run.finished_at)),
+    el("td", "num", clock(run.audio_seconds)),
+    el("td", "num", clock(run.processing_seconds)),
+    el("td", "num", (run.processing_seconds / Math.max(run.audio_seconds, 0.001)).toFixed(2)),
+    el("td", "num", run.process_memory_bytes === null ? "—" : bytes(run.process_memory_bytes)),
+    el("td", "num", bytes(run.available_memory_bytes)),
+  );
+  return row;
+}
+function renderPerformance() {
+  const { memory, runs } = state.performance;
+  renderProps($("performance-facts"), [
+    ["行程用量", memory.inference_bytes === null ? "—" : bytes(memory.inference_bytes), "推論行程目前使用的記憶體"],
+    ["系統可用", `${bytes(memory.available_bytes)}／${bytes(memory.total_bytes)}`, "系統目前還能使用的記憶體／全部記憶體"],
+    ...state.config.models.map((model) => ["模型", modelSummary(model)]),
+  ]);
+  const rows = $("performance-rows");
+  const key = JSON.stringify(runs);
+  if (rows.dataset.key !== key) {
+    rows.dataset.key = key;
+    rows.replaceChildren(...runs.map(performanceRow));
+  }
+  $("performance-table").hidden = !runs.length;
+  $("performance-empty").hidden = !!runs.length;
 }
 function benchRow(item, settings) {
   const chosen =
@@ -664,7 +723,10 @@ function bindDialogs() {
     loadVoices();
     $("voices-dialog").showModal();
   });
-  $("hardware-btn").addEventListener("click", () => $("hardware-dialog").showModal());
+  $("hardware-btn").addEventListener("click", () => {
+    $("hardware-dialog").showModal();
+    refreshPerformance();
+  });
   $("version-btn").addEventListener("click", () => $("about-dialog").showModal());
   $("update-check").addEventListener("click", checkUpdate);
   $("update-apply").addEventListener("click", applyUpdate);
@@ -697,12 +759,7 @@ function jobItem(job) {
   const button = el("button", "job-item");
   button.type = "button";
   if (state.job?.id === job.id) button.setAttribute("aria-current", "true");
-  const when = new Date(job.created_at * 1000).toLocaleString("zh-TW", {
-    month: "numeric",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const when = shortDateTime(job.created_at);
   const status = el("span", "job-status", jobStatusText(job));
   if (job.status === "failed") status.dataset.tone = "error";
   else if (job.status === "queued" || job.status === "running") status.dataset.tone = "busy";
@@ -1894,7 +1951,7 @@ function renderCuePanel() {
   const withSpeakers = !!state.result.speakers;
   const select = $("cue-speaker");
   select.hidden = !withSpeakers;
-  $("cue-speaker-label").hidden = !withSpeakers;
+  $("cue-speaker-add").hidden = withSpeakers;
   if (withSpeakers) {
     select.replaceChildren(...state.speakers.map((s) => new Option(s.name, s.id)), new Option("新增說話者", NEW_SPEAKER));
     select.value = segment.speaker;
@@ -1925,21 +1982,30 @@ async function setCueTime(which, seconds) {
   if (await commit(draft, `已調整第 ${index + 1} 段的時間`)) selectSegment(draft.segments.indexOf(moved), true);
   else renderCuePanel();
 }
+function newSpeaker(draft) {
+  const taken = [...draft.speakers.map((s) => s.id), ...state.result.voiceprint_speakers];
+  const next = Math.max(0, ...taken.map((id) => Number(id.slice(1)))) + 1;
+  const speaker = { id: `S${next}`, name: `說話者 ${next}`, voice_id: null, similarity: null };
+  draft.speakers.push(speaker);
+  return speaker;
+}
 async function setCueSpeaker(value) {
   await settle();
   const index = state.selected;
   if (!state.segments[index]) return;
   const draft = currentDraft();
-  let speakerId = value;
-  if (value === NEW_SPEAKER) {
-    const taken = [...draft.speakers.map((s) => s.id), ...state.result.voiceprint_speakers];
-    const next = Math.max(0, ...taken.map((id) => Number(id.slice(1)))) + 1;
-    speakerId = `S${next}`;
-    draft.speakers.push({ id: speakerId, name: `說話者 ${next}`, voice_id: null, similarity: null });
-  }
-  draft.segments[index].speaker = speakerId;
-  const name = draft.speakers.find((s) => s.id === speakerId).name;
-  if (!(await commit(draft, `第 ${index + 1} 段改為「${name}」`))) renderCuePanel();
+  const speaker = value === NEW_SPEAKER ? newSpeaker(draft) : draft.speakers.find((s) => s.id === value);
+  draft.segments[index].speaker = speaker.id;
+  if (!(await commit(draft, `第 ${index + 1} 段改為「${speaker.name}」`))) renderCuePanel();
+}
+async function labelSpeakers() {
+  await settle();
+  const draft = currentDraft();
+  if (draft.speakers) return;
+  draft.speakers = [];
+  const speaker = newSpeaker(draft);
+  for (const segment of draft.segments) segment.speaker = speaker.id;
+  await commit(draft, `已加上說話者，每段先標成「${speaker.name}」`);
 }
 async function splitCue() {
   await settle();
@@ -2037,6 +2103,7 @@ function bindCueEditor() {
     $(`cue-${which}-now`).addEventListener("click", () => setCueTime(which, audioEl().currentTime));
   }
   $("cue-speaker").addEventListener("change", (event) => setCueSpeaker(event.target.value));
+  $("cue-speaker-add").addEventListener("click", labelSpeakers);
   $("cue-split").addEventListener("click", splitCue);
   $("cue-merge").addEventListener("click", mergeCue);
   $("cue-delete").addEventListener("click", deleteCue);
@@ -2062,7 +2129,7 @@ function bindCueEditor() {
 }
 function renderSpeakers(result) {
   const notice = $("speakers-error");
-  const message = result.speakers_error ? `${result.speakers_error}（字幕不受影響）` : "";
+  const message = result.speakers_error && !result.speakers ? `${result.speakers_error}（字幕不受影響）` : "";
   notice.textContent = message;
   notice.hidden = !message;
   $("speakers-empty").hidden = !!state.speakers.length || !!message;

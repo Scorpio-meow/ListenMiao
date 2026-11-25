@@ -9,7 +9,7 @@ from app.inference import InferenceClient, _Pending
 
 
 def test_failed_profile_change_still_restarts_the_inference_process(caplog):
-    client = InferenceClient(SimpleNamespace(), SimpleNamespace(models=[]))
+    client = InferenceClient(SimpleNamespace(), SimpleNamespace(models=[]), lambda _record: None)
     calls = []
     client._shutdown_process = lambda: calls.append("stop")
     client._spawn = lambda: calls.append("spawn")
@@ -42,7 +42,7 @@ class _FakeProcess:
 
 
 def test_cancel_during_a_crash_restart_leaves_one_inference_process(monkeypatch, tmp_path):
-    client = InferenceClient(SimpleNamespace(logs_dir=tmp_path), SimpleNamespace(models=[]))
+    client = InferenceClient(SimpleNamespace(logs_dir=tmp_path), SimpleNamespace(models=[]), lambda _record: None)
     spawned = []
 
     def spawn():
@@ -74,6 +74,45 @@ def test_cancel_during_a_crash_restart_leaves_one_inference_process(monkeypatch,
     cancel.join(5)
     assert sum(process.is_alive() for process in spawned) == 1
     assert client._pending["job"].error == "工作已取消"
+
+
+def test_performance_record_is_passed_on_even_when_the_job_is_no_longer_pending():
+    seen = []
+    client = InferenceClient(SimpleNamespace(), SimpleNamespace(models=[]), seen.append)
+    client._handle(("performance", {"model": "org/model"}))
+    assert seen == [{"model": "org/model"}]
+
+
+def test_performance_report_names_the_settings_only_for_local_models(monkeypatch):
+    import queue
+
+    monkeypatch.setattr(inference_module, "performance_record", lambda model_id, used, transcript: (model_id, used))
+    specs = {"local": SimpleNamespace(remote=None), "remote": SimpleNamespace(remote=SimpleNamespace())}
+    catalog = SimpleNamespace(get=specs.get)
+    profile = SimpleNamespace(settings=SimpleNamespace(describe=lambda: "OpenVINO・GPU・int8"))
+    events = queue.Queue()
+    inference_module._report_performance(events, catalog, profile, "local", None)
+    inference_module._report_performance(events, catalog, None, "remote", None)
+    assert [events.get_nowait(), events.get_nowait()] == [
+        ("performance", ("local", "OpenVINO・GPU・int8")),
+        ("performance", ("remote", None)),
+    ]
+
+
+def test_memory_is_unknown_unless_the_inference_process_is_running(monkeypatch):
+    client = InferenceClient(SimpleNamespace(), SimpleNamespace(models=[]), lambda _record: None)
+    assert client.memory_bytes() is None
+    client._process = SimpleNamespace(pid=4242)
+    monkeypatch.setattr(
+        inference_module.psutil, "Process", lambda pid: SimpleNamespace(memory_info=lambda: SimpleNamespace(rss=pid))
+    )
+    assert client.memory_bytes() == 4242
+
+    def gone(pid):
+        raise inference_module.psutil.NoSuchProcess(pid)
+
+    monkeypatch.setattr(inference_module.psutil, "Process", gone)
+    assert client.memory_bytes() is None
 
 
 def test_cpu_meter_restarts_when_transcription_begins():

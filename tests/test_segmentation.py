@@ -1,4 +1,4 @@
-from app.segmentation import Word, split_sentences
+from app.segmentation import Word, chunk_segments, split_sentences
 
 
 def _chars(text: str, start: float, step: float) -> list[Word]:
@@ -12,6 +12,18 @@ def test_splits_at_sentence_punctuation():
     words = _chars("今天天氣很好", 0.0, 0.2) + [Word("。", 1.2, 1.25)] + _chars("我們去公園吧", 1.5, 0.2)
     segments = split_sentences(words, "今天天氣很好。我們去公園吧", max_seconds=10, min_seconds=0.5, audio_seconds=5)
     assert [(s.text, s.start, s.end) for s in segments] == [("今天天氣很好。", 0.0, 1.25), ("我們去公園吧", 1.5, 2.7)]
+
+
+def test_chunk_without_end_ends_where_the_next_chunk_starts():
+    chunks = [(0.0, 26.96, "一"), (26.96, None, "二"), (56.96, -1.0, "三"), (86.96, 86.96, "四")]
+    segments = chunk_segments(chunks, 100.0)
+    assert [(s.start, s.end) for s in segments] == [(0.0, 26.96), (26.96, 56.96), (56.96, 86.96), (86.96, 100.0)]
+
+
+def test_chunk_never_runs_past_a_neighbour_with_the_same_start_or_starts_after_the_audio():
+    chunks = [(5.0, 5.0, "一"), (5.0, 8.0, "二"), (101.0, 105.0, "三"), (102.0, None, "四")]
+    segments = chunk_segments(chunks, 100.0)
+    assert [(s.start, s.end) for s in segments] == [(5.0, 5.0), (5.0, 8.0), (100.0, 100.0), (100.0, 100.0)]
 
 
 def test_returns_none_when_words_do_not_match_reference():

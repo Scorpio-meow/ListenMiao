@@ -11,6 +11,7 @@ import numpy as np
 
 from .audio import SAMPLE_RATE
 from .catalog import RemoteBackend
+from .segmentation import chunk_segments
 from .transcript import Segment
 
 log = logging.getLogger(__name__)
@@ -100,13 +101,13 @@ def transcribe(
                 time.sleep(remote.poll_seconds)
     except httpx.HTTPError as exc:
         raise RemoteError(f"與遠端服務 {remote.url} 連線失敗：{exc}") from exc
-    segments = []
-    for item in job.get("segments") or []:
-        text = str(item.get("text", "")).strip()
-        if not text:
-            continue
-        start = float(item["start_time"])
-        end = float(item["end_time"]) if item.get("end_time") is not None else audio_seconds
-        end = round(min(max(end, start), audio_seconds), 2)
-        segments.append(Segment(start=round(start, 2), end=end, text=text, speaker=None))
+    chunks = [
+        (
+            float(item["start_time"]),
+            float(item["end_time"]) if item.get("end_time") is not None else None,
+            str(item.get("text", "")),
+        )
+        for item in job.get("segments") or []
+    ]
+    segments = chunk_segments(chunks, audio_seconds)
     return segments, "\n".join(s.text for s in segments)

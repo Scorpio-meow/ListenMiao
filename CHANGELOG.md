@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+## [0.7.10] - 2026-11-25
+
+### Added
+
+- 轉錄時沒有分辨說話者的工作也能手動標說話者：「字幕」面板按「加上說話者」，每段先標成「說話者 1」，再用說話者選單逐段改給別人或新的說話者，也能在「說話者」面板改名字。手動加上的說話者沒有聲紋，不能記住聲音。`PUT /api/jobs/{id}/transcript` 不再要求 `speakers` 跟轉錄時是否分辨說話者一致：沒有分辨說話者的結果可以送陣列，送 `null` 則拿掉全部說話者。分辨說話者失敗的工作手動加上說話者後，網頁與命令列工具不再顯示失敗原因，`speakers_error` 仍保留在結果裡。
+- 每次辨識成功記下一筆效能紀錄：完成時間、模型、當時的推論設定、音訊長度、辨識秒數，以及辨識完成時推論子行程使用的記憶體、系統可用的記憶體、是否用電池供電。紀錄存在 `ASR_DATA_DIR/performance.json`，保留最近 200 筆，重新啟動服務後還在，不含檔名；失敗或取消的工作不記錄。
+- 工具列的「硬體」多了「目前狀態」與「轉錄紀錄」：推論子行程與系統的記憶體、每個模型的狀態與實際速度，以及每次辨識的速度，視窗開著時每 4 秒自動更新。新增 `GET /api/performance` 提供同樣的資料。
+
+### Fixed
+
+- 有說話者的工作把字幕全部刪光後重新啟動服務，「說話者」面板會誤顯示「沒有偵測到說話聲音」。現在字幕刪光時直接拿掉說話者（`speakers` 變成 `null`），復原時再帶回來。
+- 模型輸出的段落沒有結束時間時（例如 Breeze ASR 26 每個 30 秒視窗，或逐字時間戳記對不起來、改用模型原本的分段時），結束時間一律設成音訊結尾，這些字幕會一路延伸到最後、互相重疊。現在改用下一段的開始當結束，只有最後一段到音訊結尾；OpenVINO、PyTorch 與遠端服務三種引擎都一樣。
+- 模型輸出的段落開始時間超過音訊長度時，字幕的結束時間會早於開始，之後的修改一律被拒絕。現在開始時間也限制在音訊長度內。
+
 ## [0.7.9] - 2026-11-23
 
 ### Fixed
@@ -414,7 +428,8 @@
 - 在不能錄音的網址按「錄音」，狀態列說明原因與瀏覽器的設定方式。
 - 所有回應加上 `Cache-Control: no-cache`，更新版本後瀏覽器不會繼續使用舊的前端程式。
 
-[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.9...HEAD
+[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.10...HEAD
+[0.7.10]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.9...v0.7.10
 [0.7.9]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.8...v0.7.9
 [0.7.8]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.7...v0.7.8
 [0.7.7]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.6...v0.7.7

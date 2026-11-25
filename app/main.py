@@ -47,6 +47,7 @@ from .jobs import (
     TranscriptInvalid,
 )
 from .logsetup import project, remove_tree
+from .performance import PerformanceLog, memory_now
 from .punctuation import PunctuationService
 from .renders import SOURCE_NAME, RenderQueue, RenderQueueFull
 from .speakers import SpeakerService, default_speaker_name
@@ -348,7 +349,8 @@ def _discard(path: Path) -> None:
 
 def create_app(settings: Settings) -> FastAPI:
     catalog = load_catalog(settings.models_file)
-    inference = InferenceClient(settings, catalog)
+    performance = PerformanceLog(settings.performance_file)
+    inference = InferenceClient(settings, catalog, performance.add)
     speaker_service = SpeakerService(catalog.speakers, settings.voices_dir) if catalog.speakers is not None else None
     punctuation_service = PunctuationService(catalog.punctuation) if catalog.punctuation is not None else None
     glossary = GlossaryStore(settings.glossary_file)
@@ -629,6 +631,13 @@ def create_app(settings: Settings) -> FastAPI:
         log.info("收到更新要求，服務即將關閉，由啟動腳本下載並套用新版後重新啟動")
         background.add_task(exit_for_update)
         return {"restarting": True}
+
+    @app.get("/api/performance")
+    def performance_status() -> dict:
+        return {
+            "memory": {"inference_bytes": inference.memory_bytes(), **memory_now()},
+            "runs": performance.recent(),
+        }
 
     @app.post("/api/hardware/retune", status_code=202)
     def retune() -> dict:

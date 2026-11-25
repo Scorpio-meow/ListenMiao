@@ -196,6 +196,10 @@ class Settings:
     def glossary_file(self) -> Path:
         return self.data_dir / "glossary.json"
 
+    @property
+    def performance_file(self) -> Path:
+        return self.data_dir / "performance.json"
+
 
 def _load_watch() -> WatchSettings | None:
     raw = _require("ASR_WATCH_DIR")

@@ -29,6 +29,7 @@ from .hardware import (
     system_memory,
 )
 from .logsetup import capture_native_stderr, log_crashes_to, log_to_file, set_level, setup_logging, versions
+from .performance import record as performance_record
 from .telemetry import disable_openvino_telemetry
 from .transcript import Transcript
 
@@ -76,6 +77,13 @@ def _enter_stage(events: Queue, meter: CpuMeter, job_id: str, stage: str) -> Non
     if stage == "transcribing":
         meter.restart()
     _put_event(events, "stage", job_id, stage)
+
+
+def _report_performance(
+    events: Queue, catalog: Catalog, profile: HardwareProfile | None, model_id: str, transcript: Transcript
+) -> None:
+    used = profile.settings.describe() if catalog.get(model_id).remote is None else None
+    events.put(("performance", performance_record(model_id, used, transcript)))
 
 
 def _hardware_config(settings: Settings, catalog: Catalog, events: Queue):
@@ -187,6 +195,7 @@ def _serve(settings: Settings, requests: Queue, events: Queue) -> None:
                 meter.report(),
                 power_source(),
             )
+            _report_performance(events, catalog, profile, model_id, transcript)
             events.put(("done", job_id, transcript.to_dict()))
         except Exception as exc:
             log.exception("工作 %s 辨識失敗；%s", job_id, memory_usage())
@@ -205,9 +214,10 @@ class _Pending:
 
 
 class InferenceClient:
-    def __init__(self, settings: Settings, catalog: Catalog) -> None:
+    def __init__(self, settings: Settings, catalog: Catalog, on_performance: Callable[[dict], None]) -> None:
         self._settings = settings
         self._catalog = catalog
+        self._on_performance = on_performance
         self._ctx = mp.get_context("spawn")
         self._lock = threading.Lock()
         self._lifecycle = threading.Lock()
@@ -329,6 +339,16 @@ class InferenceClient:
         with self._lock:
             return next((m["seconds_per_audio_second"] for m in self._models if m["id"] == model_id), None)
 
+    def memory_bytes(self) -> int | None:
+        with self._lock:
+            process = self._process
+        if process is None or process.pid is None:
+            return None
+        try:
+            return psutil.Process(process.pid).memory_info().rss
+        except psutil.Error:
+            return None
+
     def transcribe(
         self,
         job_id: str,
@@ -392,6 +412,9 @@ class InferenceClient:
         if kind == "hardware":
             with self._lock:
                 self._hardware = event[1]
+            return
+        if kind == "performance":
+            self._on_performance(event[1])
             return
         with self._lock:
             pending = self._pending.get(event[1])

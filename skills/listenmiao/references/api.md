@@ -38,6 +38,7 @@ Git Bash, Linux and macOS shells send UTF-8 and are fine. Prefer `<asr>` wheneve
 | `POST /api/jobs/{id}/renders`, `GET /api/renders/{id}`, `GET /api/renders/{id}/file`, `DELETE /api/renders/{id}` | Burn-in: upload the original video as multipart `file`, poll, download, cancel |
 | `GET`/`PUT /api/glossary` | `{"hotwords": "...", "replacements": [{"find": "...", "replace": "..."}]}`; `PUT` replaces the whole glossary |
 | `GET`/`POST /api/voices`, `DELETE /api/voices/{id}` | Voice library; `POST` body `{"job_id": "...", "speaker_id": "S1"}`. `POST` answers 409 without saving when the voice sounds more like another person in the library; send it again with `"confirm": true` only after the user confirms it is the same person |
+| `GET /api/performance` | `memory` (inference process, available and total bytes right now) and `runs`: the last 200 successful transcriptions, newest first, each with `finished_at`, `model`, `settings`, `audio_seconds`, `processing_seconds` (recognition only), memory at the end and `on_battery` |
 | `POST /api/hardware/retune` | Re-detect hardware and re-tune (7–35 min, no transcription meanwhile). Only on the user's request. |
 | `POST /api/hardware/settings` | `{"label": "<hardware.tuning.candidates[].label from /api/config>"}`: switch to another measured profile. Only on the user's request. |
 
@@ -49,6 +50,6 @@ Git Bash, Linux and macOS shells send UTF-8 and are fine. Prefer `<asr>` wheneve
 2. Change what you need: fix text, move a segment to another speaker, merge or split segments (times in seconds, two decimals, within the audio length, sorted by `start`).
 3. Send `{"revision": <same number>, "segments": [...], "speakers": [...]}`. 409 means someone edited it meanwhile: fetch again and redo the change.
 
-Speakers with no remaining segments are removed. A new speaker id (`S5`) has no voiceprint, so it can't be remembered in the voice library; don't reuse ids from `result.voiceprint_speakers`. For transcripts without diarization, `speakers` and every `speaker` are `null`.
+Speakers with no remaining segments are removed. A new speaker id (`S5`) has no voiceprint, so it can't be remembered in the voice library; don't reuse ids from `result.voiceprint_speakers`. For transcripts without diarization, `speakers` and every `speaker` are `null`; to label speakers by hand, send a `speakers` list and give every segment one of its ids.
 
 Only edit a transcript when the user asked for that change; the web editor is the better tool for proofreading by hand.

@@ -112,7 +112,7 @@ def test_unreadable_result_is_renamed_so_it_is_not_read_again(tmp_path, caplog):
 
 
 def test_bad_event_from_the_inference_process_fails_only_that_job():
-    client = InferenceClient(SimpleNamespace(), SimpleNamespace(models=[]))
+    client = InferenceClient(SimpleNamespace(), SimpleNamespace(models=[]), lambda _record: None)
     pending = _Pending(lambda _stage: None, lambda _progress: None)
     client._pending["job"] = pending
     with pytest.raises(KeyError):

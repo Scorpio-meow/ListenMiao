@@ -581,7 +581,7 @@ wheels = [
 
 [[package]]
 name = "listenmiao"
-version = "0.7.9"
+version = "0.7.10"
 source = { virtual = "." }
 default-groups = ["cpu"]
 dependencies = [

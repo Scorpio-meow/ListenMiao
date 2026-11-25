@@ -156,6 +156,14 @@ def power_source() -> str:
     return "電源：接電" if battery.power_plugged else f"電源：電池 {battery.percent:.0f}%"
 
 
+def on_battery() -> bool | None:
+    try:
+        battery = psutil.sensors_battery()
+    except OSError:
+        return None
+    return None if battery is None else not battery.power_plugged
+
+
 def max_loaded(config: EngineConfig, memory_bytes: int, local_models: int) -> tuple[int, str]:
     if local_models == 1:
         return 1, "只有 1 個本機模型"

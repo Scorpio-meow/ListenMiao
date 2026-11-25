@@ -106,7 +106,7 @@ bunx skills add Scorpio-meow/ListenMiao --skill listenmiao -g
 - **上傳與錄音**：上傳音訊或影片（m4a、mp3、wav、mp4 等常見格式，可一次選多個排隊）、拖進視窗或用瀏覽器錄音；顯示排隊位置與預估時間，排隊中或處理中都能取消
 - **熱詞**：先給人名、公司名與術語，辨識時比較容易寫對；詞彙表的取代規則自動修正同音字
 - **自動標點**：辨識完用獨立的標點模型補上全形標點
-- **[分辨說話者](docs/how-it-works.md#分辨說話者)**：自動判斷或指定人數；取名後存進語者庫，之後自動認出；分錯時可以合併或改給別人
+- **[分辨說話者](docs/how-it-works.md#分辨說話者)**：自動判斷或指定人數；取名後存進語者庫，之後自動認出；分錯時可以合併或改給別人；沒開也能手動標
 
 **校對與輸出**
 
@@ -121,7 +121,7 @@ bunx skills add Scorpio-meow/ListenMiao --skill listenmiao -g
 
 **硬體**
 
-- **[自動調校](docs/how-it-works.md#自動調校)**：選用 OpenVINO（CPU、Intel 內顯）或 PyTorch（NVIDIA CUDA、AMD ROCm），也能在工具列的「硬體」改用其他實測過的設定
+- **[自動調校](docs/how-it-works.md#自動調校)**：選用 OpenVINO（CPU、Intel 內顯）或 PyTorch（NVIDIA CUDA、AMD ROCm），也能在工具列的「硬體」改用其他實測過的設定；「硬體」同時顯示目前的記憶體用量與每次辨識的速度紀錄
 - **轉呼叫遠端服務**：在 `models.json` 把模型設成 [`remote`](docs/configuration.md#remote)，轉呼叫既有的 Breeze ASR 服務
 
 ## 支援的模型

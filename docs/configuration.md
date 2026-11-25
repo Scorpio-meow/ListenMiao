@@ -26,7 +26,7 @@
 | 變數 | 說明 | `.env.example` |
 | --- | --- | --- |
 | `ASR_MODELS_FILE` | [模型清單檔](#modelsjson) | `models.json` |
-| `ASR_DATA_DIR` | 轉換後模型、編譯快取、辨識結果、語者庫、詞彙表、日誌與上傳暫存的目錄 | `data` |
+| `ASR_DATA_DIR` | 轉換後模型、編譯快取、辨識結果、語者庫、詞彙表、效能紀錄、日誌與上傳暫存的目錄 | `data` |
 | `ASR_HARDWARE_PROFILE` | [硬體設定檔](#硬體設定檔)；不存在時第一次啟動自動調校並寫出 | `data/hardware-profile.json` |
 
 **上限與保留期限**

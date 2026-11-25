@@ -361,13 +361,13 @@ class JobQueue:
                 log.info("工作 %s 的修改未儲存：送來的是第 %d 版，目前是第 %d 版", job.id, revision, job.revision)
                 raise RevisionConflict("這份字幕已經在別的地方改過，請重新載入後再編輯")
             current = job.transcript
-            _check_transcript(segments, speakers, current.speakers is not None, current.audio_seconds)
+            _check_transcript(segments, speakers, current.audio_seconds)
             if speakers is not None:
                 speaking = {s.id: 0.0 for s in speakers}
                 for segment in segments:
                     speaking[segment.speaker] += segment.end - segment.start
                 used = {segment.speaker for segment in segments}
-                speakers = [replace(s, seconds=round(speaking[s.id], 1)) for s in speakers if s.id in used]
+                speakers = [replace(s, seconds=round(speaking[s.id], 1)) for s in speakers if s.id in used] or None
             job.transcript = replace(
                 current,
                 segments=segments,
@@ -748,13 +748,7 @@ def _describe_ranking(ranked: list[Match]) -> str:
     return f"{first}，第二名 {ranked[1].voice_id} {ranked[1].similarity:.3f}，差距 {gap:.3f}"
 
 
-def _check_transcript(
-    segments: list[Segment], speakers: list[Speaker] | None, has_speakers: bool, audio_seconds: float
-) -> None:
-    if has_speakers and speakers is None:
-        raise TranscriptInvalid("這份結果有分辨說話者，speakers 必須是陣列")
-    if not has_speakers and speakers is not None:
-        raise TranscriptInvalid("這份結果沒有分辨說話者，speakers 必須是 null")
+def _check_transcript(segments: list[Segment], speakers: list[Speaker] | None, audio_seconds: float) -> None:
     ids = {s.id for s in speakers or []}
     if speakers is not None:
         if len(ids) != len(speakers):
@@ -774,6 +768,6 @@ def _check_transcript(
             raise TranscriptInvalid(f"第 {i} 段的開始時間早於上一段，字幕必須依開始時間排序")
         previous_start = segment.start
         if speakers is None and segment.speaker is not None:
-            raise TranscriptInvalid(f"第 {i} 段指定了說話者，但這份結果沒有分辨說話者")
+            raise TranscriptInvalid(f"第 {i} 段指定了說話者，但 speakers 是 null")
         if speakers is not None and segment.speaker not in ids:
             raise TranscriptInvalid(f"第 {i} 段的說話者 {segment.speaker!r} 不在說話者清單裡")

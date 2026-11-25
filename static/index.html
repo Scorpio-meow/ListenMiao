@@ -173,8 +173,9 @@
               <label class="cue-field" for="cue-end">結束</label>
               <input type="text" class="tb-input timecode-input" id="cue-end" inputmode="decimal" autocomplete="off" spellcheck="false">
               <button type="button" class="tb-btn" id="cue-end-now" title="把結束時間設為目前播放位置">設為播放位置</button>
-              <label class="cue-field" for="cue-speaker" id="cue-speaker-label">說話者</label>
+              <label class="cue-field" for="cue-speaker">說話者</label>
               <select class="tb-select" id="cue-speaker"></select>
+              <button type="button" class="tb-btn cue-speaker-add" id="cue-speaker-add" title="每段先標成「說話者 1」，再逐段改給別人" hidden>加上說話者</button>
               <div class="cue-actions">
                 <button type="button" class="tb-btn" id="cue-split" title="在文字游標處分成兩段（Ctrl+Enter）">分割</button>
                 <button type="button" class="tb-btn" id="cue-merge">與下一段合併</button>
@@ -301,6 +302,20 @@
     </form>
     <div class="dialog-body">
       <dl class="props" id="hardware-facts"></dl>
+      <div id="hardware-live">
+        <h3 class="dialog-section">目前狀態</h3>
+        <dl class="props" id="performance-facts"></dl>
+        <h3 class="dialog-section">轉錄紀錄</h3>
+        <div class="table-wrap runs-wrap" id="performance-table" hidden>
+          <table class="bench">
+            <thead>
+              <tr><th scope="col">模型</th><th scope="col">完成時間</th><th scope="col" class="num">音訊</th><th scope="col" class="num">辨識</th><th scope="col" class="num" title="辨識秒數 ÷ 音訊秒數，越小越快">速度</th><th scope="col" class="num" title="辨識完成時推論行程使用的記憶體">行程記憶體</th><th scope="col" class="num" title="辨識完成時系統還能使用的記憶體">可用記憶體</th></tr>
+            </thead>
+            <tbody id="performance-rows"></tbody>
+          </table>
+        </div>
+        <p class="panel-empty" id="performance-empty" hidden>還沒有轉錄紀錄</p>
+      </div>
       <div id="hardware-tuning">
         <h3 class="dialog-section">實測</h3>
         <div class="table-wrap">

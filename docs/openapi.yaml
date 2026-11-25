@@ -3,7 +3,7 @@ $self: https://raw.githubusercontent.com/Scorpio-meow/ListenMiao/main/docs/opena
 info:
   title: ListenMiao
   summary: 本機語音辨識服務的 HTTP API：上傳錄音、取得逐字稿、編輯字幕、匯出檔案與燒錄字幕。
-  version: 0.7.9
+  version: 0.7.10
   license:
     name: MIT
     identifier: MIT
@@ -101,7 +101,7 @@ tags:
     kind: nav
   - name: hardware
     summary: 硬體與調校
-    description: 自動調校實測推論裝置與權重格式，並可改用其他實測過的設定。
+    description: 自動調校實測推論裝置與權重格式，並可改用其他實測過的設定；也能讀取目前的記憶體與最近的辨識效能。
     kind: nav
   - name: glossary
     summary: 詞彙表與熱詞
@@ -354,6 +354,39 @@ paths:
                 busy:
                   dataValue:
                     detail: 還有辨識或燒錄工作在進行，請等全部完成後再更新
+
+  /api/performance:
+    get:
+      operationId: getPerformance
+      tags: [hardware]
+      summary: 目前的記憶體與最近的辨識效能
+      description: |
+        每次辨識成功都會記下一筆效能紀錄，存在 `ASR_DATA_DIR/performance.json`，重新啟動服務後仍然保留；失敗或取消的工作不記錄。紀錄不含檔名與工作編號。網頁的「硬體」視窗開著時會反覆讀取這個端點。
+      responses:
+        "200":
+          summary: 目前的記憶體與辨識紀錄
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Performance"
+              examples:
+                oneRun:
+                  dataValue:
+                    memory:
+                      inference_bytes: 3221225472
+                      available_bytes: 8589934592
+                      total_bytes: 16856322048
+                    runs:
+                      - finished_at: 1795572000.5
+                        model: MediaTek-Research/Breeze-ASR-25
+                        settings: OpenVINO・GPU・int8
+                        audio_seconds: 180.01
+                        processing_seconds: 63.4
+                        process_memory_bytes: 3221225472
+                        available_memory_bytes: 8589934592
+                        on_battery: false
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
   /api/hardware/retune:
     post:
@@ -882,9 +915,9 @@ paths:
         - `revision` 必須等於目前 `result.revision`，否則回 409。
         - 字幕依開始時間排序；每段的結束時間不可早於開始時間，而且在 0 到音訊長度之間（容許 0.01 秒誤差）；時間四捨五入到 0.01 秒。最多 20000 段。
         - 每段文字的連續空白與換行會合併成一個空格，不可空白，最多 500 字。
-        - 沒有分辨說話者的結果，`speakers` 與每段的 `speaker` 都必須是 `null`；有分辨說話者時，`speakers` 是陣列，每段的 `speaker` 都要在裡面。
+        - `speakers` 是 `null` 時，每段的 `speaker` 也都必須是 `null`；`speakers` 是陣列時，每段的 `speaker` 都要在裡面。沒有分辨說話者的結果也可以送陣列，手動加上說話者；送 `null` 則拿掉全部說話者。
         - 說話者 `id` 是 S 加 1–4 位數字（例如 `S5`），可以新增；新增的人沒有聲紋，不能記住聲音。新的編號不要用 `voiceprint_speakers` 裡的編號，否則會沿用那位說話者原本的聲紋。
-        - 沒有任何字幕的說話者會被移除（合併說話者就是把字幕都改給另一人）；每人的 `seconds` 依字幕重新計算，送來的值不會用到。
+        - 沒有任何字幕的說話者會被移除（合併說話者就是把字幕都改給另一人），字幕全部刪光時 `speakers` 變成 `null`；每人的 `seconds` 依字幕重新計算，送來的值不會用到。
         - `voice_id` 是語者庫裡的人或 `null`；語者庫裡已經沒有的人（例如剛刪除）存成 `null`。`voice_id` 是 `null` 時 `similarity` 一律存成 `null`。
         - 全文 `text` 會改成各段文字以換行相接。
       requestBody:
@@ -974,7 +1007,7 @@ paths:
                     detail: 說話者編號必須是 S 加數字，例如 S1，不能是 'A'
                 speakersNull:
                   dataValue:
-                    detail: 這份結果沒有分辨說話者，speakers 必須是 null
+                    detail: 第 2 段指定了說話者，但 speakers 是 null
                 emptyText:
                   dataValue:
                     detail: 第 4 段文字不可空白
@@ -2506,6 +2539,67 @@ components:
                 type: string
                 enum: [CUDA, ROCm]
 
+    Performance:
+      type: object
+      required: [memory, runs]
+      properties:
+        memory:
+          type: object
+          description: 讀取當下的記憶體
+          required: [inference_bytes, available_bytes, total_bytes]
+          properties:
+            inference_bytes:
+              type: [integer, "null"]
+              description: 推論子行程使用的記憶體；子行程還沒啟動或正在重新啟動時是 `null`
+            available_bytes:
+              type: integer
+              description: 系統還能使用的記憶體
+            total_bytes:
+              type: integer
+              description: 系統全部的記憶體
+        runs:
+          type: array
+          description: 最近 200 次辨識的紀錄，最新的在前
+          items:
+            $ref: "#/components/schemas/PerformanceRun"
+
+    PerformanceRun:
+      type: object
+      required:
+        - finished_at
+        - model
+        - settings
+        - audio_seconds
+        - processing_seconds
+        - process_memory_bytes
+        - available_memory_bytes
+        - on_battery
+      properties:
+        finished_at:
+          type: number
+          description: 辨識完成的時間（Unix 秒）
+        model:
+          type: string
+          description: 模型 id
+        settings:
+          type: [string, "null"]
+          description: 當時使用的推論設定，例如 `OpenVINO・GPU・int8`；轉呼叫外部服務的模型是 `null`
+        audio_seconds:
+          type: number
+          description: 音訊長度
+        processing_seconds:
+          type: number
+          description: 辨識花的秒數，不含分辨說話者與自動標點
+        process_memory_bytes:
+          type: [integer, "null"]
+          description: 辨識完成時推論子行程使用的記憶體；轉呼叫外部服務的模型是 `null`
+        available_memory_bytes:
+          type: integer
+          description: 辨識完成時系統還能使用的記憶體
+        on_battery:
+          type: [boolean, "null"]
+          description: 是否用電池供電；沒有電池或讀不到時是 `null`
+
     FeatureStatus:
       type: object
       description: 選用模型的準備狀態。服務啟動時就開始下載。
@@ -2813,7 +2907,7 @@ components:
           items:
             $ref: "#/components/schemas/Segment"
         speakers:
-          description: 說話者清單；不分辨說話者、分辨失敗或沒有偵測到說話聲音時是 `null`，後兩者的原因在 `speakers_error`
+          description: 說話者清單；不分辨說話者、分辨失敗或沒有偵測到說話聲音時是 `null`，後兩者的原因在 `speakers_error`。之後手動加上說話者就變成陣列
           anyOf:
             - type: array
               items:
@@ -2826,7 +2920,7 @@ components:
             type: string
         speakers_error:
           type: [string, "null"]
-          description: 分辨說話者失敗的原因；字幕照常產生
+          description: 分辨說話者失敗的原因；字幕照常產生。之後手動加上說話者時仍保留
         audio_seconds:
           type: number
         processing_seconds:
@@ -2847,7 +2941,7 @@ components:
           type: string
         speaker:
           type: [string, "null"]
-          description: 說話者編號；不分辨說話者時是 `null`
+          description: 說話者編號；`speakers` 是 `null` 時也是 `null`
     Speaker:
       type: object
       required: [id, name, seconds, voice_id, similarity]
@@ -2885,7 +2979,7 @@ components:
           items:
             $ref: "#/components/schemas/SegmentInput"
         speakers:
-          description: 有分辨說話者時必須是陣列，否則必須是 `null`
+          description: 說話者清單；`null` 表示不標說話者，此時每段的 `speaker` 都必須是 `null`
           anyOf:
             - type: array
               items:
@@ -2960,17 +3054,17 @@ components:
                 type: string
               speaker:
                 type: string
-                description: 說話者編號（有分辨說話者時才有）
+                description: 說話者編號（有說話者時才有）
               speaker_name:
                 type: string
-                description: 說話者名字（有分辨說話者時才有）
+                description: 說話者名字（有說話者時才有）
         audio_seconds:
           type: number
         processing_seconds:
           type: number
         speakers:
           type: array
-          description: 有分辨說話者時才有
+          description: 有說話者時才有
           items:
             type: object
             required: [id, name, seconds]

@@ -62,7 +62,7 @@ def test_new_speaker_can_be_added(tmp_path):
         ([Segment(0.5, 0.4, "x", None)], "結束時間"),
         ([Segment(0.0, 1.5, "x", None)], "超出音訊範圍"),
         ([Segment(0.5, 0.8, "x", None), Segment(0.1, 0.2, "y", None)], "排序"),
-        ([Segment(0.0, 0.5, "x", "S1")], "沒有分辨說話者"),
+        ([Segment(0.0, 0.5, "x", "S1")], "speakers 是 null"),
         ([Segment(float("nan"), 0.5, "x", None)], "不是數字"),
     ],
 )
@@ -79,11 +79,32 @@ def test_zero_length_segment_from_the_model_can_be_saved(tmp_path):
     assert updated.revision == 1
 
 
+def test_speakers_can_be_added_by_hand_and_removed_again(tmp_path):
+    queue, job = _finished(tmp_path)
+    job.transcript = replace(job.transcript, speakers_error=NO_SPEECH)
+    plain = job.transcript.segments
+    labelled = [replace(s, speaker="S1") for s in plain]
+    added = queue.replace_transcript(job.id, 0, labelled, [Speaker("S1", "說話者 1", 0.0, None, None)]).transcript
+    assert [(s.id, s.seconds) for s in added.speakers] == [("S1", round(sum(s.end - s.start for s in plain), 1))]
+    assert all(s.speaker == "S1" for s in added.segments)
+    assert added.speakers_error == NO_SPEECH
+    removed = queue.replace_transcript(job.id, 1, plain, None).transcript
+    assert removed.speakers is None
+
+
+def test_deleting_every_segment_drops_the_speakers(tmp_path):
+    queue, job = _finished(tmp_path)
+    labelled = [replace(s, speaker="S1") for s in job.transcript.segments]
+    queue.replace_transcript(job.id, 0, labelled, [Speaker("S1", "說話者 1", 0.0, None, None)])
+    emptied = queue.replace_transcript(job.id, 1, [], [Speaker("S1", "說話者 1", 0.0, None, None)]).transcript
+    assert emptied.speakers is None
+    restored = _queue(tmp_path, FakeInference(finish=True)).get(job.id).transcript
+    assert (restored.speakers, restored.speakers_error) == (None, None)
+
+
 def test_speakers_must_match_the_result(tmp_path):
     queue, job = _finished(tmp_path, speakers=True)
     segments = job.transcript.segments
-    with pytest.raises(TranscriptInvalid, match="speakers 必須是陣列"):
-        queue.replace_transcript(job.id, 0, segments, None)
     with pytest.raises(TranscriptInvalid, match="不在說話者清單"):
         queue.replace_transcript(job.id, 0, segments, job.transcript.speakers[:1])
     bad = [replace(job.transcript.speakers[0], id="X1"), job.transcript.speakers[1]]

@@ -245,10 +245,10 @@ def describe_progress(job: dict) -> str:
 
 def _result_notes(result: dict) -> list[str]:
     notes = []
-    if result.get("speakers_error"):
-        notes.append(f"分辨說話者失敗：{result['speakers_error']}")
-    elif result.get("speakers"):
+    if result.get("speakers"):
         notes.append(f"說話者 {len(result['speakers'])} 位")
+    elif result.get("speakers_error"):
+        notes.append(f"分辨說話者失敗：{result['speakers_error']}")
     if result.get("punctuation_error"):
         notes.append(f"自動標點失敗：{result['punctuation_error']}")
     return notes

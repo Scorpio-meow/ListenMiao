@@ -50,6 +50,7 @@ curl -o meeting.srt http://127.0.0.1:7860/api/jobs/<id>/export/srt
 | `GET` | [`/api/config`](#get-apiconfig) | 模型、硬體與各項功能的狀態，匯出格式與上限 |
 | `GET` | [`/api/update`](#get-apiupdate) | 檢查有沒有新版 |
 | `POST` | [`/api/update`](#post-apiupdate) | 關閉服務並更新到最新版 |
+| `GET` | [`/api/performance`](#get-apiperformance) | 目前的記憶體與最近的辨識效能 |
 | `POST` | [`/api/hardware/retune`](#post-apihardwareretune) | 重新調校 |
 | `POST` | [`/api/hardware/settings`](#post-apihardwaresettings) | 改用另一個實測過的設定 |
 | `GET` | [`/api/glossary`](#get-apiglossary) | 讀取詞彙表（熱詞與取代規則） |
@@ -133,6 +134,15 @@ curl -o meeting.srt http://127.0.0.1:7860/api/jobs/<id>/export/srt
 - 409：不能從網頁更新（原因同 `GET /api/update` 的 `how`），或還有辨識、燒錄工作在進行
 
 ## 硬體
+
+### GET /api/performance
+
+每次辨識成功都會記下一筆效能紀錄，存在 `ASR_DATA_DIR/performance.json`，保留最近 200 筆，重新啟動服務後還在。失敗或取消的工作不記錄；紀錄不含檔名與工作編號。
+
+**回應：**
+- 200：
+  - `memory`：讀取當下的 `inference_bytes`（推論子行程使用的記憶體，子行程沒在執行時是 `null`）、`available_bytes`、`total_bytes`（系統可用與全部的記憶體）
+  - `runs`：辨識紀錄，最新的在前。每筆有 `finished_at`（Unix 秒）、`model`、`settings`（當時的推論設定，例如 `OpenVINO・GPU・int8`）、`audio_seconds`、`processing_seconds`（只算辨識，不含分辨說話者與自動標點）、`process_memory_bytes`、`available_memory_bytes`（辨識完成時推論子行程使用的、系統還能使用的記憶體）、`on_battery`（沒有電池或讀不到時是 `null`）。轉呼叫外部服務的模型，`settings` 與 `process_memory_bytes` 是 `null`
 
 ### POST /api/hardware/retune
 
@@ -240,7 +250,7 @@ curl -o meeting.srt http://127.0.0.1:7860/api/jobs/<id>/export/srt
 | `punctuation_error` | 自動標點失敗的原因，字幕保留沒有標點的版本 |
 | `audio_seconds`、`processing_seconds` | 音訊長度、處理花的秒數 |
 
-不分辨說話者時，`speakers` 與每段的 `speaker` 是 `null`；分辨失敗或沒有偵測到說話聲音時也是，原因在 `speakers_error`。
+不分辨說話者時，`speakers` 與每段的 `speaker` 是 `null`；分辨失敗或沒有偵測到說話聲音時也是，原因在 `speakers_error`。之後手動加上說話者（[`PUT …/transcript`](#put-apijobsidtranscript)），`speakers` 就變成陣列，`speakers_error` 仍保留轉錄時的原因。
 
 ### DELETE /api/jobs/{id}
 
@@ -267,9 +277,9 @@ curl -o meeting.srt http://127.0.0.1:7860/api/jobs/<id>/export/srt
 
 - `revision` 必須等於目前結果的版本號，避免覆蓋在別的分頁做的修改。
 - 最多 20000 段，依開始時間排序；每段的結束時間不可早於開始時間，而且在音訊長度內；時間取到百分之一秒。每段文字的規則同 [`PATCH …/segments/{index}`](#patch-apijobsidsegmentsindex)。
-- 沒有分辨說話者的結果，`speakers` 與每段的 `speaker` 都是 `null`；有分辨說話者時，每段的 `speaker` 必須在 `speakers` 裡。
+- `speakers` 是 `null` 時，每段的 `speaker` 也都是 `null`；`speakers` 是陣列時，每段的 `speaker` 必須在裡面。沒有分辨說話者的結果也可以送陣列，手動加上說話者；送 `null` 則拿掉全部說話者。
 - 說話者 `id` 是 S 加數字，可以新增（例如把幾段改給新的說話者 `S5`）。新增的人沒有聲紋，不能「記住聲音」；新的編號不要用 `voiceprint_speakers` 裡的編號，否則會沿用那位說話者原本的聲紋。
-- 沒有任何字幕的說話者會被移除（合併說話者就是把字幕都改給另一人）；每人的時間 `seconds` 依字幕重新計算。
+- 沒有任何字幕的說話者會被移除（合併說話者就是把字幕都改給另一人），字幕全部刪光時 `speakers` 變成 `null`；每人的時間 `seconds` 依字幕重新計算。
 - `voice_id` 是語者庫裡的人或 `null`；語者庫裡已經沒有的人（例如剛刪除）存成 `null`，復原刪除前的版本時不會失敗。
 
 **回應：**

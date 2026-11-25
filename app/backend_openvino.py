@@ -11,7 +11,7 @@ from . import preparation
 from .catalog import ModelSpec
 from .config import Settings
 from .hardware import EngineConfig
-from .segmentation import Word, split_sentences
+from .segmentation import Word, chunk_segments, split_sentences
 from .transcript import Segment
 
 log = logging.getLogger(__name__)
@@ -71,14 +71,7 @@ class OpenVinoEngine:
             self._log_breakdown(spec, result.perf_metrics)
         except Exception:
             log.warning("%s 的辨識分項時間讀不出來", spec.id, exc_info=True)
-        segments = []
-        for chunk in result.chunks or []:
-            text = chunk.text.strip()
-            if not text:
-                continue
-            end = chunk.end_ts if chunk.end_ts > chunk.start_ts else audio_seconds
-            end = round(min(end, audio_seconds), 2)
-            segments.append(Segment(start=round(chunk.start_ts, 2), end=end, text=text, speaker=None))
+        segments = chunk_segments([(c.start_ts, c.end_ts, c.text) for c in result.chunks or []], audio_seconds)
         if local.sentence_segments is not None:
             segments = self._sentence_segments(spec, result, segments, audio_seconds)
         return segments, result.texts[0].strip()

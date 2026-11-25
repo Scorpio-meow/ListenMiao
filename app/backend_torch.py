@@ -12,7 +12,7 @@ from . import preparation
 from .catalog import ModelSpec
 from .config import Settings
 from .hardware import EngineConfig
-from .segmentation import Word, split_sentences
+from .segmentation import Word, chunk_segments, split_sentences
 from .transcript import Segment
 
 log = logging.getLogger(__name__)
@@ -21,17 +21,7 @@ _PIECE = re.compile(r"[A-Za-z0-9'’.-]+|\S")
 
 
 def _segments(chunks: list[dict], audio_seconds: float) -> list[Segment]:
-    segments = []
-    for chunk in chunks:
-        text = chunk["text"].strip()
-        if not text:
-            continue
-        start, end = chunk["timestamp"]
-        start = start or 0.0
-        end = end if end is not None and end > start else audio_seconds
-        end = round(min(end, audio_seconds), 2)
-        segments.append(Segment(start=round(start, 2), end=end, text=text, speaker=None))
-    return segments
+    return chunk_segments([(c["timestamp"][0] or 0.0, c["timestamp"][1], c["text"]) for c in chunks], audio_seconds)
 
 
 def _pieces(text: str) -> list[str]:
