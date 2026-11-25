@@ -42,7 +42,7 @@ classifiers = [
     "Topic :: Multimedia :: Sound/Audio :: Speech",
 ]
 dependencies = [
-    "fastapi==0.163.1",
+    "fastapi==0.165.0",
     "uvicorn==0.54.0",
     "python-multipart==0.0.33",
     "httpx==0.28.1",
