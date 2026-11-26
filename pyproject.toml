@@ -1,6 +1,6 @@
 [project]
 name = "listenmiao"
-version = "0.7.10"
+version = "0.7.11"
 description = "Breeze ASR 25／26 的本機網頁 APP：把台灣華語、中英夾雜與台語錄音轉成字幕與逐字稿，錄音不上傳"
 requires-python = ">=3.12,<3.13"
 readme = "README.md"
@@ -42,9 +42,9 @@ classifiers = [
     "Topic :: Multimedia :: Sound/Audio :: Speech",
 ]
 dependencies = [
-    "fastapi==0.163.1",
+    "fastapi==0.165.0",
     "uvicorn==0.54.0",
-    "python-multipart==0.0.33",
+    "python-multipart==0.0.34",
     "httpx==0.28.1",
     "imageio-ffmpeg==0.8.1",
     "numpy==2.4.6",
@@ -75,7 +75,7 @@ Releases = "https://github.com/Scorpio-meow/ListenMiao/releases"
 cpu = ["torch==2.14.1", "torchvision==0.29.1"]
 cu130 = ["torch==2.14.1", "torchvision==0.29.1"]
 rocm72 = ["torch==2.14.1", "torchvision==0.29.1", "triton-rocm==3.8.0; sys_platform == 'linux'"]
-dev = ["pytest==9.2.0", "pyyaml==6.0.3", "ruff==0.17.5"]
+dev = ["pytest==9.2.0", "pyyaml==6.0.4", "ruff==0.17.6"]
 site = ["fonttools[woff]==4.68.0"]
 
 [tool.uv]

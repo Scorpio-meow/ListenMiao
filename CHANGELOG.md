@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [0.7.11] - 2026-11-26
+
+### Changed
+
+- 相依套件 FastAPI 升到 0.165.0、python-multipart 升到 0.0.34，開發用的 ruff 升到 0.17.6、PyYAML 升到 6.0.4。
+
 ## [0.7.10] - 2026-11-25
 
 ### Added
@@ -428,7 +434,8 @@
 - 在不能錄音的網址按「錄音」，狀態列說明原因與瀏覽器的設定方式。
 - 所有回應加上 `Cache-Control: no-cache`，更新版本後瀏覽器不會繼續使用舊的前端程式。
 
-[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.10...HEAD
+[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.11...HEAD
+[0.7.11]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.10...v0.7.11
 [0.7.10]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.9...v0.7.10
 [0.7.9]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.8...v0.7.9
 [0.7.8]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.7...v0.7.8
