@@ -115,6 +115,25 @@ def test_memory_is_unknown_unless_the_inference_process_is_running(monkeypatch):
     assert client.memory_bytes() is None
 
 
+def test_inference_process_runs_above_normal_priority_only_on_windows(monkeypatch, caplog):
+    calls = []
+    monkeypatch.setattr(inference_module.psutil, "ABOVE_NORMAL_PRIORITY_CLASS", 32768, raising=False)
+    monkeypatch.setattr(inference_module.psutil, "Process", lambda: SimpleNamespace(nice=calls.append))
+    monkeypatch.setattr(inference_module.os, "name", "posix")
+    inference_module._raise_priority()
+    assert calls == []
+    monkeypatch.setattr(inference_module.os, "name", "nt")
+    inference_module._raise_priority()
+    assert calls == [32768]
+
+    def denied(priority):
+        raise inference_module.psutil.AccessDenied()
+
+    monkeypatch.setattr(inference_module.psutil, "Process", lambda: SimpleNamespace(nice=denied))
+    inference_module._raise_priority()
+    assert any("優先權調不上去" in r.getMessage() for r in caplog.records)
+
+
 def test_cpu_meter_restarts_when_transcription_begins():
     import queue
 

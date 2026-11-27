@@ -39,6 +39,35 @@
 - 內顯第一次編譯約 30 秒，之後讀編譯快取約 6 秒。
 - 轉換：以原始精度匯出約 1.5 分鐘，壓縮成 int4 約 37 秒、fp16 約 21 秒。
 
+2026-11-27，其他程式占用 CPU 時（內顯・int8；另開 12 個運算行程，占用約 11.3 核；每種情況 3 次取中位數）：
+
+| 情況 | 一般優先權 | 優先權「高」 |
+| --- | --- | --- |
+| CPU 空閒 | 0.37 | 0.36 |
+| CPU 被占滿，負載剛穩定 | 0.46 | 0.41 |
+| CPU 被占滿，持續約 12 分鐘後 | 0.53 | 0.50 |
+
+- 變慢的是 decoder 逐字產生的部分，encoder 幾乎不受影響。調高優先權後 decoder 每個 token 快 7–15%（7 組比較中的 6 組），「高於一般」與「高」效果相同，所以推論子行程固定用「高於一般」。
+- 負載持續越久越慢：同樣的設定，12 分鐘內 decoder 每個 token 從 73 ms 變成 91 ms。
+- OpenVINO GPU 外掛的 `GPU_QUEUE_THROTTLE`、`GPU_QUEUE_PRIORITY`、`GPU_HOST_TASK_PRIORITY` 設成 `HIGH` 都沒有量到穩定的改善，其中 `GPU_QUEUE_THROTTLE` 還會多占用約 0.3 核，沒有採用。
+- 模型跑在 CPU 上時（CPU・int8，2026-11-28，另開 14 個運算行程）效果更大，代價也比較明顯：辨識從 58.3 秒縮短到 35.5 秒，那 14 個行程的運算量則從單獨執行時的 89% 降到 75%。只有辨識在跑時沒有差別（12.4 秒與 12.1 秒），其他程式的反應時間也沒有變慢。
+- 推論子行程啟動的子行程（自動調校的實測、模型轉換）仍是一般優先權，上面各表的調校數字不受影響。
+
+2026-11-28，Intel NPU（AI Boost，架構 3720；OpenVINO 2026.4.1、NPU 驅動 32.0.100.5540）。能辨識但比內顯慢，所以不支援。下表是 29 秒範例語音的辨識秒數：
+
+| 情況 | 內顯・int8 | NPU・fp16 |
+| --- | --- | --- |
+| CPU 空閒 | 10.5 | 16.9 |
+| CPU 被占滿，一般優先權 | 13.5–15.3 | 38–44 |
+| CPU 被占滿，優先權「高」 | 11.9–14.5 | 約 23 |
+
+- 照 OpenVINO GenAI 的預設用法，整個 encoder 編譯成一塊交給 NPU（約 3 分鐘），第一次推論就回報 `ZE_RESULT_ERROR_DEVICE_LOST`。改用 OpenVINO 內附的編譯器（`NPU_COMPILER_TYPE=PLUGIN`）、開 `NPU_TURBO`、設 `NPU_DISABLE_IDLE_MEMORY_PRUNING` 結果都一樣。
+- 能辨識的組合只有一種：fp16 權重，加上 `NPU_USE_NPUW=YES`、`NPUW_FOLD=YES`、`NPUW_DEVICES=NPU`、`NPUW_ONLINE_PIPELINE=REG`、`NPUW_FUNCALL_FOR_ALL=YES`，把 encoder 與 decoder 都拆成重複區塊執行。CER 1.7%，和內顯、CPU 相同；載入約 14 秒，行程記憶體約 4 GB。
+- int8 權重不行：OpenVINO 對 int8 的 Whisper decoder 會關閉拆塊，而不拆塊的 decoder 不論 int8 或 fp16，執行時都回報 `ZE_RESULT_ERROR_INVALID_NATIVE_BINARY`。
+- decoder 每個 token 約 105 ms，內顯約 52 ms。辨識時行程只用約 0.05 核，但每個 token 要向 NPU 送出許多小工作，CPU 被占滿時每個 token 變成 229–259 ms，比內顯更受影響。
+- 87 秒的音訊（4 個視窗）花 53 秒，長音訊解碼正常。
+- 熱詞不能用：把 `MAX_PROMPT_LEN` 調到 228、`MIN_RESPONSE_LEN` 調到 220 後，不帶熱詞可以辨識，帶熱詞就失敗。Breeze ASR 26 的逐字時間戳記沒有測。
+
 ### Core i5-12500H、Iris Xe（40 GB）
 
 2026-11-08，Windows 11、OpenVINO 2026.4.1：

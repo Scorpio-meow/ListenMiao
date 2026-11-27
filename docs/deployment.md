@@ -358,7 +358,7 @@ NVIDIA 卡的顯示記憶體：
 
 | 硬體 | 狀況 |
 | --- | --- |
-| Intel NPU（AI Boost） | 不支援，自動調校不測。在 Core Ultra 7 155U 上，1.5B 參數的 Whisper 編譯約 10 分鐘後，推論時驅動回報 `DEVICE_LOST`、裝置被重置（OpenVINO 2026.4.1、NPU 驅動 32.0.100.5540） |
+| Intel NPU（AI Boost） | 不支援，自動調校不測。在 Core Ultra 7 155U 上（OpenVINO 2026.4.1、NPU 驅動 32.0.100.5540），照 OpenVINO GenAI 的預設用法，1.5B 參數的 Whisper 在第一次推論時驅動就回報 `DEVICE_LOST`、裝置被重置。改用 fp16 權重、把模型拆成重複區塊執行後可以辨識，但比內顯慢約 1.6 倍，CPU 忙碌時差距更大，熱詞也不能用，見[實測](benchmarks.md#core-ultra-7-155u32-gb) |
 | Docker 裡的 Intel 內顯 | Docker Desktop（WSL2）的容器看不到內顯，只能用 CPU；Linux 主機把 `/dev/dri` 交給容器理論上可用內顯，但本專案沒有提供對應的 compose 疊加檔，也未實測 |
 | Windows ARM64（Snapdragon 等） | 無法安裝：OpenVINO 與 PyTorch 都沒有 Windows ARM64 版，安裝腳本與 `uv sync` 會失敗。改用 x64 版 Python（例如 `uv sync --python cpython-3.12-windows-x86_64-none`）透過 Windows 的 x64 模擬執行，理論上能用 CPU 推論，但會明顯變慢，OpenVINO 需要的 x86 指令集在模擬下能否正常運作也未實測 |
 | Qualcomm Hexagon NPU、Adreno GPU | 用不到：Hexagon 需要 Qualcomm QNN，Adreno 不支援 CUDA 或 ROCm，OpenVINO 也不認得這兩種裝置 |

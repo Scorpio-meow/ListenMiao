@@ -77,6 +77,7 @@ flowchart LR
 | 遠端 | 不佔本服務資源 | 轉呼叫既有的 Breeze ASR 服務（`/v1/transcribe/jobs` 介面），進度沿用它回報的 `progress` |
 
 - 本機模型用哪個引擎、裝置與權重格式由[自動調校](#自動調校)決定。
+- Windows 上推論子行程以「高於一般」的優先權執行：其他程式把 CPU 占滿時辨識比較不受影響，空閒時沒有差別；模型跑在 CPU 上時，這些程式分到的 CPU 會少一些（[實測](benchmarks.md#core-ultra-7-155u32-gb)）。Linux 與 macOS 調高優先權需要管理員權限，維持系統預設。
 - 長音檔沿用 Whisper 原生的逐段（sequential）長音訊解碼，與官方 [`run.py`](https://github.com/mtkresearch/Breeze-ASR-25/blob/main/run.py) 用 `chunk_length_s=0` 的建議一致。
 
 ## 自動調校

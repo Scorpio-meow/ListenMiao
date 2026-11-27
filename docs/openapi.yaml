@@ -3,7 +3,7 @@ $self: https://raw.githubusercontent.com/Scorpio-meow/ListenMiao/main/docs/opena
 info:
   title: ListenMiao
   summary: 本機語音辨識服務的 HTTP API：上傳錄音、取得逐字稿、編輯字幕、匯出檔案與燒錄字幕。
-  version: 0.7.11
+  version: 0.7.12
   license:
     name: MIT
     identifier: MIT
@@ -2013,7 +2013,7 @@ components:
                 cer: 0.0169
             skipped:
               - label: Intel(R) AI Boost（NPU）
-                reason: 實測時驅動回報 DEVICE_LOST、裝置被重置，不支援 NPU
+                reason: 不支援 NPU：在 Core Ultra 7 155U 實測比內顯慢、不能用熱詞，照預設用法推論時驅動還會回報 DEVICE_LOST
             reasons:
               - 選擇 Intel(R) Graphics (iGPU)（OpenVINO GPU・int8）：實測處理時間為音訊長度的 0.38 倍，是可用裝置中最快的
               - 每個模型約 2.8 GB，目前可用記憶體 18.7 GB，最多用其中 50%，同時常駐 2 個

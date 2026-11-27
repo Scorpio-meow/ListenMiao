@@ -56,6 +56,17 @@ def _watch_parent() -> None:
     os._exit(0)
 
 
+def _raise_priority() -> None:
+    if os.name != "nt":
+        return
+    try:
+        psutil.Process().nice(psutil.ABOVE_NORMAL_PRIORITY_CLASS)
+    except psutil.Error as exc:
+        log.warning("推論行程的優先權調不上去，其他程式占用 CPU 時辨識會比較慢：%s", exc)
+        return
+    log.info("推論行程的優先權已調為「高於一般」")
+
+
 def _children(process: BaseProcess) -> list[psutil.Process]:
     try:
         return psutil.Process(process.pid).children(recursive=True)
@@ -141,6 +152,7 @@ def _worker_main(settings: Settings, requests: Queue, events: Queue) -> None:
     signal.signal(signal.SIGINT, signal.SIG_IGN)
     if os.name == "nt":
         signal.signal(signal.SIGBREAK, signal.SIG_IGN)
+    _raise_priority()
     log.info("%s", versions(_PACKAGES))
     threading.Thread(target=_watch_parent, name="parent-watch", daemon=True).start()
     try:

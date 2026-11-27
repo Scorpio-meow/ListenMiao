@@ -246,7 +246,13 @@ def _candidates(hardware: dict, source: tuple[str, ov.Type] | None) -> tuple[lis
     for device, info in hardware["openvino_devices"].items():
         if device.startswith("NPU"):
             skipped.append(
-                {"label": f"{info['name']}（{device}）", "reason": "實測時驅動回報 DEVICE_LOST、裝置被重置，不支援 NPU"}
+                {
+                    "label": f"{info['name']}（{device}）",
+                    "reason": (
+                        "不支援 NPU：在 Core Ultra 7 155U 實測比內顯慢、不能用熱詞，"
+                        "照預設用法推論時驅動還會回報 DEVICE_LOST"
+                    ),
+                }
             )
             continue
         vendor = _gpu_vendor(info)

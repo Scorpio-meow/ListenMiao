@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+## [0.7.12] - 2026-11-28
+
+### Changed
+
+- Windows 上推論子行程改以「高於一般」的優先權執行。其他程式把 CPU 占滿時，內顯辨識 29 秒的範例語音快約 5–11%（Core Ultra 7 155U 實測），電腦空閒時沒有差別。模型跑在 CPU 上時效果更大，其他程式分到的 CPU 也會少一些。Linux 與 macOS 維持系統預設。
+- 「硬體」裡 Intel NPU 的未測試原因改寫：重新實測後，NPU 改用 fp16 權重並拆成重複區塊可以辨識，但比內顯慢、不能用熱詞，所以仍不支援。已經調校過的電腦要按「重新調校」才會看到新的說明。
+
 ## [0.7.11] - 2026-11-26
 
 ### Changed
@@ -434,7 +441,8 @@
 - 在不能錄音的網址按「錄音」，狀態列說明原因與瀏覽器的設定方式。
 - 所有回應加上 `Cache-Control: no-cache`，更新版本後瀏覽器不會繼續使用舊的前端程式。
 
-[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.11...HEAD
+[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.12...HEAD
+[0.7.12]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.11...v0.7.12
 [0.7.11]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.10...v0.7.11
 [0.7.10]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.9...v0.7.10
 [0.7.9]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.8...v0.7.9
