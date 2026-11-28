@@ -35,7 +35,9 @@ body:
       label: 執行方式
       options:
         - Windows 安裝腳本
+        - Windows 安裝腳本（系統匣）
         - Linux 安裝腳本
+        - macOS 安裝腳本
         - Docker（自行建置）
         - Docker（GitHub 發布的映像檔）
         - 手動 uv
@@ -67,7 +69,7 @@ body:
     id: logs
     attributes:
       label: 日誌
-      description: 終端機輸出、docker compose logs，或 data/logs 裡 listenmiao.log、inference.log 的相關片段。
+      description: 終端機輸出、docker compose logs，或 data/logs 裡 listenmiao.log、inference.log 的相關片段；用系統匣啟動的請附 data/logs/console.log。
       render: text
   - type: checkboxes
     id: privacy

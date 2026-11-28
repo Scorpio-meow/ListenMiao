@@ -1,6 +1,6 @@
 # 運作方式
 
-[README](../README.md) · [部署](deployment.md) · [設定](configuration.md) · **運作方式** · [API](api.md) · [命令列、MCP 與 Skill](cli.md) · [效能實測](benchmarks.md)
+[README](../README.md) · [部署](deployment.md) · [設定](configuration.md) · **運作方式** · [API](api.md) · [命令列、MCP 與 Skill](cli.md) · [效能實測](benchmarks.md) · [疑難排解](troubleshooting.md)
 
 服務內部怎麼分工、每個功能背後的作法與取捨。
 
@@ -29,14 +29,14 @@ flowchart TD
 
 | 路徑 | 內容 |
 | --- | --- |
-| `app/__main__.py`、`app/logsetup.py` | 啟動服務；日誌（見[部署](deployment.md#日誌)） |
+| `app/__main__.py`、`app/logsetup.py`、`app/tray.py` | 啟動服務；日誌（見[部署](deployment.md#日誌)）；Windows 的系統匣圖示（見[部署](deployment.md#windows-安裝腳本)） |
 | `app/main.py` | FastAPI 路由與服務組裝 |
 | `app/config.py`、`app/catalog.py` | `.env` 設定與 `models.json` 的讀取與檢查 |
 | `app/jobs.py`、`app/transcript.py` | 工作佇列、結果儲存與過期清理、字幕編輯與版本號；逐字稿資料結構 |
 | `app/inference.py`、`app/engine.py`、`app/preparation.py` | 推論子行程；模型的下載、轉換、載入與卸載；編譯快取的清理 |
 | `app/telemetry.py` | 推論子行程啟動時關閉 OpenVINO 與 NNCF 的用量回報 |
 | `app/backend_openvino.py`、`app/backend_torch.py`、`app/backend_remote.py` | 三種推論方式 |
-| `app/tune.py`、`app/benchmark.py`、`app/hardware.py` | 自動調校、單一裝置實測、硬體設定檔 |
+| `app/tune.py`、`app/benchmark.py`、`app/hardware.py`、`app/performance.py` | 自動調校、單一裝置實測、硬體設定檔；轉錄效能紀錄 |
 | `app/segmentation.py` | 句子分段 |
 | `app/diarize.py`、`app/speakers.py`、`app/voices.py` | 分辨說話者、對到字幕、語者庫 |
 | `app/audio.py`、`app/exports.py` | ffmpeg 解碼與讀取影片資訊；TXT／SRT／VTT／ASS／Markdown／DOCX／JSON 匯出 |

@@ -1,6 +1,6 @@
 # API
 
-[README](../README.md) · [部署](deployment.md) · [設定](configuration.md) · [運作方式](how-it-works.md) · **API** · [命令列、MCP 與 Skill](cli.md) · [效能實測](benchmarks.md)
+[README](../README.md) · [部署](deployment.md) · [設定](configuration.md) · [運作方式](how-it-works.md) · **API** · [命令列、MCP 與 Skill](cli.md) · [效能實測](benchmarks.md) · [疑難排解](troubleshooting.md)
 
 網頁用的就是這組 API，所有路徑都在 `/api` 底下。機器可讀的完整規格是 [`openapi.yaml`](openapi.yaml)（OpenAPI 3.2，含每個欄位、狀態碼與範例，可匯入 Postman、Insomnia 等工具）；服務執行時 `/api/openapi.json` 另有 FastAPI 自動產生的簡略版。
 

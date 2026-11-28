@@ -1,6 +1,6 @@
 # 設定
 
-[README](../README.md) · [部署](deployment.md) · **設定** · [運作方式](how-it-works.md) · [API](api.md) · [命令列、MCP 與 Skill](cli.md) · [效能實測](benchmarks.md)
+[README](../README.md) · [部署](deployment.md) · **設定** · [運作方式](how-it-works.md) · [API](api.md) · [命令列、MCP 與 Skill](cli.md) · [效能實測](benchmarks.md) · [疑難排解](troubleshooting.md)
 
 服務的行為由三個檔案決定：環境設定 `.env`、模型清單 `models.json`，以及自動調校寫出的硬體設定檔。
 

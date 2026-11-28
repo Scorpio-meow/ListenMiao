@@ -1,6 +1,6 @@
 # 效能實測
 
-[README](../README.md) · [部署](deployment.md) · [設定](configuration.md) · [運作方式](how-it-works.md) · [API](api.md) · [命令列、MCP 與 Skill](cli.md) · **效能實測**
+[README](../README.md) · [部署](deployment.md) · [設定](configuration.md) · [運作方式](how-it-works.md) · [API](api.md) · [命令列、MCP 與 Skill](cli.md) · **效能實測** · [疑難排解](troubleshooting.md)
 
 速度是處理秒數除以音訊秒數，越小越快。除非另外註明，都是 Breeze ASR 25、內附的 29 秒範例語音（`app/assets/tune-sample.ogg`）、greedy 解碼，在 Intel Core Ultra 7 155U（32 GB）接電源時測。
 
@@ -223,4 +223,4 @@ Breeze ASR 26，內顯、int8。「句子邊界」是每句實際開口與收尾
 
 ---
 
-[← 命令列、MCP 與 Skill](cli.md) · [README →](../README.md)
+[← 命令列、MCP 與 Skill](cli.md) · [疑難排解 →](troubleshooting.md)

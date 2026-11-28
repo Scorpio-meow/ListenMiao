@@ -1,6 +1,6 @@
 # 部署
 
-[README](../README.md) · **部署** · [設定](configuration.md) · [運作方式](how-it-works.md) · [API](api.md) · [命令列、MCP 與 Skill](cli.md) · [效能實測](benchmarks.md)
+[README](../README.md) · **部署** · [設定](configuration.md) · [運作方式](how-it-works.md) · [API](api.md) · [命令列、MCP 與 Skill](cli.md) · [效能實測](benchmarks.md) · [疑難排解](troubleshooting.md)
 
 安裝、啟動、更新與日常維運。每個環境變數的說明見[設定](configuration.md)。
 
@@ -28,13 +28,13 @@ powershell -ExecutionPolicy Bypass -File scripts\install.ps1
 | `-Device cpu`、`-Device cuda` | 指定 PyTorch 版本 |
 | `-NoShortcut` | 不建立桌面捷徑 |
 
-之後點桌面捷徑或執行 `scripts\start.ps1` 啟動，服務就緒後自動開啟瀏覽器（加 `-NoBrowser` 則不開），關閉視窗即停止服務。啟動失敗或服務異常結束時，視窗會停住並顯示原因，按 Enter 才關閉。
+之後點桌面捷徑或執行 `scripts\start.ps1` 啟動，服務就緒後自動開啟瀏覽器（加 `-NoBrowser` 則不開），關閉視窗即停止服務。啟動失敗或服務異常結束時，視窗會停住並顯示原因，按 Enter 才關閉；常見的原因與處理見[疑難排解](troubleshooting.md#啟動不了)。
 
 **不開終端機視窗**：執行 `scripts\install.ps1 -Tray`，桌面捷徑會改成隱藏視窗啟動，服務的圖示放在工作列右下角的系統匣（Windows 11 可能把它收在「顯示隱藏的圖示」裡，拖到工作列上就會固定顯示）。
 
 - 在圖示上按一下開啟網頁；按右鍵可以開啟日誌資料夾或「結束 ListenMiao」，結束時會走完正常的關閉流程。
 - 服務已經在執行時再點一次捷徑，只會開啟網頁，不會再啟動一份。
-- 啟動失敗或更新出問題時改用訊息視窗提示，並附上服務最後幾行輸出。服務原本印在終端機的內容改寫到 `ASR_DATA_DIR/logs/console.log`；這個檔案不受 `ASR_LOG_FILE_MB` 限制，只在每次啟動時清空，內容和 `listenmiao.log` 重複。
+- 啟動失敗或更新出問題時改用訊息視窗提示，並附上服務最後幾行輸出。服務原本印在終端機的內容改寫到 `ASR_DATA_DIR/logs/console.log`（見[日誌](#日誌)）。
 - 服務還在啟動時又點了一次捷徑，第二次會等第一份準備好再開啟網頁，不會再啟動一份。
 - 要改回開視窗的方式，重新執行 `scripts\install.ps1`（不加 `-Tray`）。已經安裝過的電腦更新到這一版後，同樣執行一次 `scripts\install.ps1 -Tray` 才會換成新的捷徑。
 - 直接執行也可以：`powershell -WindowStyle Hidden -File scripts\start.ps1 -Tray`。
@@ -290,7 +290,7 @@ ASR_WATCH_SOURCE=/srv/recordings
 
 ## 日誌
 
-日誌同時印在終端機（Docker 版用 `docker compose logs`），並寫進 `ASR_DATA_DIR/logs/`，關掉視窗後仍可查看：
+日誌同時印在終端機（Docker 版用 `docker compose logs`；Windows 用系統匣啟動時改寫到 `console.log`），並寫進 `ASR_DATA_DIR/logs/`，關掉視窗後仍可查看：
 
 | 檔案 | 內容 |
 | --- | --- |
@@ -298,6 +298,7 @@ ASR_WATCH_SOURCE=/srv/recordings
 | `inference.log` | 推論子行程：版本、關閉 OpenVINO 用量回報（只在實際改寫設定時記一行，寫不進去時記警告）、自動調校、模型下載轉換與載入、每個工作的辨識開始與完成、編譯快取清理、啟動時的例外；載入模型與辨識開始、完成時附上推論行程的記憶體與系統可用記憶體；辨識完成時另外記下辨識期間（不含等模型載入）CPU 平均忙碌幾個核心（分成本行程與本行程以外）與電源狀態，OpenVINO 再記一行分項（視窗數、encoder 與 decoder 各花幾秒、產生幾個 token） |
 | `listenmiao-crash.log`、`inference-crash.log` | 每次啟動記一行；原生程式碼當掉時寫入當下的 Python 呼叫堆疊 |
 | `inference-native.log` | 推論子行程裡 OpenVINO、GPU 驅動等原生函式庫直接印出的訊息（不會再出現在終端機） |
+| `console.log` | 只有 Windows 用系統匣啟動時才有：原本印在終端機的內容，也就是網頁行程與推論子行程的日誌，加上日誌開始記錄前的錯誤（例如 `.env` 缺少變數、套件載入失敗）。不受 `ASR_LOG_FILE_MB` 限制，每次啟動時清空；啟動失敗時先看這個檔案 |
 
 - 每行開頭是含時區的時間、等級與行程編號（推論子行程標「推論」），例如 `2026-10-31 23:36:35.503+08:00 INFO [推論 24884] app.engine: …`。
 - 等級、換檔大小與保留份數由 `ASR_LOG_LEVEL`、`ASR_LOG_FILE_MB`、`ASR_LOG_FILE_COUNT` 決定（見[設定](configuration.md#env)），舊檔從 `.log.1` 起編號；`*-crash.log` 與 `inference-native.log` 在啟動時超過大小就換成 `.1`。

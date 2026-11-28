@@ -164,6 +164,7 @@ bunx skills add Scorpio-meow/ListenMiao --skill listenmiao -g
 | 文件 | 內容 |
 | --- | --- |
 | [部署](docs/deployment.md) | 安裝腳本、Docker、更新版本、從其他電腦與手機連線、監看資料夾、日誌、GPU 支援 |
+| [疑難排解](docs/troubleshooting.md) | 啟動不了、網頁打不開、辨識失敗或變慢、錄音、燒錄字幕、更新與系統匣的常見狀況與處理 |
 | [設定](docs/configuration.md) | `.env`、`models.json`、硬體設定檔 |
 | [運作方式](docs/how-it-works.md) | 架構、自動調校、句子分段、分辨說話者與語者庫、熱詞、自動標點、編輯與燒錄字幕 |
 | [API](docs/api.md) | 各端點的參數與回應；機器可讀的規格是 [`openapi.yaml`](docs/openapi.yaml) |

@@ -1,6 +1,6 @@
 # 命令列工具、MCP server 與 Agent Skill
 
-[README](../README.md) · [部署](deployment.md) · [設定](configuration.md) · [運作方式](how-it-works.md) · [API](api.md) · **命令列、MCP 與 Skill** · [效能實測](benchmarks.md)
+[README](../README.md) · [部署](deployment.md) · [設定](configuration.md) · [運作方式](how-it-works.md) · [API](api.md) · **命令列、MCP 與 Skill** · [效能實測](benchmarks.md) · [疑難排解](troubleshooting.md)
 
 命令列工具、MCP server 與 Agent Skill 都是呼叫執行中的服務（先用桌面捷徑、`scripts\start.ps1` 或 `bash scripts/start.sh` 啟動），檔案從這台電腦上傳到服務，不經過其他地方。
 

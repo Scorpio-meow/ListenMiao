@@ -1,6 +1,6 @@
 # Setup and troubleshooting
 
-Install, start, update and fix a ListenMiao service. Full documentation lives in the repository: <https://github.com/Scorpio-meow/ListenMiao/tree/main/docs> (`deployment.md`, `configuration.md`, `api.md`, `cli.md`).
+Install, start, update and fix a ListenMiao service. Full documentation lives in the repository: <https://github.com/Scorpio-meow/ListenMiao/tree/main/docs> (`deployment.md`, `configuration.md`, `api.md`, `cli.md`; `troubleshooting.md` is the Chinese troubleshooting page for the user, with the on-screen messages verbatim).
 
 Contents: [Requirements](#requirements) · [Install](#install) · [Start and stop](#start-and-stop) · [First start](#first-start) · [Update](#update) · [Errors](#errors) · [Logs](#logs) · [Other devices](#other-devices) · [Watched folder](#watched-folder)
 
@@ -22,7 +22,7 @@ Download `listenmiao-<version>.zip` from <https://github.com/Scorpio-meow/Listen
 
 | Platform | Command | Notes |
 | --- | --- | --- |
-| Windows | `powershell -ExecutionPolicy Bypass -File scripts\install.ps1` | Installs uv, the Python environment and `.env`, and a desktop shortcut "ListenMiao". Picks CUDA when `nvidia-smi` exists. Options: `-Device cpu`/`cuda`, `-NoShortcut`. |
+| Windows | `powershell -ExecutionPolicy Bypass -File scripts\install.ps1` | Installs uv, the Python environment and `.env`, and a desktop shortcut "ListenMiao". Picks CUDA when `nvidia-smi` exists. Options: `-Device cpu`/`cuda`, `-NoShortcut`, `-Tray` (the shortcut starts the service hidden, with a tray icon instead of a terminal window). |
 | Linux | `bash scripts/install.sh` | Picks CUDA or ROCm automatically; force with `cpu`, `cuda` or `rocm` as the argument. |
 | macOS (Apple Silicon) | `bash scripts/install.sh` | CPU only (OpenVINO). Before the first start, set `ASR_SUBTITLE_FONT` and `ASR_SUBTITLE_FONTS_DIR` in `.env` to a Chinese font the Mac has, or the service refuses to start; see `docs/deployment.md#字幕字型`. |
 | Docker | `cp .env.example .env`, set `ASR_ACCESS_TOKEN`, then `docker compose up -d --build` | The container always listens on `0.0.0.0`, so Docker needs an access token. NVIDIA: also layer `compose.cuda.yaml`; AMD: `compose.rocm.yaml`. See `docs/deployment.md#docker`. |
@@ -36,6 +36,7 @@ Generate a token with `uv run --no-sync python -c "import secrets; print(secrets
 | Way | Start | Stop |
 | --- | --- | --- |
 | Desktop shortcut / `scripts\start.ps1` (Windows) | Double-click, or run the script. Opens the browser when ready (`-NoBrowser` to skip). Fills in `.env` variables added by newer versions. | Ctrl+C in its window. Closing the window kills the service abruptly. |
+| Shortcut installed with `-Tray` / `scripts\start.ps1 -Tray` (Windows) | Double-click. No terminal window; the service shows a tray icon. Starting it again while it runs, or while it is still starting, only opens the page. Startup failures appear in a message box with the last lines of output. | Right-click the tray icon, 結束 ListenMiao (a normal shutdown). |
 | `bash scripts/start.sh` (Linux, macOS) | Same as above. | Ctrl+C |
 | From an agent | Run in the background: `uv run --directory <install-dir> --no-sync --env-file .env python -m app`. A service started this way can't update itself from the web app; that needs the shortcut or start script. | Stop that background task. |
 | Docker | `docker compose up -d` | `docker compose stop` (or `docker stop -t 15 listenmiao`) |
@@ -100,7 +101,7 @@ The service answers errors as `{"detail": "<reason in Chinese>"}`; the CLI print
 
 ## Logs
 
-In `<ASR_DATA_DIR>/logs/` (`data/logs/` by default): `listenmiao.log` (web process: requests, jobs, stages, rejected requests), `inference.log` (model download, tuning, transcription), `*-crash.log` and `inference-native.log` for crashes. Logs record file names and job ids, not transcript text, hotwords or names. Docker: `docker compose logs`.
+In `<ASR_DATA_DIR>/logs/` (`data/logs/` by default): `listenmiao.log` (web process: requests, jobs, stages, rejected requests), `inference.log` (model download, tuning, transcription), `*-crash.log` and `inference-native.log` for crashes. A service started with `-Tray` has no terminal: what it would print (both processes' log lines, plus errors from before logging starts, such as a missing `.env` variable or a package that fails to import) goes to `console.log` in the same folder, cleared on every start; read it first when such a service fails to start. Logs record file names and job ids, not transcript text, hotwords or names. Docker: `docker compose logs`.
 
 ## Other devices
 
