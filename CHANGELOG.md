@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [0.7.13] - 2026-11-28
+
+### Added
+
+- Windows 可以不開終端機視窗：執行 `scripts\install.ps1 -Tray`，桌面捷徑改成隱藏視窗啟動，服務的圖示放在系統匣。在圖示上按一下開啟網頁，按右鍵可以開啟日誌資料夾或結束服務；從這裡結束會走完正常的關閉流程。服務已經在執行時再點捷徑只會開啟網頁。啟動失敗或更新出問題時改用訊息視窗提示，並附上服務最後幾行輸出；服務原本印在終端機的內容寫到 `ASR_DATA_DIR/logs/console.log`。新增相依套件 pystray（只在 Windows 安裝）。
+
 ## [0.7.12] - 2026-11-28
 
 ### Changed
@@ -441,7 +447,8 @@
 - 在不能錄音的網址按「錄音」，狀態列說明原因與瀏覽器的設定方式。
 - 所有回應加上 `Cache-Control: no-cache`，更新版本後瀏覽器不會繼續使用舊的前端程式。
 
-[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.12...HEAD
+[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.13...HEAD
+[0.7.13]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.12...v0.7.13
 [0.7.12]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.11...v0.7.12
 [0.7.11]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.10...v0.7.11
 [0.7.10]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.9...v0.7.10

@@ -30,6 +30,15 @@ powershell -ExecutionPolicy Bypass -File scripts\install.ps1
 
 之後點桌面捷徑或執行 `scripts\start.ps1` 啟動，服務就緒後自動開啟瀏覽器（加 `-NoBrowser` 則不開），關閉視窗即停止服務。啟動失敗或服務異常結束時，視窗會停住並顯示原因，按 Enter 才關閉。
 
+**不開終端機視窗**：執行 `scripts\install.ps1 -Tray`，桌面捷徑會改成隱藏視窗啟動，服務的圖示放在工作列右下角的系統匣（Windows 11 可能把它收在「顯示隱藏的圖示」裡，拖到工作列上就會固定顯示）。
+
+- 在圖示上按一下開啟網頁；按右鍵可以開啟日誌資料夾或「結束 ListenMiao」，結束時會走完正常的關閉流程。
+- 服務已經在執行時再點一次捷徑，只會開啟網頁，不會再啟動一份。
+- 啟動失敗或更新出問題時改用訊息視窗提示，並附上服務最後幾行輸出。服務原本印在終端機的內容改寫到 `ASR_DATA_DIR/logs/console.log`；這個檔案不受 `ASR_LOG_FILE_MB` 限制，只在每次啟動時清空，內容和 `listenmiao.log` 重複。
+- 服務還在啟動時又點了一次捷徑，第二次會等第一份準備好再開啟網頁，不會再啟動一份。
+- 要改回開視窗的方式，重新執行 `scripts\install.ps1`（不加 `-Tray`）。已經安裝過的電腦更新到這一版後，同樣執行一次 `scripts\install.ps1 -Tray` 才會換成新的捷徑。
+- 直接執行也可以：`powershell -WindowStyle Hidden -File scripts\start.ps1 -Tray`。
+
 不用腳本也可以手動執行，再開啟 <http://127.0.0.1:7860>：
 
 ```powershell
@@ -297,7 +306,7 @@ ASR_WATCH_SOURCE=/srv/recordings
 
 關閉服務時：
 
-- Windows 上直接關閉終端機視窗，服務會被系統直接結束，日誌只來得及記下「終端機視窗被關閉」與還沒完成的工作；要正常關閉請按 Ctrl+C。
+- Windows 上直接關閉終端機視窗，服務會被系統直接結束，日誌只來得及記下「終端機視窗被關閉」與還沒完成的工作；要正常關閉請按 Ctrl+C；用系統匣啟動時，從圖示的選單選「結束 ListenMiao」也是正常關閉。
 - Docker 版的 `compose.yaml` 設了 `stop_grace_period: 15s`：`docker compose stop` 或 `down` 時，辨識中的推論子行程最多等 10 秒結束，日誌會記到「推論行程已結束」。直接用 `docker stop` 時請加 `-t 15`（`docker stop -t 15 listenmiao`），否則 Docker 的預設寬限時間過短，服務會在關閉途中被強制結束。
 
 日誌會記上傳的檔名、工作編號與說話者編號，不記字幕內容、熱詞內容與人名。被拒絕的請求：欄位格式不符時只記欄位名稱；其他情況記錯誤訊息，可能帶有送來的模型名稱、說話者編號、語者庫編號這類識別碼。瀏覽器回報的錯誤照錯誤訊息記下（移除控制字元、每欄最多 1000 字，整個服務每分鐘最多 30 則）。MCP server 的日誌在 MCP 用戶端那邊（標準錯誤）。

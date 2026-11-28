@@ -1,7 +1,8 @@
 ﻿param(
     [ValidateSet("cpu", "cuda")]
     [string]$Device,
-    [switch]$NoShortcut
+    [switch]$NoShortcut,
+    [switch]$Tray
 )
 
 $ErrorActionPreference = "Stop"
@@ -48,11 +49,22 @@ if (-not $NoShortcut) {
     $shell = New-Object -ComObject WScript.Shell
     $shortcut = $shell.CreateShortcut((Join-Path $desktop "ListenMiao.lnk"))
     $shortcut.TargetPath = (Get-Command powershell.exe).Source
-    $shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$(Join-Path $PSScriptRoot 'start.ps1')`""
+    $start = "-File `"$(Join-Path $PSScriptRoot 'start.ps1')`""
+    if ($Tray) {
+        $shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden $start -Tray"
+        $shortcut.WindowStyle = 7
+    } else {
+        $shortcut.Arguments = "-NoProfile -ExecutionPolicy Bypass $start"
+        $shortcut.WindowStyle = 1
+    }
     $shortcut.WorkingDirectory = $root
     $shortcut.IconLocation = "$(Join-Path $PSScriptRoot 'listenmiao.ico'),0"
     $shortcut.Save()
-    Write-Host "已在桌面建立捷徑「ListenMiao」"
+    if ($Tray) {
+        Write-Host "已在桌面建立捷徑「ListenMiao」：不開視窗，服務的圖示在工作列右下角的系統匣"
+    } else {
+        Write-Host "已在桌面建立捷徑「ListenMiao」"
+    }
 }
 
 uv run --no-sync python -m app.update --root . skills

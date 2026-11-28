@@ -581,7 +581,7 @@ wheels = [
 
 [[package]]
 name = "listenmiao"
-version = "0.7.12"
+version = "0.7.13"
 source = { virtual = "." }
 default-groups = ["cpu"]
 dependencies = [
@@ -598,6 +598,7 @@ dependencies = [
     { name = "optimum" },
     { name = "optimum-intel" },
     { name = "psutil" },
+    { name = "pystray", marker = "sys_platform == 'win32'" },
     { name = "python-multipart" },
     { name = "sherpa-onnx" },
     { name = "sherpa-onnx-core" },
@@ -645,6 +646,7 @@ requires-dist = [
     { name = "optimum", specifier = "==2.3.0" },
     { name = "optimum-intel", specifier = "==2.2.0" },
     { name = "psutil", specifier = "==7.2.2" },
+    { name = "pystray", marker = "sys_platform == 'win32'", specifier = "==0.19.5" },
     { name = "python-multipart", specifier = "==0.0.34" },
     { name = "sherpa-onnx", specifier = "==2.0.1" },
     { name = "sherpa-onnx-core", specifier = "==2.0.1" },
@@ -1274,12 +1276,60 @@ crypto = [
 ]
 
 [[package]]
+name = "pyobjc-core"
+version = "13.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/36/5f/b14b6b66a38f628af7a0983728f8d7360f17b68075bcd86631872aa7bb71/pyobjc_core-13.1.tar.gz", hash = "sha256:fd73c9020389c325d2045992134a8d89f8f554b46084c8ff36fe05a54bc9996e", size = 1084546, upload-time = "2026-11-24T20:24:42.003Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/22/52/f8e991a89c6795045a608dcb04486efb1a0bb5b6ac7440b3d6be9414d746/pyobjc_core-13.1-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:0882594c79adee620a30dcb9ef370dcc2d40c43d5039aa44432b2d36b5af00ff", size = 770376, upload-time = "2026-11-24T20:13:09.121Z" },
+]
+
+[[package]]
+name = "pyobjc-framework-cocoa"
+version = "13.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyobjc-core", marker = "extra != 'group-10-listenmiao-cpu' or extra == 'group-10-listenmiao-cu130' or extra == 'group-10-listenmiao-rocm72'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8d/f9/20f550e334092a7e762fc9a9e8214ea4750b622c08b594c20782910daa31/pyobjc_framework_cocoa-13.1.tar.gz", hash = "sha256:2f373dedbfffc236ed2f6278b45ea5f053940e621a486b2e9f4d23a06b06ba22", size = 3135708, upload-time = "2026-11-24T20:25:04.293Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4a/87/1d78863d3fbbaba5b3b04dc7316c598c95948eeced8c4acc3bb59e0bd9b0/pyobjc_framework_cocoa-13.1-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:97c0be3d7142597a7d895fe5e79721e9d2500a472136c017f0cbf27b18d3dda1", size = 391700, upload-time = "2026-11-24T20:15:12.523Z" },
+]
+
+[[package]]
+name = "pyobjc-framework-quartz"
+version = "13.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyobjc-core", marker = "extra != 'group-10-listenmiao-cpu' or extra == 'group-10-listenmiao-cu130' or extra == 'group-10-listenmiao-rocm72'" },
+    { name = "pyobjc-framework-cocoa", marker = "extra != 'group-10-listenmiao-cpu' or extra == 'group-10-listenmiao-cu130' or extra == 'group-10-listenmiao-rocm72'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/76/07/8593e98a622f08b80b0d7622d1598be25ccdb506fce1bb38f5d46a2e6aec/pyobjc_framework_quartz-13.1.tar.gz", hash = "sha256:08ac31f4193e8f433cadc53d4e3681cc39021c5846de75424a317e51d20885b1", size = 3396157, upload-time = "2026-11-24T20:26:22.141Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a5/14/465bf0460f8f82d36d4dffe0abea6de9f95d0e2088fc6a6cc0345bae2336/pyobjc_framework_quartz-13.1-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:c7806ed9f79778b2668c79ce8dc1bc540bfc1de0f77a143eea289dcc078ffb77", size = 212534, upload-time = "2026-11-24T20:21:51.794Z" },
+]
+
+[[package]]
 name = "pyparsing"
 version = "3.3.3"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e4/11/b213bebff182584360cb8d17c72c1677fec5c5c228de439e63bcf8ab1c8f/pyparsing-3.3.3.tar.gz", hash = "sha256:928ae7e20211f3b6f3915a72f06a0cfd29ab9d24279dd6346b6b1a7146397d36", size = 1050487, upload-time = "2026-09-20T20:59:05.609Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/38/bb/d215ee7c73b61497b28a5503f9f53523f294fcc936762b7caf90e0c1c2b5/pyparsing-3.3.3-py3-none-any.whl", hash = "sha256:ece8c00a69cf01b45d0b1dedabb469c90d8caf996d4fda40f147627a122849a4", size = 126420, upload-time = "2026-09-20T20:59:04.025Z" },
+]
+
+[[package]]
+name = "pystray"
+version = "0.19.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pillow" },
+    { name = "pyobjc-framework-quartz", marker = "(extra == 'group-10-listenmiao-cpu' and extra == 'group-10-listenmiao-cu130') or (extra == 'group-10-listenmiao-cpu' and extra == 'group-10-listenmiao-rocm72') or (extra == 'group-10-listenmiao-cu130' and extra == 'group-10-listenmiao-rocm72')" },
+    { name = "python-xlib", marker = "python_version < '0'" },
+    { name = "six" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5c/64/927a4b9024196a4799eba0180e0ca31568426f258a4a5c90f87a97f51d28/pystray-0.19.5-py2.py3-none-any.whl", hash = "sha256:a0c2229d02cf87207297c22d86ffc57c86c227517b038c0d3c59df79295ac617", size = 49068, upload-time = "2023-09-17T13:44:26.872Z" },
 ]
 
 [[package]]
@@ -1305,6 +1355,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/7e/c0/c753d487a83d873f6946cee6cbc26cea3fe59a476ad0de99a14938a2fbd8/python_multipart-0.0.34.tar.gz", hash = "sha256:b998ae90ca6e1e363261ce2e0e230281b8af53867b757970abd69ee9edcd843a", size = 52456, upload-time = "2026-11-16T10:40:38.261Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f5/0e/090c52b122d8ec5fa37942c1410fea9cf04ce98bca0c84dde7f0aa11594d/python_multipart-0.0.34-py3-none-any.whl", hash = "sha256:ebacd224bd686eee2f9aa1066a657affe07435a185834e05e5235e2e59173e91", size = 32585, upload-time = "2026-11-16T10:40:37.119Z" },
+]
+
+[[package]]
+name = "python-xlib"
+version = "0.33"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "six", marker = "sys_platform != 'darwin' or extra != 'group-10-listenmiao-cpu' or extra == 'group-10-listenmiao-cu130' or extra == 'group-10-listenmiao-rocm72'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/86/f5/8c0653e5bb54e0cbdfe27bf32d41f27bc4e12faa8742778c17f2a71be2c0/python-xlib-0.33.tar.gz", hash = "sha256:55af7906a2c75ce6cb280a584776080602444f75815a7aff4d287bb2d7018b32", size = 269068, upload-time = "2022-12-25T18:53:00.824Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fc/b8/ff33610932e0ee81ae7f1269c890f697d56ff74b9f5b2ee5d9b7fa2c5355/python_xlib-0.33-py2.py3-none-any.whl", hash = "sha256:c3534038d42e0df2f1392a1b30a15a4ff5fdc2b86cfa94f072bf11b10a164398", size = 182185, upload-time = "2022-12-25T18:52:58.662Z" },
 ]
 
 [[package]]
@@ -1583,6 +1645,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/de/00/003c989ab1807807bd768a794b2f40ee7a846d5613f983b13f5bc72b8e0f/sherpa_onnx_core-2.0.1-py3-none-win32.whl", hash = "sha256:d76e69f6a0accd2c9f92754058ac5a7b4856dd41746041299bf2f59089296ad4", size = 14555812, upload-time = "2026-10-26T15:55:19.695Z" },
     { url = "https://files.pythonhosted.org/packages/68/ea/8f02cc34c19d956697dda2f2c470c14cd6b7af77f3ae855c514a86039b68/sherpa_onnx_core-2.0.1-py3-none-win_amd64.whl", hash = "sha256:08890e9ea23ed2f59f81d5840c63b6b5cc8674d0f6e48d9069126a848aa0e022", size = 16663244, upload-time = "2026-10-26T15:12:40.9Z" },
     { url = "https://files.pythonhosted.org/packages/fc/0c/a8aadc343a9c7427153fabd0bcaf2c9d1d2ffacdbf3f6399592462067511/sherpa_onnx_core-2.0.1-py3-none-win_arm64.whl", hash = "sha256:dcd870aa0c14539f063d286fbcbe9ca4ccbfc69d64f3314fb60d0c3f03ae2ff6", size = 16025137, upload-time = "2026-10-26T15:31:41.223Z" },
+]
+
+[[package]]
+name = "six"
+version = "1.17.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031, upload-time = "2024-12-04T17:35:28.174Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
 ]
 
 [[package]]

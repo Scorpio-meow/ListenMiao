@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import contextlib
 import logging
@@ -5,12 +7,17 @@ import os
 import socket
 import sys
 from collections.abc import Callable
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 import uvicorn
 
 from .config import ConfigError, load_settings
 from .logsetup import log_crashes_to, log_to_file, set_level, setup_logging, versions
 from .main import create_app
+
+if TYPE_CHECKING:
+    from .tray import Tray
 
 log = logging.getLogger(__name__)
 
@@ -60,11 +67,18 @@ def _arguments() -> argparse.Namespace:
         action="store_true",
         help="由啟動腳本啟動：網頁上按「立即更新」時服務會關閉，由啟動腳本套用新版後重新啟動",
     )
+    parser.add_argument(
+        "--tray",
+        action="store_true",
+        help="在 Windows 的系統匣顯示圖示，可以從圖示開啟網頁或結束服務；由啟動腳本以隱藏視窗啟動時使用",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = _arguments()
+    if args.tray and os.name != "nt":
+        sys.exit("--tray 只能在 Windows 使用")
     setup_logging(None)
     try:
         settings = load_settings()
@@ -115,8 +129,22 @@ def main() -> None:
     server = uvicorn.Server(config)
     if args.updatable:
         app.state.exit_for_update = lambda: setattr(server, "should_exit", True)
-    with contextlib.suppress(KeyboardInterrupt):
-        server.run(sockets=sockets)
+    tray = _start_tray(settings.logs_dir, server) if args.tray else None
+    try:
+        with contextlib.suppress(KeyboardInterrupt):
+            server.run(sockets=sockets)
+    finally:
+        if tray is not None:
+            tray.stop()
+
+
+def _start_tray(logs_dir: Path, server: uvicorn.Server) -> Tray:
+    from .cli import load
+    from .tray import Tray
+
+    tray = Tray(load().service_url(None), logs_dir, lambda: setattr(server, "should_exit", True))
+    tray.start()
+    return tray
 
 
 def _url(sock: socket.socket) -> str:

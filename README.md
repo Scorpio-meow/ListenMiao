@@ -56,6 +56,8 @@ A local web app for transcribing speech with the Breeze ASR 25/26 models: wavefo
 powershell -ExecutionPolicy Bypass -File scripts\install.ps1
 ```
 
+不想開著終端機視窗，就在指令最後加上 `-Tray`：服務改在背景執行，圖示放在系統匣，見[部署](docs/deployment.md)。
+
 **Linux、macOS（Apple Silicon）**：在專案根目錄執行安裝腳本。
 
 ```bash
