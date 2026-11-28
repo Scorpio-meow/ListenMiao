@@ -24,6 +24,32 @@ def test_failed_profile_change_still_restarts_the_inference_process(caplog):
     assert any("變更硬體設定失敗" in r.getMessage() for r in caplog.records)
 
 
+def test_hardware_failure_says_tuning_only_when_tuning_ran(monkeypatch, tmp_path):
+    import queue
+
+    from app import tune
+
+    def broken(*_args):
+        raise RuntimeError("顯示卡驅動錯誤")
+
+    monkeypatch.setattr(tune, "run_tuning", broken)
+    path = tmp_path / "hardware.json"
+    settings = SimpleNamespace(hardware_profile=path)
+    catalog = SimpleNamespace(models=[SimpleNamespace(local=object())])
+    events = queue.Queue()
+    assert inference_module._hardware_config(settings, catalog, events) == (None, "自動調校失敗：顯示卡驅動錯誤")
+    path.write_text('{"settings": {}, "tuning": null}', encoding="utf-16")
+    _, message = inference_module._hardware_config(settings, catalog, events)
+    assert message.startswith("硬體設定失敗：")
+
+    def denied():
+        raise PermissionError(13, "存取被拒")
+
+    locked = SimpleNamespace(hardware_profile=SimpleNamespace(exists=denied))
+    _, message = inference_module._hardware_config(locked, catalog, events)
+    assert message.startswith("硬體設定失敗：")
+
+
 class _FakeProcess:
     pid = None
     exitcode = None

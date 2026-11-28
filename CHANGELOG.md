@@ -4,12 +4,16 @@
 
 ## [Unreleased]
 
+## [0.7.14] - 2026-11-28
+
 ### Added
 
 - 中文的疑難排解文件 `docs/troubleshooting.md`：依啟動、網頁連線、狀態列、辨識、速度、錄音、說話者與標點、燒錄字幕、更新、系統匣分類，列出畫面上的訊息原文、原因與處理方式，以及回報問題時要附哪些日誌。
 
 ### Fixed
 
+- 硬體設定失敗時，狀態列的訊息前面不再重複一次「硬體設定失敗：」；自動調校失敗時改成直接顯示「自動調校失敗：…」。
+- 硬體設定檔讀不出來（例如存成 UTF-16）時，訊息從「自動調校失敗」改成「硬體設定失敗」：只有真的在調校時才說是調校失敗。
 - 文件補上系統匣模式：Agent Skill 的安裝與排錯說明加上 `-Tray`、從系統匣結束服務的方式與 `console.log`；隱私權政策與部署文件寫明 `console.log` 不受 `ASR_LOG_FILE_MB` 限制、每次啟動時清空；問題回報範本請系統匣使用者附上 `console.log`，執行方式加上 macOS 安裝腳本。
 
 ## [0.7.13] - 2026-11-28
@@ -455,7 +459,8 @@
 - 在不能錄音的網址按「錄音」，狀態列說明原因與瀏覽器的設定方式。
 - 所有回應加上 `Cache-Control: no-cache`，更新版本後瀏覽器不會繼續使用舊的前端程式。
 
-[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.13...HEAD
+[Unreleased]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.14...HEAD
+[0.7.14]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.13...v0.7.14
 [0.7.13]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.12...v0.7.13
 [0.7.12]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.11...v0.7.12
 [0.7.11]: https://github.com/Scorpio-meow/ListenMiao/compare/v0.7.10...v0.7.11

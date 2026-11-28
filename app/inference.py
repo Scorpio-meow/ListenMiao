@@ -18,7 +18,7 @@ from pathlib import Path
 import psutil
 
 from .catalog import Catalog, model_status
-from .config import ConfigError, Settings
+from .config import Settings
 from .hardware import (
     CpuMeter,
     HardwareProfile,
@@ -107,10 +107,12 @@ def _hardware_config(settings: Settings, catalog: Catalog, events: Queue):
         events.put(("hardware", {"state": "not_needed"}))
         return None, None
     path = settings.hardware_profile
+    tuning = False
     try:
         if path.exists():
             profile = load_profile(path)
         else:
+            tuning = True
             log.info("找不到硬體設定檔 %s，開始自動調校", path)
             events.put(("hardware", {"state": "tuning", "step": "準備自動調校"}))
             profile = run_tuning(
@@ -120,7 +122,7 @@ def _hardware_config(settings: Settings, catalog: Catalog, events: Queue):
             log.info("自動調校完成，已寫入 %s", path)
     except Exception as exc:
         log.exception("硬體設定失敗")
-        message = f"硬體設定失敗：{exc}" if isinstance(exc, ConfigError) else f"自動調校失敗：{exc}"
+        message = f"自動調校失敗：{exc}" if tuning else f"硬體設定失敗：{exc}"
         events.put(("hardware", {"state": "failed", "error": message, "path": str(path)}))
         return None, message
     log.info(

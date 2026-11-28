@@ -508,7 +508,7 @@ function renderNotice(config) {
     title = "正在為這台電腦挑選最快的設定，約 1–3 分鐘；第一次還要下載模型";
     tone = "busy";
   } else if (hardware.state === "failed") {
-    text = `硬體設定失敗：${hardware.error}`;
+    text = hardware.error;
     title = `設定檔：${hardware.path}`;
     tone = "error";
   } else if (speakers?.state === "downloading") {
